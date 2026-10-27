@@ -1,5 +1,5 @@
 === DZ COD Order Form ===
-Contributors: nedjai
+Contributors: mrdhia
 Tags: cash on delivery, algeria, yalidine, zr express, wilaya
 Requires at least: 6.3
 Tested up to: 7.1
