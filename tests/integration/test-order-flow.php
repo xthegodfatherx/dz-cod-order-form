@@ -88,7 +88,9 @@ class Test_Order_Flow extends WP_Ajax_UnitTestCase {
 			$note = 'stop:' . $e->getMessage();
 		}
 		$this->assertNotSame( '', $this->_last_response, 'Empty AJAX response (' . $note . ')' );
-		return json_decode( $this->_last_response, true );
+		$res = json_decode( $this->_last_response, true );
+		$this->assertIsArray( $res, 'Non-JSON AJAX response (' . $note . '): ' . substr( $this->_last_response, 0, 600 ) );
+		return $res;
 	}
 
 	/**
