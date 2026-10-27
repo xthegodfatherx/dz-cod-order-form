@@ -247,6 +247,14 @@ class DZCOD_Admin {
 				<label><input type="radio" name="<?php echo esc_attr( $n ); ?>[dup_action]" value="flag" <?php checked( $s['dup_action'], 'flag' ); ?>> <?php esc_html_e( 'Accept it but put it On hold and flag it', 'dz-cod-order-form' ); ?></label>
 			</td></tr>
 			<tr><th><label for="dzcod-rl"><?php esc_html_e( 'Rate limit', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-rl" type="number" min="0" name="<?php echo esc_attr( $n ); ?>[rate_limit]" value="<?php echo esc_attr( $s['rate_limit'] ); ?>" style="width:80px"> <?php esc_html_e( 'orders per hour per IP address (0 = off)', 'dz-cod-order-form' ); ?></td></tr>
+			<tr><th><label for="dzcod-ip"><?php esc_html_e( 'Visitor IP from', 'dz-cod-order-form' ); ?></label></th><td>
+				<select id="dzcod-ip" name="<?php echo esc_attr( $n ); ?>[ip_source]">
+					<option value="remote" <?php selected( $s['ip_source'], 'remote' ); ?>><?php esc_html_e( 'Direct connection (default)', 'dz-cod-order-form' ); ?></option>
+					<option value="cloudflare" <?php selected( $s['ip_source'], 'cloudflare' ); ?>><?php esc_html_e( 'Cloudflare (CF-Connecting-IP)', 'dz-cod-order-form' ); ?></option>
+					<option value="proxy" <?php selected( $s['ip_source'], 'proxy' ); ?>><?php esc_html_e( 'Reverse proxy / load balancer (X-Forwarded-For)', 'dz-cod-order-form' ); ?></option>
+				</select>
+				<p class="description"><?php esc_html_e( 'Only change this if your site really is behind Cloudflare or a proxy. Otherwise all visitors share one IP and the rate limit blocks everyone; choosing it without a proxy lets attackers fake their IP.', 'dz-cod-order-form' ); ?></p>
+			</td></tr>
 			<tr><th><label for="dzcod-bl"><?php esc_html_e( 'Blocked phones', 'dz-cod-order-form' ); ?></label></th><td><textarea id="dzcod-bl" class="large-text code" rows="6" name="<?php echo esc_attr( $n ); ?>[blocked_phones]" placeholder="0555123456"><?php echo esc_textarea( $s['blocked_phones'] ); ?></textarea><p class="description"><?php esc_html_e( 'One number per line, e.g. customers who repeatedly refuse deliveries.', 'dz-cod-order-form' ); ?></p></td></tr>
 		</table>
 		<?php

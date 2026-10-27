@@ -82,6 +82,10 @@ class DZCOD_Order {
 		$address      = self::field( 'address' );
 		$type         = ( 'desk' === self::field( 'delivery_type' ) && $s['stopdesk_enabled'] ) ? 'desk' : 'home';
 
+		// Length caps keep garbage out of orders, sheets and courier exports.
+		$name    = mb_substr( $name, 0, 100 );
+		$address = mb_substr( $address, 0, 200 );
+
 		// Validate fields.
 		if ( mb_strlen( $name ) < 3 ) {
 			self::fail( __( 'Please enter your full name.', 'dz-cod-order-form' ), 'invalid', 'name' );
@@ -109,8 +113,15 @@ class DZCOD_Order {
 		if ( ! $product || ( $variation_id && $product->get_parent_id() !== $product_id ) ) {
 			self::fail( __( 'This product is not available.', 'dz-cod-order-form' ), 'product' );
 		}
+		$parent = $variation_id ? wc_get_product( $product_id ) : $product;
+		if ( ! $parent || 'publish' !== $parent->get_status() || post_password_required( $parent->get_id() ) ) {
+			self::fail( __( 'This product is not available.', 'dz-cod-order-form' ), 'product' );
+		}
 		if ( $product->is_type( 'variable' ) ) {
 			self::fail( __( 'Please choose an option.', 'dz-cod-order-form' ), 'invalid', 'variation_id' );
+		}
+		if ( $product->is_sold_individually() ) {
+			$qty = 1;
 		}
 		if ( ! $product->is_purchasable() || ! $product->is_in_stock() || ! $product->has_enough_stock( $qty ) ) {
 			self::fail( __( 'Sorry, this product is out of stock.', 'dz-cod-order-form' ), 'stock' );

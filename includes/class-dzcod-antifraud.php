@@ -43,12 +43,21 @@ class DZCOD_Antifraud {
 	}
 
 	/**
-	 * Client IP (REMOTE_ADDR only; proxy headers are spoofable).
+	 * Client IP. Uses REMOTE_ADDR unless the admin says the site is behind
+	 * Cloudflare or a reverse proxy (those headers are spoofable otherwise).
 	 *
 	 * @return string
 	 */
 	public static function client_ip() {
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$ip     = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$source = (string) DZCOD_Settings::get( 'ip_source' );
+		if ( 'cloudflare' === $source && ! empty( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ) {
+			$ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_CONNECTING_IP'] ) );
+		} elseif ( 'proxy' === $source && ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			$list = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
+			$ip   = trim( $list[0] );
+		}
+		$ip = filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '';
 		return (string) apply_filters( 'dzcod_client_ip', $ip );
 	}
 
@@ -80,7 +89,7 @@ class DZCOD_Antifraud {
 		}
 
 		$limit = (int) $s['rate_limit'];
-		if ( $limit > 0 ) {
+		if ( $limit > 0 && '' !== self::client_ip() ) {
 			$key   = 'dzcod_rl_' . md5( self::client_ip() );
 			$count = (int) get_transient( $key );
 			if ( $count >= $limit ) {
@@ -119,7 +128,7 @@ class DZCOD_Antifraud {
 	 */
 	public static function record_order() {
 		$limit = (int) DZCOD_Settings::get( 'rate_limit' );
-		if ( $limit <= 0 ) {
+		if ( $limit <= 0 || '' === self::client_ip() ) {
 			return;
 		}
 		$key = 'dzcod_rl_' . md5( self::client_ip() );

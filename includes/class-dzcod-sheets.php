@@ -68,7 +68,7 @@ class DZCOD_Sheets {
 	 */
 	public static function send( $payload, $blocking = false ) {
 		$payload['secret'] = (string) DZCOD_Settings::get( 'sheets_secret' );
-		return wp_remote_post(
+		return wp_safe_remote_post(
 			DZCOD_Settings::get( 'sheets_url' ),
 			array(
 				'timeout'     => $blocking ? 15 : 3,

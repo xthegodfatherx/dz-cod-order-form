@@ -5,7 +5,7 @@ Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -59,6 +59,14 @@ Follow the steps on the "Google Sheets & export" tab. The script to paste is in 
 No. It creates standard WooCommerce orders with the Cash on delivery payment method, so your existing order management, emails and delivery plugins keep working.
 
 == Changelog ==
+
+= 1.0.1 =
+* Security: Google Sheets requests use wp_safe_remote_post (no requests to internal addresses).
+* Security: orders are refused for draft, private or password-protected products.
+* Security: name and address length limits.
+* New: "Visitor IP from" setting for sites behind Cloudflare or a proxy, so the rate limit counts real visitors.
+* Fix: shop managers can now save the settings.
+* Fix: "Sold individually" products are always ordered with quantity 1.
 
 = 1.0.0 =
 * First release.

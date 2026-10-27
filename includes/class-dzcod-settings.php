@@ -51,6 +51,7 @@ class DZCOD_Settings {
 			'dup_action'         => 'block',
 			'blocked_phones'     => '',
 			'rate_limit'         => 5,
+			'ip_source'          => 'remote',
 			// Google Sheets.
 			'sheets_url'         => '',
 			'sheets_secret'      => '',
@@ -62,6 +63,12 @@ class DZCOD_Settings {
 	 */
 	public static function init() {
 		add_action( 'admin_init', array( __CLASS__, 'register' ) );
+		add_filter(
+			'option_page_capability_dzcod',
+			function () {
+				return 'manage_woocommerce';
+			}
+		);
 	}
 
 	/**
@@ -164,6 +171,8 @@ class DZCOD_Settings {
 			$out['dup_hours']      = isset( $input['dup_hours'] ) ? max( 0, absint( $input['dup_hours'] ) ) : 24;
 			$out['dup_action']     = ( isset( $input['dup_action'] ) && 'flag' === $input['dup_action'] ) ? 'flag' : 'block';
 			$out['rate_limit']     = isset( $input['rate_limit'] ) ? absint( $input['rate_limit'] ) : 5;
+			$src                   = isset( $input['ip_source'] ) ? sanitize_key( $input['ip_source'] ) : 'remote';
+			$out['ip_source']      = in_array( $src, array( 'remote', 'cloudflare', 'proxy' ), true ) ? $src : 'remote';
 			$phones                = isset( $input['blocked_phones'] ) ? explode( "\n", (string) $input['blocked_phones'] ) : array();
 			$clean                 = array_filter( array_map( array( 'DZCOD_Antifraud', 'normalize_phone' ), $phones ) );
 			$out['blocked_phones'] = implode( "\n", array_unique( $clean ) );
