@@ -23,6 +23,7 @@ class DZCOD_Courier_API {
 			'yalidine'      => array( 'Yalidine', 'yalidine', 'https://api.yalidine.app' ),
 			'yalitec'       => array( 'Yalitec (Guepex)', 'yalidine', 'https://api.yalitec.me' ),
 			'zrexpress'     => array( 'ZR Express', 'procolis', 'https://procolis.com/api_v1' ),
+			'ecotrack'      => array( __( 'Ecotrack (any courier — paste its address)', 'dz-cod-order-form' ), 'ecotrack', '' ),
 			'dhd'           => array( 'DHD', 'ecotrack', 'https://dhd.ecotrack.dz' ),
 			'conexlog'      => array( 'Conexlog / UPS', 'ecotrack', 'https://conexlog.ecotrack.dz' ),
 			'msmgo'         => array( 'MSM Go', 'ecotrack', 'https://msmgo.ecotrack.dz' ),
@@ -45,8 +46,6 @@ class DZCOD_Courier_API {
 			'fretdirect'    => array( 'Fret Direct', 'ecotrack', 'https://fretdirect.ecotrack.dz' ),
 			'tsl'           => array( 'TSL Express', 'ecotrack', 'https://tsl.ecotrack.dz' ),
 			'negmar'        => array( 'Negmar Express', 'ecotrack', 'https://negmar.ecotrack.dz' ),
-			'ecorapide'     => array( 'EcoRapide Express', 'ecotrack', 'https://ecorapide-express.ecotrack.dz' ),
-			'ecotrack'      => array( __( 'Other Ecotrack courier (custom address)', 'dz-cod-order-form' ), 'ecotrack', '' ),
 		);
 		return (array) apply_filters( 'dzcod_courier_providers', $list );
 	}
@@ -154,9 +153,25 @@ class DZCOD_Courier_API {
 		}
 		$base = $p[ $key ][2];
 		if ( 'ecotrack' === $key ) {
-			$base = (string) $settings['ecotrack_url'];
+			$base = self::ecotrack_origin( (string) $settings['ecotrack_url'] );
 		}
 		return untrailingslashit( $base );
+	}
+
+	/**
+	 * Keep only https://host from an Ecotrack address pasted from the browser
+	 * (e.g. https://name.ecotrack.dz/home → https://name.ecotrack.dz).
+	 *
+	 * @param string $url URL.
+	 * @return string
+	 */
+	public static function ecotrack_origin( $url ) {
+		$url = trim( $url );
+		if ( '' !== $url && ! preg_match( '#^https?://#i', $url ) ) {
+			$url = 'https://' . $url;
+		}
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		return $host ? 'https://' . strtolower( $host ) : '';
 	}
 
 	/**

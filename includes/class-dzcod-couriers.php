@@ -122,7 +122,7 @@ class DZCOD_Couriers {
 			}
 		}
 		$out['procolis_confirmed'] = empty( $in['procolis_confirmed'] ) ? 0 : 1;
-		$out['ecotrack_url']       = '' === $out['ecotrack_url'] ? '' : esc_url_raw( $out['ecotrack_url'], array( 'https' ) );
+		$out['ecotrack_url']       = DZCOD_Courier_API::ecotrack_origin( $out['ecotrack_url'] );
 		return $out;
 	}
 
@@ -525,7 +525,7 @@ class DZCOD_Couriers {
 				<tr class="dzcod-p dzcod-p-procolis"><th><label for="dzcod-pkey"><?php esc_html_e( 'Key', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-pkey" type="password" class="regular-text" name="<?php echo esc_attr( $n ); ?>[procolis_key]" value="" placeholder="<?php echo $s['procolis_key'] ? $saved : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" autocomplete="new-password"></td></tr>
 				<tr class="dzcod-p dzcod-p-procolis"><th><?php esc_html_e( 'Parcel status', 'dz-cod-order-form' ); ?></th><td><label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[procolis_confirmed]" value="1" <?php checked( ! empty( $s['procolis_confirmed'] ) ); ?>> <?php esc_html_e( 'Send parcels as confirmed (ready for pickup)', 'dz-cod-order-form' ); ?></label></td></tr>
 
-				<tr class="dzcod-p dzcod-p-ecotrack-custom"><th><label for="dzcod-eurl"><?php esc_html_e( 'Ecotrack address', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-eurl" type="url" class="regular-text" name="<?php echo esc_attr( $n ); ?>[ecotrack_url]" value="<?php echo esc_attr( $s['ecotrack_url'] ); ?>" placeholder="https://yourcourier.ecotrack.dz"></td></tr>
+				<tr class="dzcod-p dzcod-p-ecotrack-custom"><th><label for="dzcod-eurl"><?php esc_html_e( 'Ecotrack address', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-eurl" type="url" class="regular-text" name="<?php echo esc_attr( $n ); ?>[ecotrack_url]" value="<?php echo esc_attr( $s['ecotrack_url'] ); ?>" placeholder="https://yourcourier.ecotrack.dz"><p class="description"><?php esc_html_e( 'The address you use to log in to your courier’s Ecotrack account, e.g. https://ecorapide-express.ecotrack.dz', 'dz-cod-order-form' ); ?></p></td></tr>
 				<tr class="dzcod-p dzcod-p-ecotrack"><th><label for="dzcod-etk"><?php esc_html_e( 'API token', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-etk" type="password" class="regular-text" name="<?php echo esc_attr( $n ); ?>[ecotrack_token]" value="" placeholder="<?php echo $s['ecotrack_token'] ? $saved : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" autocomplete="new-password"></td></tr>
 
 				<tr><th><label for="dzcod-auto"><?php esc_html_e( 'Send automatically', 'dz-cod-order-form' ); ?></label></th><td>
