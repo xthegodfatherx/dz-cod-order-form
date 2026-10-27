@@ -45,6 +45,7 @@ class DZCOD_Courier_API {
 			'fretdirect'    => array( 'Fret Direct', 'ecotrack', 'https://fretdirect.ecotrack.dz' ),
 			'tsl'           => array( 'TSL Express', 'ecotrack', 'https://tsl.ecotrack.dz' ),
 			'negmar'        => array( 'Negmar Express', 'ecotrack', 'https://negmar.ecotrack.dz' ),
+			'ecorapide'     => array( 'EcoRapide Express', 'ecotrack', 'https://ecorapide-express.ecotrack.dz' ),
 			'ecotrack'      => array( __( 'Other Ecotrack courier (custom address)', 'dz-cod-order-form' ), 'ecotrack', '' ),
 		);
 		return (array) apply_filters( 'dzcod_courier_providers', $list );
