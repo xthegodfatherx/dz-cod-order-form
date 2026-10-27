@@ -73,6 +73,7 @@ class DZCOD_Antifraud {
 			'ok'           => true,
 			'error'        => '',
 			'duplicate_of' => 0,
+			'risky'        => false,
 		);
 
 		if ( ! self::is_valid_phone( $phone ) ) {
@@ -116,6 +117,19 @@ class DZCOD_Antifraud {
 				if ( 'block' === $s['dup_action'] ) {
 					$result['ok']    = false;
 					$result['error'] = __( 'You already placed an order recently. We will call you to confirm it — no need to order again.', 'dz-cod-order-form' );
+				}
+			}
+		}
+
+		// Repeat refusers: more returned parcels than delivered ones.
+		if ( $result['ok'] && 'off' !== $s['refusals_action'] && class_exists( 'DZCOD_History' ) ) {
+			$h = DZCOD_History::for_phone( $phone );
+			if ( DZCOD_History::is_risky( $h ) ) {
+				if ( 'block' === $s['refusals_action'] ) {
+					$result['ok']    = false;
+					$result['error'] = __( 'We could not accept this order online. Please contact us directly.', 'dz-cod-order-form' );
+				} else {
+					$result['risky'] = true;
 				}
 			}
 		}

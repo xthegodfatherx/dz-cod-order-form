@@ -32,6 +32,9 @@ class DZCOD_Couriers {
 			'procolis_confirmed'   => 1,
 			'ecotrack_token'       => '',
 			'ecotrack_url'         => '',
+			'sync_enabled'         => 1,
+			'delivered_status'     => 'completed',
+			'returned_status'      => 'dzcod-returned',
 		);
 	}
 
@@ -122,6 +125,11 @@ class DZCOD_Couriers {
 			}
 		}
 		$out['procolis_confirmed'] = empty( $in['procolis_confirmed'] ) ? 0 : 1;
+		$out['sync_enabled']       = empty( $in['sync_enabled'] ) ? 0 : 1;
+		foreach ( array( 'delivered_status', 'returned_status' ) as $k ) {
+			$v         = isset( $in[ $k ] ) ? sanitize_key( $in[ $k ] ) : '';
+			$out[ $k ] = ( '' === $v || in_array( $v, $valid, true ) ) ? $v : $old[ $k ];
+		}
 		$typed                     = (string) $out['ecotrack_url'];
 		$out['ecotrack_url']       = DZCOD_Courier_API::ecotrack_origin( $typed );
 		if ( '' !== trim( $typed ) && '' === $out['ecotrack_url'] ) {
@@ -292,7 +300,7 @@ class DZCOD_Couriers {
 		if ( '' === $s['provider'] || '' === $s['auto_status'] || $to !== $s['auto_status'] || ! $order ) {
 			return;
 		}
-		if ( '' !== (string) $order->get_meta( '_dzcod_tracking' ) || $order->get_meta( '_dzcod_duplicate_of' ) ) {
+		if ( '' !== (string) $order->get_meta( '_dzcod_tracking' ) || $order->get_meta( '_dzcod_duplicate_of' ) || $order->get_meta( '_dzcod_risky' ) ) {
 			return;
 		}
 		self::queue( $order_id );
@@ -371,6 +379,13 @@ class DZCOD_Couriers {
 
 		if ( '' !== $tracking ) {
 			echo '<p><strong>' . esc_html__( 'Tracking:', 'dz-cod-order-form' ) . '</strong> <code>' . esc_html( $tracking ) . '</code></p>';
+			$ps     = (string) $order->get_meta( '_dzcod_parcel_status' );
+			$labels = DZCOD_Tracking::labels();
+			if ( '' !== $ps ) {
+				echo '<p><span class="dzcod-ps dzcod-ps-' . esc_attr( $ps ) . '">' . esc_html( isset( $labels[ $ps ] ) ? $labels[ $ps ] : $ps ) . '</span><br><small>' . esc_html( (string) $order->get_meta( '_dzcod_parcel_raw' ) ) . '</small></p>';
+			}
+			$refresh = wp_nonce_url( admin_url( 'admin-post.php?action=dzcod_refresh_parcel&order_id=' . $order->get_id() ), 'dzcod_refresh_parcel_' . $order->get_id() );
+			echo '<p><a class="button" href="' . esc_url( $refresh ) . '">' . esc_html__( 'Refresh status', 'dz-cod-order-form' ) . '</a></p>';
 			if ( '' !== $label ) {
 				echo '<p><a class="button" target="_blank" rel="noopener" href="' . esc_url( $label ) . '">' . esc_html__( 'Print label', 'dz-cod-order-form' ) . '</a></p>';
 			}
@@ -474,9 +489,17 @@ class DZCOD_Couriers {
 		if ( ! $order ) {
 			return;
 		}
+		if ( class_exists( 'DZCOD_History' ) && $order->get_billing_phone() ) {
+			echo DZCOD_History::badge( DZCOD_History::for_phone( $order->get_billing_phone(), $order->get_id() ) ) . '<br>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in badge().
+		}
 		$t = (string) $order->get_meta( '_dzcod_tracking' );
 		if ( '' !== $t ) {
 			echo '<code>' . esc_html( $t ) . '</code>';
+			$ps     = (string) $order->get_meta( '_dzcod_parcel_status' );
+			$labels = DZCOD_Tracking::labels();
+			if ( '' !== $ps && isset( $labels[ $ps ] ) ) {
+				echo '<br><span class="dzcod-ps dzcod-ps-' . esc_attr( $ps ) . '">' . esc_html( $labels[ $ps ] ) . '</span>';
+			}
 		} elseif ( $order->get_meta( '_dzcod_courier_error' ) ) {
 			echo '<span style="color:#b32d2e" title="' . esc_attr( (string) $order->get_meta( '_dzcod_courier_error' ) ) . '">' . esc_html__( 'Error', 'dz-cod-order-form' ) . '</span>';
 		} else {
@@ -575,6 +598,23 @@ class DZCOD_Couriers {
 				<tr class="dzcod-p dzcod-p-ecotrack-custom"><th><label for="dzcod-eurl"><?php esc_html_e( 'Ecotrack address', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-eurl" type="url" class="regular-text" name="<?php echo esc_attr( $n ); ?>[ecotrack_url]" value="<?php echo esc_attr( $s['ecotrack_url'] ); ?>" placeholder="https://yourcourier.ecotrack.dz"><p class="description"><?php esc_html_e( 'The address you use to log in to your courier’s Ecotrack account, e.g. https://ecorapide-express.ecotrack.dz', 'dz-cod-order-form' ); ?></p></td></tr>
 				<tr class="dzcod-p dzcod-p-ecotrack"><th><label for="dzcod-etk"><?php esc_html_e( 'API token', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-etk" type="password" class="regular-text" name="<?php echo esc_attr( $n ); ?>[ecotrack_token]" value="" placeholder="<?php echo $s['ecotrack_token'] ? $saved : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" autocomplete="new-password"></td></tr>
 
+				<tr><th><?php esc_html_e( 'Parcel tracking', 'dz-cod-order-form' ); ?></th><td>
+					<label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[sync_enabled]" value="1" <?php checked( ! empty( $s['sync_enabled'] ) ); ?>> <?php esc_html_e( 'Check parcel status every 3 hours (delivered, returned, in transit…)', 'dz-cod-order-form' ); ?></label>
+					<p>
+						<?php
+						foreach ( array( 'delivered_status' => __( 'When delivered, set the order to', 'dz-cod-order-form' ), 'returned_status' => __( 'When returned, set the order to', 'dz-cod-order-form' ) ) as $key => $label ) :
+							?>
+							<label style="display:block;margin:4px 0"><?php echo esc_html( $label ); ?>
+								<select name="<?php echo esc_attr( $n . '[' . $key . ']' ); ?>">
+									<option value=""><?php esc_html_e( '— do not change —', 'dz-cod-order-form' ); ?></option>
+									<?php foreach ( wc_get_order_statuses() as $sk => $sl ) : ?>
+										<option value="<?php echo esc_attr( substr( $sk, 3 ) ); ?>" <?php selected( $s[ $key ], substr( $sk, 3 ) ); ?>><?php echo esc_html( $sl ); ?></option>
+									<?php endforeach; ?>
+								</select>
+							</label>
+						<?php endforeach; ?>
+					</p>
+				</td></tr>
 				<tr><th><label for="dzcod-auto"><?php esc_html_e( 'Send automatically', 'dz-cod-order-form' ); ?></label></th><td>
 					<select id="dzcod-auto" name="<?php echo esc_attr( $n ); ?>[auto_status]">
 						<option value=""><?php esc_html_e( 'No — I send orders manually', 'dz-cod-order-form' ); ?></option>

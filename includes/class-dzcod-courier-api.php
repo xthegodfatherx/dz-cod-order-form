@@ -309,6 +309,121 @@ class DZCOD_Courier_API {
 		);
 	}
 
+	/**
+	 * Current parcel status for several tracking numbers.
+	 * Yalidine: GET /v1/parcels/?tracking=a,b (batch). ZR Express: POST /lire (batch).
+	 * Ecotrack: GET /api/v1/get/tracking/info?tracking= (one by one; format not officially documented).
+	 *
+	 * @param string $key       Provider key.
+	 * @param array  $settings  Courier settings.
+	 * @param array  $trackings Tracking numbers (max 25).
+	 * @return array{ok:bool,error:string,status:array} status: tracking => raw status text.
+	 */
+	public static function track( $key, $settings, $trackings ) {
+		$p         = self::providers();
+		$base      = self::base_url( $key, $settings );
+		$trackings = array_values( array_filter( array_map( 'strval', (array) $trackings ) ) );
+		$out       = array();
+		if ( ! isset( $p[ $key ] ) || '' === $base || ! $trackings ) {
+			return array( 'ok' => false, 'error' => __( 'No delivery company configured.', 'dz-cod-order-form' ), 'status' => array() );
+		}
+		$platform = $p[ $key ][1];
+
+		if ( 'yalidine' === $platform ) {
+			$r = self::http( 'GET', $base . '/v1/parcels/?tracking=' . rawurlencode( implode( ',', $trackings ) ) . '&page_size=' . count( $trackings ), self::yalidine_headers( $settings ) );
+			if ( 200 !== $r['status'] || ! is_array( $r['json'] ) ) {
+				return array( 'ok' => false, 'error' => self::http_error( $r ), 'status' => array() );
+			}
+			foreach ( (array) ( isset( $r['json']['data'] ) ? $r['json']['data'] : array() ) as $row ) {
+				if ( isset( $row['tracking'] ) ) {
+					$out[ (string) $row['tracking'] ] = self::status_text( $row, array( 'last_status', 'status' ) );
+				}
+			}
+		} elseif ( 'procolis' === $platform ) {
+			$colis = array();
+			foreach ( $trackings as $t ) {
+				$colis[] = array( 'Tracking' => $t );
+			}
+			$r = self::http( 'POST', $base . '/lire', self::procolis_headers( $settings ), array( 'Colis' => $colis ) );
+			if ( 200 !== $r['status'] ) {
+				return array( 'ok' => false, 'error' => self::http_error( $r ), 'status' => array() );
+			}
+			foreach ( (array) ( is_array( $r['json'] ) && isset( $r['json']['Colis'] ) ? $r['json']['Colis'] : array() ) as $row ) {
+				if ( isset( $row['Tracking'] ) ) {
+					$out[ (string) $row['Tracking'] ] = self::status_text( $row, array( 'Situation', 'situation', 'Statut', 'statut', 'Etat', 'etat', 'MessageRetour' ) );
+				}
+			}
+		} else {
+			foreach ( $trackings as $t ) {
+				$r = self::http( 'GET', $base . '/api/v1/get/tracking/info?tracking=' . rawurlencode( $t ), self::ecotrack_headers( $settings ) );
+				if ( 200 === $r['status'] && is_array( $r['json'] ) ) {
+					$row = $r['json'];
+					// Newest event first or last depending on tenant: take the most recent "activity" entry if present.
+					if ( isset( $row['activity'] ) && is_array( $row['activity'] ) && $row['activity'] ) {
+						$acts = $row['activity'];
+						$last = end( $acts );
+						$row  = is_array( $last ) ? array_merge( $row, $last ) : $row;
+					}
+					$out[ $t ] = self::status_text( $row, array( 'status', 'statut', 'state', 'etat', 'situation', 'event', 'libelle' ) );
+				}
+				usleep( 200000 );
+			}
+		}
+		return array( 'ok' => true, 'error' => '', 'status' => $out );
+	}
+
+	/**
+	 * First non-empty text among candidate keys.
+	 *
+	 * @param array $row  Row.
+	 * @param array $keys Keys.
+	 * @return string
+	 */
+	private static function status_text( $row, $keys ) {
+		foreach ( $keys as $k ) {
+			if ( isset( $row[ $k ] ) && is_scalar( $row[ $k ] ) && '' !== trim( (string) $row[ $k ] ) ) {
+				return trim( (string) $row[ $k ] );
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * Map a courier's wording (French, Arabic, English) to one vocabulary:
+	 * delivered, returned, return_in_transit, cancelled, delivery_attempted,
+	 * out_for_delivery, in_transit, picked_up, pending, unknown.
+	 *
+	 * @param string $raw Raw status.
+	 * @return string
+	 */
+	public static function normalize_status( $raw ) {
+		$orig = function_exists( 'mb_strtolower' ) ? mb_strtolower( (string) $raw, 'UTF-8' ) : strtolower( (string) $raw );
+		$t    = strtolower( remove_accents( (string) $raw ) );
+		if ( '' === trim( $orig ) ) {
+			return 'unknown';
+		}
+		// Regex fragments; order matters ("retour" beats "livré", "en cours de livraison" beats "livré").
+		$rules = array(
+			'return_in_transit'  => array( 'retour en cours', 'retour vers', 'en retour', 'return in transit', 'قيد الإرجاع', 'في طريق الإرجاع' ),
+			'returned'           => array( '\bretour', '\breturn', '\brefus', 'مرتجع', 'إرجاع', 'ارجاع', 'رفض' ),
+			'cancelled'          => array( '\bannul', '\bcancel', 'ملغى', 'الغاء', 'إلغاء' ),
+			'delivery_attempted' => array( 'tentative', '\bechec', 'injoignable', '\babsent', '\breporte', 'ne repond', '\bfailed', 'attempt', 'لا يرد', 'محاولة', 'مؤجل' ),
+			'out_for_delivery'   => array( 'en cours de livraison', 'sorti en livraison', '\ben livraison', 'out for delivery', 'خرج للتوصيل', 'قيد التوصيل' ),
+			'delivered'          => array( '\blivree?s?\b', '\bdelivered\b', '\bencaisse', 'تم التسليم', 'تم التوصيل', 'مسلم' ),
+			'in_transit'         => array( 'transit', '\bexpedi', '\bvers\b', 'centre de tri', '\bhub\b', 'transfert', '\barrive', 'en route', 'قيد النقل', 'مركز' ),
+			'pending'            => array( 'attente', 'preparation', '\bpret\b', '\bcree', '\bnouveau', 'pending', 'created', 'في الانتظار' ),
+			'picked_up'          => array( '\bramass', '\brecu\b', '\bcollecte', 'picked', 'تم الاستلام' ),
+		);
+		foreach ( $rules as $status => $patterns ) {
+			foreach ( $patterns as $p ) {
+				if ( preg_match( '/' . $p . '/u', $t ) || preg_match( '/' . $p . '/u', $orig ) ) {
+					return $status;
+				}
+			}
+		}
+		return 'unknown';
+	}
+
 	/* ---------------------------------------------------------------- Yalidine */
 
 	/**

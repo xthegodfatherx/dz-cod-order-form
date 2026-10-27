@@ -261,6 +261,37 @@
 			});
 		}
 
+		// One-click upsell card shown under the success message.
+		function showUpsell(u, finish) {
+			var box = document.createElement('div');
+			box.className = 'dzcod-upsell';
+			if (u.image) { var img = document.createElement('img'); img.src = u.image; img.alt = ''; box.appendChild(img); }
+			var body = document.createElement('div');
+			var t = document.createElement('strong'); t.textContent = u.title; body.appendChild(t);
+			var n = document.createElement('div'); n.textContent = u.name; body.appendChild(n);
+			var p = document.createElement('div'); p.className = 'dzcod-upsell-price';
+			var now = document.createElement('b'); now.textContent = u.price; p.appendChild(now);
+			if (u.was) { var was = document.createElement('s'); was.textContent = u.was; p.appendChild(was); }
+			body.appendChild(p);
+			var yes = document.createElement('button'); yes.type = 'button'; yes.className = 'dzcod-submit dzcod-upsell-yes'; yes.textContent = u.yes;
+			var no = document.createElement('button'); no.type = 'button'; no.className = 'dzcod-upsell-no'; no.textContent = u.no;
+			body.appendChild(yes); body.appendChild(no);
+			box.appendChild(body);
+			msg.insertAdjacentElement('afterend', box);
+			no.addEventListener('click', function () { box.remove(); finish(); });
+			yes.addEventListener('click', function () {
+				yes.disabled = true; no.disabled = true; yes.textContent = C.i18n.sending;
+				post(C.ajaxUrl, { action: 'dzcod_upsell', order: u.order, product: u.product, token: u.token }).then(function (r) {
+					var done = document.createElement('p');
+					done.className = 'dzcod-message ' + (r && r.success ? 'is-success' : 'is-error');
+					done.textContent = (r && r.data && r.data.message ? r.data.message : C.i18n.error) + (r && r.success && r.data.total ? ' — ' + r.data.total : '');
+					box.replaceWith(done);
+					if (r && r.success) { document.dispatchEvent(new CustomEvent('dzcod:upsell', { detail: u })); }
+					finish();
+				}).catch(function () { box.remove(); finish(); });
+			});
+		}
+
 		form.addEventListener('submit', function (e) {
 			e.preventDefault();
 			var err = validate();
@@ -283,15 +314,19 @@
 				document.dispatchEvent(new CustomEvent('dzcod:order', { detail: o }));
 				// Ad pixels, if the site already loads them. eventID lets you dedupe with server events.
 				try {
-					if (window.fbq) { window.fbq('track', 'Purchase', { value: o.total, currency: o.currency, content_type: 'product', content_ids: o.items.map(function (i) { return String(i.id); }) }, { eventID: 'dzcod-' + o.id }); }
-					if (window.ttq) { window.ttq.track('CompletePayment', { value: o.total, currency: o.currency, event_id: 'dzcod-' + o.id }); }
+					// "Count a purchase when confirmed": the browser only reports a lead; the server sends Purchase later.
+					var ids = o.items.map(function (i) { return String(i.id); });
+					if (window.fbq) { window.fbq('track', C.purchase === false ? 'Lead' : 'Purchase', { value: o.total, currency: o.currency, content_type: 'product', content_ids: ids }, { eventID: (C.purchase === false ? 'dzcod-lead-' : 'dzcod-') + o.id }); }
+					if (window.ttq) { window.ttq.track(C.purchase === false ? 'SubmitForm' : 'CompletePayment', { value: o.total, currency: o.currency, content_type: 'product', contents: o.items.map(function (i) { return { content_id: String(i.id), quantity: i.quantity }; }) }, { event_id: (C.purchase === false ? 'dzcod-lead-' : 'dzcod-') + o.id }); }
 					if (window.gtag) { window.gtag('event', 'purchase', { transaction_id: String(o.id), value: o.total, currency: o.currency }); }
 				} catch (ignore) {}
 
-				if (res.data.redirect) { window.location.href = res.data.redirect; return; }
+				var redirect = res.data.redirect;
+				var finish = function () { if (redirect) { window.location.href = redirect; } };
 				form.classList.add('is-done');
 				msg.textContent = res.data.message;
 				msg.className = 'dzcod-message is-success';
+				if (res.data.upsell) { showUpsell(res.data.upsell, finish); } else { finish(); }
 				msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
 			}).catch(function () {
 				showError(C.i18n.error);

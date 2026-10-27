@@ -80,7 +80,7 @@
 @media (prefers-reduced-motion: reduce) { .dzcod-submit { animation: none; } }
 .dzcod-privacy { margin: 4px 0 0; text-align: center; font-size: .75em; opacity: .6; }
 .dzcod-trust { margin: 10px 0 0; text-align: center; font-size: .85em; opacity: .75; }
-.dzcod-form.is-done > *:not(.dzcod-message):not(.dzcod-title) { display: none !important; }
+.dzcod-form.is-done > *:not(.dzcod-message):not(.dzcod-title):not(.dzcod-upsell) { display: none !important; }
 .dzcod-form.is-done .dzcod-message.is-success { padding: 22px 14px; font-size: 1.05em; }
 
 /* Quantity offers */
@@ -94,3 +94,12 @@
 .dzcod-offer-total { font-size: 1.05em; }
 .dzcod-offer-was { font-size: .85em; opacity: .55; }
 .dzcod-offer-badge { position: absolute; top: -9px; inset-inline-end: 12px; padding: 1px 8px; border-radius: 20px; background: var(--dzcod-primary); color: #fff; font-size: .75em; font-weight: 700; }
+
+/* One-click upsell */
+.dzcod-upsell { display: flex !important; gap: 12px; align-items: flex-start; margin: 0 0 12px; padding: 14px; border: 2px dashed var(--dzcod-primary); border-radius: var(--dzcod-radius); background: color-mix(in srgb, var(--dzcod-primary) 5%, #fff); }
+.dzcod-upsell img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; flex: 0 0 72px; }
+.dzcod-upsell > div { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.dzcod-upsell-price b { font-size: 1.15em; color: var(--dzcod-primary); }
+.dzcod-upsell-price s { margin-inline-start: 8px; opacity: .55; }
+.dzcod-upsell .dzcod-upsell-yes { margin-top: 6px; min-height: 46px; animation: none; }
+.dzcod-upsell-no { margin-top: 4px; border: 0; background: none; color: inherit; opacity: .65; text-decoration: underline; cursor: pointer; font: inherit; }

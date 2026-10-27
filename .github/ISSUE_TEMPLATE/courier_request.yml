@@ -1,0 +1,22 @@
+name: Add a delivery company
+description: Ask for (or help add) an Algerian delivery company
+labels: [ courier, good first issue ]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Company name
+      placeholder: "e.g. HHD Express"
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Login address
+      description: The address you use to log in (for Ecotrack couriers it ends with .ecotrack.dz).
+      placeholder: "https://hhd.ecotrack.dz"
+  - type: textarea
+    id: api
+    attributes:
+      label: API documentation
+      description: A link or the endpoints you know. Never paste your API token.

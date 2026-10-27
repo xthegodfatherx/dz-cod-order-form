@@ -1,0 +1,16 @@
+.git
+.github
+.gitignore
+.distignore
+.wordpress-org
+bin
+build
+tests
+vendor
+node_modules
+composer.json
+composer.lock
+phpunit.xml.dist
+CONTRIBUTING.md
+SECURITY.md
+*.zip

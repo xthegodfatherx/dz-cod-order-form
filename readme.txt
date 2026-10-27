@@ -5,11 +5,11 @@ Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.3.1
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-One-page cash-on-delivery order form for Algerian WooCommerce stores: 69 wilayas, all communes, per-wilaya delivery prices and fake-order protection.
+Cash-on-delivery order form for Algerian WooCommerce stores: 69 wilayas, couriers, parcel tracking, call confirmation and ads tracking.
 
 == Description ==
 
@@ -24,6 +24,13 @@ Most Algerian online stores sell with cash on delivery (COD). Customers do not w
 * **Import delivery prices automatically** from Yalidine, ZR Express or your Ecotrack courier, or from a **Google Sheet** (template included, optional daily sync). New wilayas get their former wilaya's price.
 * **Quantity offers** per product: clickable packs like "1 for 3,500 · 2 for 6,000 · 3 for 8,000", with a fixed pack price or a % discount, optional badge ("Best value") and free delivery per pack. Prices are always recalculated on the server.
 * **Abandoned orders**: visitors who type a valid phone number but do not confirm are saved (after a 15-minute grace period) in WooCommerce → Abandoned orders, with call and WhatsApp buttons and one-click "Create order". Automatically deleted after a period you choose.
+* **Confirmation desk** (WooCommerce → Confirm orders): call new orders and record the outcome in one click — confirmed, no answer, call later, cancelled — with WhatsApp messages, automatic cancel after N unanswered calls, and per-agent statistics.
+* **Parcel tracking**: delivered / returned / in transit pulled from Yalidine, ZR Express and Ecotrack every 3 hours; orders move to Completed or the new "Returned (refused)" status automatically.
+* **Customer history and repeat refusers**: every order shows how many earlier parcels the phone number accepted or refused; repeat refusers can be put on hold or refused.
+* **Meta Conversions API and TikTok Events API**: server-side Purchase events deduplicated with the browser pixels, with the option to count a purchase only when the order is confirmed by phone.
+* **One-click upsell** after the order: add a discounted product to the same order with one tap.
+* **COD dashboard**: orders, confirmation rate, delivery rate, cash collected, losses on returns, best products and wilayas.
+* **Arabic and French** included.
 * Live order summary: product, delivery, total.
 * Simple and variable products, quantity selector.
 * **Anti-fraud**: Algerian phone validation (+213 accepted), duplicate detection by phone (block, or accept and put On hold), blocked phone list, per-IP rate limit, bot honeypot.
@@ -37,8 +44,8 @@ Most Algerian online stores sell with cash on delivery (COD). Customers do not w
 
 **Developers**
 
-Filters: `dzcod_locations`, `dzcod_is_valid_phone`, `dzcod_antifraud_result`, `dzcod_sheets_row`, `dzcod_auto_insert_for_product`, `dzcod_client_ip`, `dzcod_courier_providers`, `dzcod_courier_parcel`, `dzcod_courier_payload`, `dzcod_courier_logo`, `dzcod_offers`.
-Actions: `dzcod_before_order_save`, `dzcod_order_created`, `dzcod_parcel_created`, `dzcod_lead_recovered`.
+Filters: `dzcod_ecotrack_hosts`, `dzcod_leads_per_hour`, `dzcod_meta_api_version`, `dzcod_locations`, `dzcod_is_valid_phone`, `dzcod_antifraud_result`, `dzcod_sheets_row`, `dzcod_auto_insert_for_product`, `dzcod_client_ip`, `dzcod_courier_providers`, `dzcod_courier_parcel`, `dzcod_courier_payload`, `dzcod_courier_logo`, `dzcod_offers`.
+Actions: `dzcod_before_order_save`, `dzcod_order_created`, `dzcod_order_confirmed`, `dzcod_parcel_created`, `dzcod_parcel_status`, `dzcod_lead_recovered`, `dzcod_upsell_accepted`.
 
 Source code and issues: https://github.com/xthegodfatherx/dz-cod-order-form
 
@@ -48,6 +55,10 @@ This plugin only contacts outside services that you configure yourself:
 
 * **Google Apps Script** (Google): when you enter a web app URL, each new order (name, phone, wilaya, commune, address, products, totals, status) is sent to your own script so it can be written to your Google Sheet. [Terms](https://policies.google.com/terms), [Privacy](https://policies.google.com/privacy).
 * **Your delivery company**: when you connect one and send an order (manually, in bulk or automatically), the customer name, phone, wilaya, commune, address, products, order number and amount to collect are sent to that company's API so it can create the parcel. Depending on your choice this is Yalidine (api.yalidine.app), Yalitec (api.yalitec.me), ZR Express (procolis.com) or an Ecotrack-based courier (*.ecotrack.dz). Their terms and privacy policies are on each company's website.
+
+* **Parcel tracking**: when parcel tracking is on, the tracking numbers of your parcels are sent to the same delivery company every 3 hours to read their status.
+* **Meta Conversions API** (Meta Platforms): when you enter a dataset ID and access token, a Purchase event is sent to graph.facebook.com for each order (or each confirmed order). It contains the order value, currency, product IDs and quantities, the order number, the page address, the visitor's IP address and browser, the _fbp / _fbc cookies, and the phone number, first name and commune **hashed with SHA-256**. [Terms](https://www.facebook.com/legal/terms/businesstools), [Privacy](https://www.facebook.com/privacy/policy).
+* **TikTok Events API** (TikTok): when you enter a pixel code and access token, a CompletePayment event with the same kind of data (phone hashed with SHA-256, IP address, browser, _ttp cookie, order value and products) is sent to business-api.tiktok.com. [Terms](https://ads.tiktok.com/i18n/official/policy/business-products-terms), [Privacy](https://www.tiktok.com/legal/page/row/privacy-policy/en).
 
 Nothing is sent anywhere until you configure these services.
 
@@ -88,6 +99,14 @@ Yes: the name, phone, wilaya, commune and address a visitor typed, plus the prod
 
 Edit a product and fill in the "COD form — quantity offers" box: quantity, then either a fixed pack price or a % discount. The form then shows packs instead of the quantity selector. The pack with a badge is selected by default.
 
+= How should I set up the confirmation workflow? =
+
+In General settings set "New order status" to Pending payment and "When an order is confirmed by phone" to Processing. Your team works through WooCommerce → Confirm orders. If automatic sending is set to "When an order becomes Processing", confirmed orders go straight to your delivery company, and with "Count a purchase when the order is confirmed" Meta and TikTok only learn from real buyers.
+
+= What happens when a parcel is refused? =
+
+Parcel tracking marks it Returned and moves the order to "Returned (refused)". The phone number's history is updated, and if the customer refuses again they can be put on hold or refused automatically (Anti-fraud tab).
+
 = Is Noest supported? =
 
 Not yet. Noest's API is not publicly documented; it is on the roadmap. Contributions are welcome on GitHub.
@@ -101,6 +120,16 @@ Delivery companies sometimes spell communes differently. Open the order, correct
 No. It creates standard WooCommerce orders with the Cash on delivery payment method, so your existing order management, emails and delivery plugins keep working.
 
 == Changelog ==
+
+= 1.4.0 =
+* New: parcel status sync from Yalidine, ZR Express and Ecotrack every 3 hours, with a "Returned (refused)" order status and automatic Completed / Returned updates.
+* New: customer delivery history on every order and in the orders list; optional hold or refusal for repeat refusers.
+* New: confirmation desk (WooCommerce → Confirm orders) with call outcomes, WhatsApp template, auto-cancel and agent statistics.
+* New: Meta Conversions API and TikTok Events API, deduplicated with the browser pixels; option to count purchases only after phone confirmation.
+* New: one-click upsell after the order.
+* New: COD dashboard.
+* New: Arabic and French translations.
+* Developers: GitHub Actions (lint, unit and WordPress integration tests, release zips), contribution guide.
 
 = 1.3.1 =
 * Security: Google Sheets sync now requires a secret of at least 12 characters (a random one is generated if missing), and the Apps Script refuses to run with the example secret.

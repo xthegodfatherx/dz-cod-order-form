@@ -115,6 +115,7 @@ class DZCOD_Form {
 			'freeOver' => (float) $s['free_shipping_over'],
 			'required' => $req,
 			'leads'    => DZCOD_Leads::enabled(),
+			'purchase' => 'order' === $s['purchase_on'],
 			'currency' => array(
 				'symbol'   => html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES, 'UTF-8' ),
 				'decimals' => wc_get_price_decimals(),

@@ -151,7 +151,8 @@ class DZCOD_Order {
 			self::fail( $check['error'], 'fraud', 'phone' );
 		}
 
-		$order = self::create_order( $product, $qty, $name, $phone, $wilaya, $commune, $address, $type, (float) $shipping, (int) $check['duplicate_of'], $extras );
+		$extras['risky'] = ! empty( $check['risky'] );
+		$order           = self::create_order( $product, $qty, $name, $phone, $wilaya, $commune, $address, $type, (float) $shipping, (int) $check['duplicate_of'], $extras );
 		if ( is_wp_error( $order ) ) {
 			self::fail( __( 'Your order could not be saved. Please try again.', 'dz-cod-order-form' ), 'save' );
 		}
@@ -172,6 +173,7 @@ class DZCOD_Order {
 			array(
 				'message'  => $s['success_message'],
 				'redirect' => $s['redirect_thankyou'] ? $order->get_checkout_order_received_url() : '',
+				'upsell'   => DZCOD_Upsell::for_response( $order ),
 				'order'    => array(
 					'id'       => $order->get_id(),
 					'total'    => (float) $order->get_total(),
@@ -278,6 +280,7 @@ class DZCOD_Order {
 				'free_shipping' => false,
 				'offer'         => '',
 				'from_admin'    => false,
+				'risky'         => false,
 			)
 		);
 		$s = DZCOD_Settings::get();
@@ -372,6 +375,9 @@ class DZCOD_Order {
 			if ( $duplicate_of ) {
 				$order->update_meta_data( '_dzcod_duplicate_of', $duplicate_of );
 			}
+			if ( $extras['risky'] ) {
+				$order->update_meta_data( '_dzcod_risky', 1 );
+			}
 
 			$order->calculate_totals();
 			do_action( 'dzcod_before_order_save', $order );
@@ -383,6 +389,8 @@ class DZCOD_Order {
 					/* translators: %d: earlier order id */
 					sprintf( __( 'Possible duplicate: the same phone number placed order #%d recently.', 'dz-cod-order-form' ), $duplicate_of )
 				);
+			} elseif ( $extras['risky'] ) {
+				$order->update_status( 'on-hold', __( 'This phone number refused more parcels than it accepted. Confirm before shipping.', 'dz-cod-order-form' ) );
 			} else {
 				$order->update_status( $s['order_status'], __( 'Order placed from the COD form.', 'dz-cod-order-form' ) );
 			}

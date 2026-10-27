@@ -1,0 +1,1548 @@
+# Copyright (C) 2026 Nedjai
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: DZ COD Order Form 1.4.0\n"
+"Report-Msgid-Bugs-To: https://github.com/xthegodfatherx/dz-cod-order-form/issues\n"
+"POT-Creation-Date: 2026-10-27 11:09+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: dz-cod-order-form\n"
+
+#: dz-cod-order-form.php:64
+msgid "DZ COD Order Form requires WooCommerce to be installed and active."
+msgstr ""
+
+#: dz-cod-order-form.php:107
+msgid "Settings"
+msgstr ""
+
+#: includes/class-dzcod-pixels.php:301
+msgid "Server-side conversion not accepted: %s"
+msgstr ""
+
+#: includes/class-dzcod-pixels.php:346 includes/class-dzcod-couriers.php:324 includes/class-dzcod-couriers.php:339 includes/class-dzcod-leads.php:457
+msgid "Not allowed."
+msgstr ""
+
+#: includes/class-dzcod-upsell.php:65
+msgid "Add this to your order at a special price?"
+msgstr ""
+
+#: includes/class-dzcod-upsell.php:90
+msgid "Yes, add it"
+msgstr ""
+
+#: includes/class-dzcod-upsell.php:91
+msgid "No thanks"
+msgstr ""
+
+#: includes/class-dzcod-upsell.php:104
+msgid "This offer is no longer available."
+msgstr ""
+
+#: includes/class-dzcod-upsell.php:136
+msgid "Customer accepted the upsell: %1$s at %2$s."
+msgstr ""
+
+#: includes/class-dzcod-upsell.php:147
+msgid "Added to your order!"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:79
+msgid "COD form — quantity offers"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:93
+msgid "Show clickable packs instead of the quantity selector, e.g. 1 for 3,500 · 2 for 6,000 · 3 for 8,000. Use a fixed pack price, or a % discount (works with every variation). Leave the quantity empty to remove a row."
+msgstr ""
+
+#: includes/class-dzcod-offers.php:96 includes/class-dzcod-settings.php:44
+msgid "Quantity"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:98
+msgid "Pack price (%s)"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:99
+msgid "or % off"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:100
+msgid "Title (optional)"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:101
+msgid "Badge (optional)"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:102 includes/class-dzcod-form.php:354
+msgid "Free delivery"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:124
+msgid "Family pack"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:125
+msgid "Best value"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:132
+msgid "One-click upsell after the order"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:133
+msgid "After ordering this product, offer one more product at a discount. The customer adds it to the same order with one tap — no new form."
+msgstr ""
+
+#: includes/class-dzcod-offers.php:135
+msgid "Product ID to offer"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:136
+msgid "Discount %"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:137
+msgid "Headline"
+msgstr ""
+
+#: includes/class-dzcod-offers.php:137
+msgid "Add a second one at a special price?"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:136
+msgid "The Ecotrack address must end with .ecotrack.dz (for example https://yourcourier.ecotrack.dz)."
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:206
+msgid "Order not found."
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:212 includes/class-dzcod-courier-api.php:238 includes/class-dzcod-courier-api.php:328
+msgid "No delivery company configured."
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:228
+msgid "This order is already being sent."
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:237
+msgid "The wilaya or commune is missing. Complete the shipping address, save, then send again."
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:252
+msgid "Parcel created at %1$s. Tracking: %2$s"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:258
+msgid "Could not send to %1$s: %2$s"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:357 includes/class-dzcod-couriers.php:559 includes/class-dzcod-admin.php:91
+msgid "Delivery company"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:372 includes/class-dzcod-admin.php:388
+msgid "Connect a delivery company"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:381
+msgid "Tracking:"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:388
+msgid "Refresh status"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:390
+msgid "Print label"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:392
+msgid "This creates a second parcel at the delivery company. Continue?"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:392
+msgid "Send again"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:397
+msgid "Fix the commune or address in the shipping details if needed, save, then try again."
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:400 includes/class-dzcod-couriers.php:413
+msgid "Send to %s"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:455
+msgid "Tracking"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:504
+msgid "Error"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:542
+msgid "Saved — leave empty to keep"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:549
+msgid "Connection works."
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:564
+msgid "None"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:575
+msgid "Get your API credentials from your delivery company account (developer / API section)."
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:578
+msgid "API ID"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:579 includes/class-dzcod-couriers.php:599
+msgid "API token"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:580
+msgid "Ship from wilaya"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:593
+msgid "Token"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:594
+msgid "Key"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:595
+msgid "Parcel status"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:595
+msgid "Send parcels as confirmed (ready for pickup)"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:597
+msgid "Works with every courier that uses Ecotrack, for example:"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:598
+msgid "Ecotrack address"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:598
+msgid "The address you use to log in to your courier’s Ecotrack account, e.g. https://ecorapide-express.ecotrack.dz"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:601
+msgid "Parcel tracking"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:602
+msgid "Check parcel status every 3 hours (delivered, returned, in transit…)"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:605
+msgid "When delivered, set the order to"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:605
+msgid "When returned, set the order to"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:609 includes/class-dzcod-admin.php:214
+msgid "— do not change —"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:618
+msgid "Send automatically"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:620
+msgid "No — I send orders manually"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:623
+msgid "When an order becomes “%s”"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:627
+msgid "Tip: create orders as “Pending”, confirm them by phone, then mark them “Processing” to send them. Suspected duplicates are never sent automatically."
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:636
+msgid "Test connection"
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:639
+msgid "Orders from the 11 wilayas created in 2025 are sent under their former wilaya (e.g. Bou Saâda → 28 M’Sila), because delivery companies still use the 58 codes."
+msgstr ""
+
+#: includes/class-dzcod-couriers.php:444
+msgid "%d order is being sent to the delivery company. Tracking numbers appear in a moment."
+msgid_plural "%d orders are being sent to the delivery company. Tracking numbers appear in a moment."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-dzcod-leads.php:57 includes/class-dzcod-leads.php:263 includes/class-dzcod-leads.php:267 includes/class-dzcod-leads.php:351
+msgid "Abandoned orders"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:317 includes/class-dzcod-desk.php:247
+msgid "To call"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:318
+msgid "Contacted"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:319 includes/class-dzcod-dashboard.php:191
+msgid "Recovered"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:320 includes/class-dzcod-leads.php:423
+msgid "Lost"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:343
+msgid "Order created. You will find it in WooCommerce → Orders."
+msgstr ""
+
+#: includes/class-dzcod-leads.php:344
+msgid "Updated."
+msgstr ""
+
+#: includes/class-dzcod-leads.php:345
+msgid "Deleted."
+msgstr ""
+
+#: includes/class-dzcod-leads.php:346
+msgid "The product is no longer available."
+msgstr ""
+
+#: includes/class-dzcod-leads.php:347
+msgid "The order could not be created."
+msgstr ""
+
+#: includes/class-dzcod-leads.php:355
+msgid "Visitors who typed a valid phone number on the order form but did not confirm. They appear here after %1$d minutes and are deleted automatically after %2$d days. Call them, then create the order in one click."
+msgstr ""
+
+#: includes/class-dzcod-leads.php:362
+msgid "Capture is switched off in DZ COD Form → General."
+msgstr ""
+
+#: includes/class-dzcod-leads.php:375
+msgid "When"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:376 includes/class-dzcod-desk.php:278
+msgid "Customer"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:377
+msgid "Wilaya / commune"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:378 includes/class-dzcod-form.php:383 includes/class-dzcod-dashboard.php:224 includes/class-dzcod-elementor-widget.php:82
+msgid "Product"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:379
+msgid "Actions"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:383
+msgid "Nothing here."
+msgstr ""
+
+#: includes/class-dzcod-leads.php:398
+msgid "Hello %1$s, we saw your order request for %2$s. Shall we confirm it for delivery?"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:418
+msgid "Create order"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:420
+msgid "Called"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:426
+msgid "Delete"
+msgstr ""
+
+#: includes/class-dzcod-leads.php:542
+msgid "Recovered from an abandoned order form. Check the address with the customer."
+msgstr ""
+
+#: includes/class-dzcod-form.php:128
+msgid "Loading…"
+msgstr ""
+
+#: includes/class-dzcod-form.php:129
+msgid "Free"
+msgstr ""
+
+#: includes/class-dzcod-form.php:130
+msgid "Sending…"
+msgstr ""
+
+#: includes/class-dzcod-form.php:131
+msgid "Something went wrong. Please try again."
+msgstr ""
+
+#: includes/class-dzcod-form.php:132
+msgid "Could not load the communes. Please refresh the page."
+msgstr ""
+
+#: includes/class-dzcod-form.php:133 includes/class-dzcod-order.php:98
+msgid "Please choose your wilaya."
+msgstr ""
+
+#: includes/class-dzcod-form.php:134 includes/class-dzcod-order.php:101
+msgid "Please choose your commune."
+msgstr ""
+
+#: includes/class-dzcod-form.php:135 includes/class-dzcod-order.php:125
+msgid "Please choose an option."
+msgstr ""
+
+#: includes/class-dzcod-form.php:136 includes/class-dzcod-order.php:91
+msgid "Please enter your full name."
+msgstr ""
+
+#: includes/class-dzcod-form.php:137 includes/class-dzcod-antifraud.php:81 includes/class-dzcod-order.php:94 includes/class-dzcod-order.php:205
+msgid "Please enter a valid Algerian phone number (e.g. 0555 12 34 56)."
+msgstr ""
+
+#: includes/class-dzcod-form.php:138 includes/class-dzcod-order.php:107
+msgid "Please enter your delivery address."
+msgstr ""
+
+#: includes/class-dzcod-form.php:139 includes/class-dzcod-order.php:225 includes/class-dzcod-order.php:246
+msgid "Please fill in this field."
+msgstr ""
+
+#: includes/class-dzcod-form.php:140 includes/class-dzcod-order.php:214
+msgid "Please enter a valid email address."
+msgstr ""
+
+#: includes/class-dzcod-form.php:154
+msgid "optional"
+msgstr ""
+
+#: includes/class-dzcod-form.php:235
+msgid "Option"
+msgstr ""
+
+#: includes/class-dzcod-form.php:283 includes/class-dzcod-form.php:384 includes/class-dzcod-desk.php:279
+msgid "Delivery"
+msgstr ""
+
+#: includes/class-dzcod-form.php:285 includes/class-dzcod-admin.php:58
+msgid "Home delivery"
+msgstr ""
+
+#: includes/class-dzcod-form.php:286
+msgid "Stop desk (office pickup)"
+msgstr ""
+
+#: includes/class-dzcod-form.php:342
+msgid "Choose your pack"
+msgstr ""
+
+#: includes/class-dzcod-form.php:369
+msgid "Decrease quantity"
+msgstr ""
+
+#: includes/class-dzcod-form.php:371
+msgid "Increase quantity"
+msgstr ""
+
+#: includes/class-dzcod-form.php:379
+msgid "Leave this field empty"
+msgstr ""
+
+#: includes/class-dzcod-form.php:385 includes/class-dzcod-desk.php:281
+msgid "Total"
+msgstr ""
+
+#: includes/class-dzcod-form.php:390
+msgid "Pay on delivery — nothing to pay now"
+msgstr ""
+
+#: includes/class-dzcod-form.php:352 includes/class-dzcod-order.php:142
+msgid "%d piece"
+msgid_plural "%d pieces"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-dzcod-dashboard.php:26 includes/class-dzcod-dashboard.php:26 includes/class-dzcod-dashboard.php:196
+msgid "COD dashboard"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:183 includes/class-dzcod-dashboard.php:224 includes/class-dzcod-dashboard.php:238
+msgid "Orders"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:185 includes/class-dzcod-desk.php:148 includes/class-dzcod-desk.php:317 includes/class-dzcod-desk.php:330
+msgid "Confirmed"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:185
+msgid "%s orders"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:187 includes/class-dzcod-dashboard.php:224 includes/class-dzcod-dashboard.php:238
+msgid "Delivery rate"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:187
+msgid "%1$s delivered · %2$s returned"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:188
+msgid "Cash collected"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:188
+msgid "delivered orders"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:189
+msgid "On the way"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:189
+msgid "confirmed + shipped"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:190
+msgid "Lost on returns"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:190
+msgid "delivery fees of refused parcels"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:191
+msgid "from abandoned forms"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:192
+msgid "Upsells"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:192
+msgid "of orders"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:202
+msgid "Last %d days"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:213 includes/class-dzcod-dashboard.php:214
+msgid "Orders per day"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:222 includes/class-dzcod-desk.php:280
+msgid "Products"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:224
+msgid "Collected"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:230 includes/class-dzcod-dashboard.php:244
+msgid "No orders in this period."
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:236
+msgid "Wilayas"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:238 includes/class-dzcod-settings.php:40 includes/class-dzcod-admin.php:248 includes/class-dzcod-admin.php:436
+msgid "Wilaya"
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:251
+msgid "Form orders only. Delivered / returned come from your delivery company (parcel tracking) and from Completed / Returned order statuses. Figures refresh every 10 minutes."
+msgstr ""
+
+#: includes/class-dzcod-dashboard.php:253
+msgid "Only the latest 5,000 orders are counted."
+msgstr ""
+
+#: includes/class-dzcod-prices.php:216
+msgid "This link is not valid."
+msgstr ""
+
+#: includes/class-dzcod-prices.php:230
+msgid "Could not download the sheet. In Google Sheets use Share → “Anyone with the link can view”, or File → Share → Publish to web → CSV."
+msgstr ""
+
+#: includes/class-dzcod-prices.php:237
+msgid "Google returned a web page instead of the data: the sheet is not shared publicly."
+msgstr ""
+
+#: includes/class-dzcod-prices.php:244
+msgid "No prices found. The first row must have the columns wilaya_code, home, desk (see the template)."
+msgstr ""
+
+#: includes/class-dzcod-prices.php:251
+msgid "Prices updated for %d wilayas."
+msgstr ""
+
+#: includes/class-dzcod-prices.php:275
+msgid "Connect a delivery company first (Delivery company tab)."
+msgstr ""
+
+#: includes/class-dzcod-prices.php:308
+msgid "%1$s answered, but the price format was not recognised. Please report it on GitHub with this sample: %2$s"
+msgstr ""
+
+#: includes/class-dzcod-prices.php:314
+msgid "Prices updated for %1$d wilayas from %2$s."
+msgstr ""
+
+#: includes/class-dzcod-prices.php:343
+msgid "Choose the “Ship from wilaya” in the Delivery company tab first."
+msgstr ""
+
+#: includes/class-dzcod-prices.php:388
+msgid "%1$d / %2$d wilayas imported from %3$s"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:37
+msgid "Waiting for pickup"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:38
+msgid "Picked up"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:39
+msgid "In transit"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:40
+msgid "Out for delivery"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:41
+msgid "Delivery attempted — call the customer"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:42
+msgid "Delivered"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:43
+msgid "Return in progress"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:44
+msgid "Returned"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:45 includes/class-dzcod-desk.php:156 includes/class-dzcod-desk.php:320 includes/class-dzcod-desk.php:330
+msgid "Cancelled"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:46
+msgid "Unknown"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:209
+msgid "Parcel: %1$s (%2$s)"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:216
+msgid "Delivered and paid on delivery."
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:218
+msgid "Parcel returned by the delivery company."
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:57 includes/class-dzcod-tracking.php:79 includes/class-dzcod-tracking.php:83
+msgctxt "Order status"
+msgid "Returned (refused)"
+msgstr ""
+
+#: includes/class-dzcod-tracking.php:63
+msgid "Returned <span class=\"count\">(%s)</span>"
+msgid_plural "Returned <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-dzcod-antifraud.php:88
+msgid "We could not accept this order. Please contact us directly."
+msgstr ""
+
+#: includes/class-dzcod-antifraud.php:98
+msgid "Too many orders from your connection. Please try again later."
+msgstr ""
+
+#: includes/class-dzcod-antifraud.php:119
+msgid "You already placed an order recently. We will call you to confirm it — no need to order again."
+msgstr ""
+
+#: includes/class-dzcod-antifraud.php:130
+msgid "We could not accept this order online. Please contact us directly."
+msgstr ""
+
+#: includes/class-dzcod-order.php:66
+msgid "Your session expired. Please try again."
+msgstr ""
+
+#: includes/class-dzcod-order.php:71
+msgid "Your order could not be submitted."
+msgstr ""
+
+#: includes/class-dzcod-order.php:112
+msgid "Sorry, we do not deliver to this wilaya yet."
+msgstr ""
+
+#: includes/class-dzcod-order.php:118 includes/class-dzcod-order.php:122
+msgid "This product is not available."
+msgstr ""
+
+#: includes/class-dzcod-order.php:135
+msgid "Please choose a pack."
+msgstr ""
+
+#: includes/class-dzcod-order.php:145
+msgid "Sorry, this product is out of stock."
+msgstr ""
+
+#: includes/class-dzcod-order.php:157
+msgid "Your order could not be saved. Please try again."
+msgstr ""
+
+#: includes/class-dzcod-order.php:235
+msgid "Yes"
+msgstr ""
+
+#: includes/class-dzcod-order.php:338
+msgid "Stop desk delivery – %s"
+msgstr ""
+
+#: includes/class-dzcod-order.php:340
+msgid "Home delivery – %s"
+msgstr ""
+
+#: includes/class-dzcod-order.php:348
+msgid "Cash on delivery"
+msgstr ""
+
+#: includes/class-dzcod-order.php:390
+msgid "Possible duplicate: the same phone number placed order #%d recently."
+msgstr ""
+
+#: includes/class-dzcod-order.php:393
+msgid "This phone number refused more parcels than it accepted. Confirm before shipping."
+msgstr ""
+
+#: includes/class-dzcod-order.php:395
+msgid "Order placed from the COD form."
+msgstr ""
+
+#: includes/class-dzcod-settings.php:36 includes/class-dzcod-admin.php:244
+msgid "Full name"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:37
+msgid "Phone number"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:38
+msgid "Second phone"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:39 includes/class-dzcod-admin.php:247
+msgid "Email"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:40
+msgid "Choose your wilaya"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:41 includes/class-dzcod-admin.php:249
+msgid "Commune"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:41
+msgid "Choose your commune"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:42
+msgid "Address"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:43
+msgid "Note"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:118
+msgid "Order now – pay on delivery"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:119
+msgid "Confirm order"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:120
+msgid "Thank you! Your order has been received. We will call you shortly to confirm it."
+msgstr ""
+
+#: includes/class-dzcod-settings.php:131
+msgid "Hello {name}, thank you for your order #{order} from {shop}: {product} — total {total}. Can you confirm it so we can ship it?"
+msgstr ""
+
+#: includes/class-dzcod-settings.php:134
+msgid "Your number is only used to contact you about this order."
+msgstr ""
+
+#: includes/class-dzcod-settings.php:368
+msgid "A secret of at least 12 characters is required. A random one was generated — copy it into your Apps Script (SECRET)."
+msgstr ""
+
+#: includes/class-dzcod-history.php:112
+msgid "New customer"
+msgstr ""
+
+#: includes/class-dzcod-history.php:116
+msgid "%1$d delivered · %2$d returned"
+msgstr ""
+
+#: includes/class-dzcod-history.php:128
+msgid "Customer history"
+msgstr ""
+
+#: includes/class-dzcod-history.php:148
+msgid "This customer refused more parcels than they accepted. Confirm carefully before shipping."
+msgstr ""
+
+#: includes/class-dzcod-history.php:145
+msgid "%d other order with this phone number."
+msgid_plural "%d other orders with this phone number."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-dzcod-admin.php:31 includes/class-dzcod-admin.php:102 includes/class-dzcod-elementor-widget.php:30
+msgid "DZ COD Order Form"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:32
+msgid "DZ COD Form"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:58 includes/class-dzcod-admin.php:430 includes/class-dzcod-admin.php:438 includes/class-dzcod-desk.php:313
+msgid "Stop desk"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:59
+msgid "Wilaya:"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:60
+msgid "Delivery:"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:63
+msgid "Second phone:"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:75
+msgid "Possible duplicate of %s"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:87
+msgid "General"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:88
+msgid "Form fields"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:89
+msgid "Delivery prices"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:90
+msgid "Anti-fraud"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:92
+msgid "Ads tracking"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:93
+msgid "Google Sheets & export"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:149
+msgid "Send a test event (uses your test codes and the latest order)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:183
+msgid "Placement"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:185
+msgid "Show the form automatically on every product page"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:186
+msgid "Hide the standard Add to cart button on those pages"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:188
+msgid "Or place it anywhere with the shortcode <code>[dzcod_form]</code> (on a product page) or <code>[dzcod_form product_id=\"123\"]</code>, or with the Elementor widget “DZ COD Order Form”."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:190
+msgid "Form title"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:191
+msgid "Button text"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:192
+msgid "Success message"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:193
+msgid "Wilaya & commune names"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:195
+msgid "Arabic (العربية)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:196
+msgid "Latin (Français)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:199
+msgid "Delivery options"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:200
+msgid "Offer stop desk (office pickup) delivery"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:201
+msgid "Choose which fields the form shows in the Form fields tab →"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:203
+msgid "New order status"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:209
+msgid "Suspected duplicates are always set to On hold."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:211
+msgid "Order confirmation"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:212
+msgid "When an order is confirmed by phone, set it to"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:219
+msgid "Cancel automatically after"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:220
+msgid "unanswered calls"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:221
+msgid "WhatsApp message"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:222
+msgid "Placeholders: {name} {order} {product} {total} {shop}. Work through new orders in WooCommerce → Confirm orders."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:225
+msgid "Save visitors who type a valid phone number but do not confirm, so you can call them back"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:226
+msgid "Delete them after"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:226 includes/class-dzcod-admin.php:554
+msgid "days"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:227
+msgid "Notice under the form"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:228
+msgid "Tell visitors their number may be saved before they confirm. Check what your local data-protection law requires."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:230
+msgid "After ordering"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:230
+msgid "Redirect to the WooCommerce thank-you page (otherwise show the success message in place)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:231
+msgid "Main color"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:245
+msgid "Phone"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:246
+msgid "Second phone (given to the courier)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:250
+msgid "Address (hidden for stop desk)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:251
+msgid "Order note"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:252
+msgid "Quantity selector"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:255
+msgid "Built-in fields"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:256
+msgid "Name, phone, wilaya and commune are always shown and required — orders and couriers need them."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:259
+msgid "Field"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:260
+msgid "Show"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:261 includes/class-dzcod-admin.php:291
+msgid "Required"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:262 includes/class-dzcod-admin.php:287
+msgid "Label"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:263 includes/class-dzcod-admin.php:290
+msgid "Placeholder"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:283
+msgid "Custom fields"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:284
+msgid "Add your own questions (size, color, preferred call time…). Answers are saved on the order, shown on the order screen and sent to Google Sheets. Leave the label empty to remove a field."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:288
+msgid "Type"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:289
+msgid "Choices (for dropdown, comma-separated)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:297
+msgid "Text"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:298
+msgid "Long text"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:299
+msgid "Dropdown"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:300
+msgid "Checkbox"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:307
+msgid "e.g. Size"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:334
+msgid "Place one order through the form first."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:336
+msgid "Nothing sent: fill in a test code for Meta and/or TikTok (from Events Manager → Test events)."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:341
+msgid "%s: test event accepted. Check Test events in Events Manager."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:341
+msgid "%1$s: %2$s"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:345
+msgid "Saved — leave empty to keep, type - to remove"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:347
+msgid "Send Purchase events from your server as well as the browser. This recovers conversions lost to ad blockers and iPhones, so Meta and TikTok optimise your campaigns better. Browser and server events share the same ID, so nothing is counted twice."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:349
+msgid "Count a purchase when"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:350
+msgid "The customer submits the form (standard)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:351
+msgid "The order is confirmed by phone (Confirm orders screen) — recommended for COD"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:352
+msgid "With \"confirmed\", the browser sends a Lead (Meta) / SubmitForm (TikTok) at submission and the Purchase is sent from the server only for real buyers, so your ads learn from people who actually accept the order."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:355
+msgid "Pixel / dataset ID"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:356
+msgid "Conversions API access token"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:356
+msgid "Events Manager → your dataset → Settings → Conversions API → Generate access token."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:357 includes/class-dzcod-admin.php:361
+msgid "Test event code"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:357
+msgid "Only while testing — remove it when you go live, or real events are treated as tests."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:359
+msgid "Pixel code"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:360
+msgid "Events API access token"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:360
+msgid "TikTok Events Manager → your pixel → Settings → Generate access token."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:363
+msgid "The phone number, first name and commune are hashed (SHA-256) before they are sent, as Meta and TikTok require. The browser pixels themselves are not installed by this plugin — keep using your existing pixel setup."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:378
+msgid "Fill prices automatically"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:381
+msgid "From your delivery company"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:384
+msgid "Download your current %s rates (home and stop desk) for every wilaya."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:385
+msgid "Import from %s"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:387
+msgid "Connect Yalidine, ZR Express or an Ecotrack courier first."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:392
+msgid "From a Google Sheet"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:394
+msgid "Download the template"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:394
+msgid "(or export your current prices below) and open it in Google Sheets (File → Import)."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:395
+msgid "Edit the home and desk columns. Set enabled to 0 for wilayas you do not deliver to."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:396
+msgid "Share → “Anyone with the link can view”, then paste the link here."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:399
+msgid "Sync from this sheet every day (save the settings to switch on)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:400
+msgid "Import from sheet now"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:401
+msgid "Export current prices (CSV)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:416
+msgid "Reloading…"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:417
+msgid "Request failed."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:420
+msgid "This replaces the prices in the table below. Continue?"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:421
+msgid "Importing…"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:425
+msgid "Prices per wilaya"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:426
+msgid "Set the delivery price for each wilaya. Untick a wilaya to stop delivering there."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:428
+msgid "Apply to all:"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:429 includes/class-dzcod-admin.php:437
+msgid "Home"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:431
+msgid "Apply"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:435
+msgid "Deliver"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:456
+msgid "Free delivery from"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:456
+msgid "Order subtotal that makes delivery free. 0 = never."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:477
+msgid "Always on"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:477
+msgid "Algerian phone validation (05/06/07 mobiles and landlines, +213 accepted), hidden honeypot field against bots, commune must belong to the chosen wilaya."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:478
+msgid "Duplicate window"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:479
+msgid "hours (0 = off)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:480
+msgid "A second order from the same phone within this window is a duplicate."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:482
+msgid "When a duplicate is detected"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:483
+msgid "Block it and tell the customer their first order is already received"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:484
+msgid "Accept it but put it On hold and flag it"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:486
+msgid "Repeat refusers"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:487
+msgid "A phone number with at least"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:487
+msgid "returned parcels, and more returns than deliveries:"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:489
+msgid "Accept the order but put it On hold and never send it automatically"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:489
+msgid "Refuse the order and ask the customer to contact you"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:489
+msgid "Do nothing (only show the history on the order)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:493
+msgid "Uses the delivered / returned status pulled from your delivery company (and Completed / Returned orders)."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:495
+msgid "Rate limit"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:495
+msgid "orders per hour per IP address (0 = off)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:496
+msgid "Visitor IP from"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:498
+msgid "Direct connection (default)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:499
+msgid "Cloudflare (CF-Connecting-IP)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:500
+msgid "Reverse proxy / load balancer (X-Forwarded-For)"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:502
+msgid "Only change this if your site really is behind Cloudflare or a proxy. Otherwise all visitors share one IP and the rate limit blocks everyone; choosing it without a proxy lets attackers fake their IP."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:504
+msgid "Blocked phones"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:504
+msgid "One number per line, e.g. customers who repeatedly refuse deliveries."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:519
+msgid "Test row sent. Check your sheet."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:521
+msgid "The test failed. Check the web app URL, the secret, and that the Apps Script is deployed with access “Anyone”."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:525
+msgid "Create a Google Sheet, then open Extensions → Apps Script."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:526
+msgid "Paste the script from the plugin file <code>google-apps-script/Code.gs</code> and set the same secret as below."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:527
+msgid "Deploy → New deployment → Web app, execute as Me, access Anyone. Copy the URL here."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:530
+msgid "Web app URL"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:531
+msgid "Secret"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:531
+msgid "Any random text; it stops strangers from writing to your sheet."
+msgstr ""
+
+#: includes/class-dzcod-admin.php:548
+msgid "Send a test row"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:554
+msgid "Last"
+msgstr ""
+
+#: includes/class-dzcod-admin.php:555
+msgid "Export COD orders to CSV"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:29 includes/class-dzcod-desk.php:29 includes/class-dzcod-desk.php:257
+msgid "Confirm orders"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:141
+msgid "Confirmed by phone (%s)."
+msgstr ""
+
+#: includes/class-dzcod-desk.php:155
+msgid "Cancelled by the customer on the phone (%s)."
+msgstr ""
+
+#: includes/class-dzcod-desk.php:161
+msgid "Customer asked to be called back later (%s)."
+msgstr ""
+
+#: includes/class-dzcod-desk.php:163
+msgid "Call back in 2 hours"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:171
+msgid "No answer (attempt %1$d, %2$s)."
+msgstr ""
+
+#: includes/class-dzcod-desk.php:178
+msgid "Cancelled automatically after %d unanswered calls."
+msgstr ""
+
+#: includes/class-dzcod-desk.php:179
+msgid "Cancelled (no answer)"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:182
+msgid "No answer ×%d — retry in 1 hour"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:200
+msgid "Invalid request."
+msgstr ""
+
+#: includes/class-dzcod-desk.php:203
+msgid "Already handled by someone else."
+msgstr ""
+
+#: includes/class-dzcod-desk.php:207
+msgid "Someone is handling this order right now."
+msgstr ""
+
+#: includes/class-dzcod-desk.php:248 includes/class-dzcod-desk.php:318 includes/class-dzcod-desk.php:330
+msgid "No answer"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:249
+msgid "Call later"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:262
+msgid "Tip: new orders and confirmed orders currently have the same status (%s). Set “New order status” to Pending payment in General, so only confirmed orders become Processing — and are sent to the delivery company if automatic sending is on."
+msgstr ""
+
+#: includes/class-dzcod-desk.php:277
+msgid "Order"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:282
+msgid "Outcome"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:286
+msgid "Nothing to call right now. 🎉"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:302
+msgid "%d calls"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:319
+msgid "Later"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:328
+msgid "Team — last 7 days"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:330
+msgid "Agent"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:330
+msgid "Confirmation rate"
+msgstr ""
+
+#: includes/class-dzcod-desk.php:335
+msgid "No calls recorded yet."
+msgstr ""
+
+#: includes/class-dzcod-desk.php:354
+msgid "Cancel this order?"
+msgstr ""
+
+#: includes/class-dzcod-elementor-widget.php:86
+msgid "Product ID"
+msgstr ""
+
+#: includes/class-dzcod-elementor-widget.php:89
+msgid "Leave empty on a single product template to use the current product."
+msgstr ""
+
+#: includes/class-dzcod-elementor-widget.php:102
+msgid "DZ COD Order Form: set a product ID, or use this widget in a single product template."
+msgstr ""
+
+#: includes/class-dzcod-courier-api.php:26
+msgid "Ecotrack (any courier — paste its address)"
+msgstr ""
+
+#: includes/class-dzcod-courier-api.php:149
+msgid "HTTP %1$d: %2$s"
+msgstr ""
+
+#: includes/class-dzcod-courier-api.php:208
+msgid "Choose a delivery company and fill in its address."
+msgstr ""
+
+#: includes/class-dzcod-courier-api.php:476
+msgid "No Yalidine stop desk found in this wilaya."
+msgstr ""
+
+#: includes/class-dzcod-courier-api.php:490
+msgid "Yalidine refuses amounts above 150,000 DA."
+msgstr ""
+
+#: includes/class-dzcod-courier-api.php:534 includes/class-dzcod-courier-api.php:590
+msgid "Parcel refused."
+msgstr ""

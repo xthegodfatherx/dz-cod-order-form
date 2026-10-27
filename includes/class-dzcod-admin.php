@@ -42,10 +42,8 @@ class DZCOD_Admin {
 	 * @param string $hook Screen hook.
 	 */
 	public static function assets( $hook ) {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- screen check only.
-		if ( isset( $_GET['page'] ) && 'dzcod' === $_GET['page'] ) {
-			wp_enqueue_style( 'dzcod-admin', DZCOD_URL . 'assets/admin.css', array(), DZCOD_VERSION );
-		}
+		// Small stylesheet: settings, desk, dashboard, and the badges on order screens.
+		wp_enqueue_style( 'dzcod-admin', DZCOD_URL . 'assets/admin.css', array(), DZCOD_VERSION );
 	}
 
 	/**
@@ -91,6 +89,7 @@ class DZCOD_Admin {
 			'delivery'  => __( 'Delivery prices', 'dz-cod-order-form' ),
 			'antifraud' => __( 'Anti-fraud', 'dz-cod-order-form' ),
 			'couriers'  => __( 'Delivery company', 'dz-cod-order-form' ),
+			'tracking'  => __( 'Ads tracking', 'dz-cod-order-form' ),
 			'sheets'    => __( 'Google Sheets & export', 'dz-cod-order-form' ),
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- tab switch only.
@@ -122,6 +121,9 @@ class DZCOD_Admin {
 					case 'fields':
 						self::tab_fields( $s, $n );
 						break;
+					case 'tracking':
+						self::tab_tracking( $s, $n );
+						break;
 					case 'delivery':
 						self::tab_delivery( $s, $n );
 						break;
@@ -139,6 +141,13 @@ class DZCOD_Admin {
 			</form>
 			<?php if ( 'sheets' === $tab ) : ?>
 				<?php self::tab_sheets_actions( $s ); ?>
+			<?php endif; ?>
+			<?php if ( 'tracking' === $tab ) : ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<input type="hidden" name="action" value="dzcod_pixels_test">
+					<?php wp_nonce_field( 'dzcod_pixels_test' ); ?>
+					<?php submit_button( __( 'Send a test event (uses your test codes and the latest order)', 'dz-cod-order-form' ), 'secondary', 'submit', false ); ?>
+				</form>
 			<?php endif; ?>
 		</div>
 		<?php
@@ -198,6 +207,19 @@ class DZCOD_Admin {
 					<?php endforeach; ?>
 				</select>
 				<p class="description"><?php esc_html_e( 'Suspected duplicates are always set to On hold.', 'dz-cod-order-form' ); ?></p>
+			</td></tr>
+			<tr><th><?php esc_html_e( 'Order confirmation', 'dz-cod-order-form' ); ?></th><td>
+				<p><label><?php esc_html_e( 'When an order is confirmed by phone, set it to', 'dz-cod-order-form' ); ?>
+					<select name="<?php echo esc_attr( $n ); ?>[confirmed_status]">
+						<option value=""><?php esc_html_e( '— do not change —', 'dz-cod-order-form' ); ?></option>
+						<?php foreach ( wc_get_order_statuses() as $sk => $sl ) : ?>
+							<option value="<?php echo esc_attr( substr( $sk, 3 ) ); ?>" <?php selected( $s['confirmed_status'], substr( $sk, 3 ) ); ?>><?php echo esc_html( $sl ); ?></option>
+						<?php endforeach; ?>
+					</select></label></p>
+				<p><label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[auto_cancel]" value="1" <?php checked( ! empty( $s['auto_cancel'] ) ); ?>> <?php esc_html_e( 'Cancel automatically after', 'dz-cod-order-form' ); ?></label>
+					<input type="number" min="1" max="10" style="width:60px" name="<?php echo esc_attr( $n ); ?>[max_attempts]" value="<?php echo esc_attr( $s['max_attempts'] ); ?>"> <?php esc_html_e( 'unanswered calls', 'dz-cod-order-form' ); ?></p>
+				<p><label><?php esc_html_e( 'WhatsApp message', 'dz-cod-order-form' ); ?><br><textarea class="large-text" rows="2" name="<?php echo esc_attr( $n ); ?>[whatsapp_template]"><?php echo esc_textarea( $s['whatsapp_template'] ); ?></textarea></label></p>
+				<p class="description"><?php esc_html_e( 'Placeholders: {name} {order} {product} {total} {shop}. Work through new orders in WooCommerce → Confirm orders.', 'dz-cod-order-form' ); ?></p>
 			</td></tr>
 			<tr><th><?php esc_html_e( 'Abandoned orders', 'dz-cod-order-form' ); ?></th><td>
 				<?php self::checkbox( $s, $n, 'leads_enabled', __( 'Save visitors who type a valid phone number but do not confirm, so you can call them back', 'dz-cod-order-form' ) ); ?>
@@ -295,6 +317,50 @@ class DZCOD_Admin {
 			<?php endfor; ?>
 			</tbody>
 		</table>
+		<?php
+	}
+
+	/**
+	 * Ads tracking tab: Meta Conversions API and TikTok Events API.
+	 *
+	 * @param array  $s Settings.
+	 * @param string $n Option name.
+	 */
+	private static function tab_tracking( $s, $n ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
+		if ( isset( $_GET['tested'] ) ) {
+			$res = get_transient( 'dzcod_pixels_test_' . get_current_user_id() );
+			if ( 'noorder' === $res ) {
+				echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Place one order through the form first.', 'dz-cod-order-form' ) . '</p></div>';
+			} elseif ( is_array( $res ) && ! $res ) {
+				echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Nothing sent: fill in a test code for Meta and/or TikTok (from Events Manager → Test events).', 'dz-cod-order-form' ) . '</p></div>';
+			} elseif ( is_array( $res ) ) {
+				foreach ( $res as $dest => $r ) {
+					$label = 'meta' === $dest ? 'Meta' : 'TikTok';
+					/* translators: 1: Meta/TikTok, 2: error */
+					echo '<div class="notice notice-' . ( $r['ok'] ? 'success' : 'error' ) . ' inline"><p>' . esc_html( $r['ok'] ? sprintf( __( '%s: test event accepted. Check Test events in Events Manager.', 'dz-cod-order-form' ), $label ) : sprintf( __( '%1$s: %2$s', 'dz-cod-order-form' ), $label, $r['error'] ) ) . '</p></div>';
+				}
+			}
+		}
+		$saved = esc_attr__( 'Saved — leave empty to keep, type - to remove', 'dz-cod-order-form' );
+		?>
+		<p><?php esc_html_e( 'Send Purchase events from your server as well as the browser. This recovers conversions lost to ad blockers and iPhones, so Meta and TikTok optimise your campaigns better. Browser and server events share the same ID, so nothing is counted twice.', 'dz-cod-order-form' ); ?></p>
+		<table class="form-table" role="presentation">
+			<tr><th><?php esc_html_e( 'Count a purchase when', 'dz-cod-order-form' ); ?></th><td>
+				<label style="display:block"><input type="radio" name="<?php echo esc_attr( $n ); ?>[purchase_on]" value="order" <?php checked( $s['purchase_on'], 'order' ); ?>> <?php esc_html_e( 'The customer submits the form (standard)', 'dz-cod-order-form' ); ?></label>
+				<label style="display:block"><input type="radio" name="<?php echo esc_attr( $n ); ?>[purchase_on]" value="confirmed" <?php checked( $s['purchase_on'], 'confirmed' ); ?>> <?php esc_html_e( 'The order is confirmed by phone (Confirm orders screen) — recommended for COD', 'dz-cod-order-form' ); ?></label>
+				<p class="description"><?php esc_html_e( 'With "confirmed", the browser sends a Lead (Meta) / SubmitForm (TikTok) at submission and the Purchase is sent from the server only for real buyers, so your ads learn from people who actually accept the order.', 'dz-cod-order-form' ); ?></p>
+			</td></tr>
+			<tr><th colspan="2"><h3 style="margin:0">Meta (Facebook / Instagram)</h3></th></tr>
+			<tr><th><label for="dzcod-mp"><?php esc_html_e( 'Pixel / dataset ID', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-mp" class="regular-text" name="<?php echo esc_attr( $n ); ?>[meta_pixel_id]" value="<?php echo esc_attr( $s['meta_pixel_id'] ); ?>" inputmode="numeric"></td></tr>
+			<tr><th><label for="dzcod-mt"><?php esc_html_e( 'Conversions API access token', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-mt" type="password" class="regular-text" name="<?php echo esc_attr( $n ); ?>[meta_token]" value="" placeholder="<?php echo $s['meta_token'] ? $saved : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" autocomplete="new-password"><p class="description"><?php esc_html_e( 'Events Manager → your dataset → Settings → Conversions API → Generate access token.', 'dz-cod-order-form' ); ?></p></td></tr>
+			<tr><th><label for="dzcod-mtc"><?php esc_html_e( 'Test event code', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-mtc" class="regular-text" name="<?php echo esc_attr( $n ); ?>[meta_test_code]" value="<?php echo esc_attr( $s['meta_test_code'] ); ?>" placeholder="TEST12345"><p class="description"><?php esc_html_e( 'Only while testing — remove it when you go live, or real events are treated as tests.', 'dz-cod-order-form' ); ?></p></td></tr>
+			<tr><th colspan="2"><h3 style="margin:0">TikTok</h3></th></tr>
+			<tr><th><label for="dzcod-tp"><?php esc_html_e( 'Pixel code', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-tp" class="regular-text" name="<?php echo esc_attr( $n ); ?>[tiktok_pixel]" value="<?php echo esc_attr( $s['tiktok_pixel'] ); ?>"></td></tr>
+			<tr><th><label for="dzcod-tt"><?php esc_html_e( 'Events API access token', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-tt" type="password" class="regular-text" name="<?php echo esc_attr( $n ); ?>[tiktok_token]" value="" placeholder="<?php echo $s['tiktok_token'] ? $saved : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" autocomplete="new-password"><p class="description"><?php esc_html_e( 'TikTok Events Manager → your pixel → Settings → Generate access token.', 'dz-cod-order-form' ); ?></p></td></tr>
+			<tr><th><label for="dzcod-ttc"><?php esc_html_e( 'Test event code', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-ttc" class="regular-text" name="<?php echo esc_attr( $n ); ?>[tiktok_test_code]" value="<?php echo esc_attr( $s['tiktok_test_code'] ); ?>"></td></tr>
+		</table>
+		<p class="description"><?php esc_html_e( 'The phone number, first name and commune are hashed (SHA-256) before they are sent, as Meta and TikTok require. The browser pixels themselves are not installed by this plugin — keep using your existing pixel setup.', 'dz-cod-order-form' ); ?></p>
 		<?php
 	}
 
@@ -416,6 +482,15 @@ class DZCOD_Admin {
 			<tr><th><?php esc_html_e( 'When a duplicate is detected', 'dz-cod-order-form' ); ?></th><td>
 				<label><input type="radio" name="<?php echo esc_attr( $n ); ?>[dup_action]" value="block" <?php checked( $s['dup_action'], 'block' ); ?>> <?php esc_html_e( 'Block it and tell the customer their first order is already received', 'dz-cod-order-form' ); ?></label><br>
 				<label><input type="radio" name="<?php echo esc_attr( $n ); ?>[dup_action]" value="flag" <?php checked( $s['dup_action'], 'flag' ); ?>> <?php esc_html_e( 'Accept it but put it On hold and flag it', 'dz-cod-order-form' ); ?></label>
+			</td></tr>
+			<tr><th><?php esc_html_e( 'Repeat refusers', 'dz-cod-order-form' ); ?></th><td>
+				<label><?php esc_html_e( 'A phone number with at least', 'dz-cod-order-form' ); ?> <input type="number" min="0" max="20" style="width:60px" name="<?php echo esc_attr( $n ); ?>[refusals_limit]" value="<?php echo esc_attr( $s['refusals_limit'] ); ?>"> <?php esc_html_e( 'returned parcels, and more returns than deliveries:', 'dz-cod-order-form' ); ?></label><br>
+				<?php
+				foreach ( array( 'flag' => __( 'Accept the order but put it On hold and never send it automatically', 'dz-cod-order-form' ), 'block' => __( 'Refuse the order and ask the customer to contact you', 'dz-cod-order-form' ), 'off' => __( 'Do nothing (only show the history on the order)', 'dz-cod-order-form' ) ) as $val => $label ) :
+					?>
+					<label style="display:block"><input type="radio" name="<?php echo esc_attr( $n ); ?>[refusals_action]" value="<?php echo esc_attr( $val ); ?>" <?php checked( $s['refusals_action'], $val ); ?>> <?php echo esc_html( $label ); ?></label>
+				<?php endforeach; ?>
+				<p class="description"><?php esc_html_e( 'Uses the delivered / returned status pulled from your delivery company (and Completed / Returned orders).', 'dz-cod-order-form' ); ?></p>
 			</td></tr>
 			<tr><th><label for="dzcod-rl"><?php esc_html_e( 'Rate limit', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-rl" type="number" min="0" name="<?php echo esc_attr( $n ); ?>[rate_limit]" value="<?php echo esc_attr( $s['rate_limit'] ); ?>" style="width:80px"> <?php esc_html_e( 'orders per hour per IP address (0 = off)', 'dz-cod-order-form' ); ?></td></tr>
 			<tr><th><label for="dzcod-ip"><?php esc_html_e( 'Visitor IP from', 'dz-cod-order-form' ); ?></label></th><td>

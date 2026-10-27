@@ -62,3 +62,32 @@
 .dzcod-fields-table { max-width: 980px; margin-bottom: 18px; }
 .dzcod-fields-table td, .dzcod-fields-table th { vertical-align: middle; }
 .dzcod-fields-table input[type="text"] { width: 100%; }
+
+/* Parcel status and customer history badges (order list, order screen, desk). */
+.dzcod-ps, .dzcod-hist { display: inline-block; margin-top: 3px; padding: 1px 7px; border-radius: 20px; font-size: 11px; line-height: 1.6; background: #f0f0f1; color: #3c434a; white-space: nowrap; }
+.dzcod-ps-delivered, .dzcod-hist-good { background: #d1fae5; color: #065f46; }
+.dzcod-ps-returned, .dzcod-ps-cancelled, .dzcod-hist-bad { background: #fee2e2; color: #991b1b; }
+.dzcod-ps-delivery_attempted, .dzcod-ps-return_in_transit, .dzcod-hist-warn { background: #fef3c7; color: #92400e; }
+.dzcod-ps-out_for_delivery, .dzcod-ps-in_transit, .dzcod-ps-picked_up { background: #dbeafe; color: #1e40af; }
+.dzcod-hist-new { background: #ede9fe; color: #5b21b6; }
+
+/* Confirmation desk */
+.dzcod-desk .dzcod-call { font-size: 14px; font-weight: 600; text-decoration: none; }
+.dzcod-desk .dzcod-outcomes { white-space: nowrap; }
+.dzcod-desk .dzcod-outcomes .button { margin: 2px 2px 2px 0; }
+.dzcod-desk tr.is-done { opacity: .45; }
+.dzcod-desk tr.is-done .dzcod-outcome-msg { color: #00a32a; font-weight: 600; }
+.dzcod-desk tr.is-error .dzcod-outcome-msg { color: #d63638; font-weight: 600; }
+@media (max-width: 782px) { .dzcod-desk .dzcod-outcomes { white-space: normal; } }
+
+/* Dashboard */
+.dzcod-cards { clear: both; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; padding-top: 12px; max-width: 1100px; }
+.dzcod-card { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border: 1px solid #dcdcde; border-radius: 10px; background: #fff; }
+.dzcod-card span { color: #50575e; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+.dzcod-card strong { font-size: 24px; line-height: 1.3; }
+.dzcod-card small { color: #646970; }
+.dzcod-bars { display: flex; align-items: flex-end; gap: 2px; height: 120px; max-width: 1100px; padding: 8px; border: 1px solid #dcdcde; border-radius: 10px; background: #fff; }
+.dzcod-bar { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.dzcod-bar i { display: block; width: 100%; min-height: 2px; border-radius: 3px 3px 0 0; background: #2271b1; }
+.dzcod-dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1100px; }
+@media (max-width: 960px) { .dzcod-dash-grid { grid-template-columns: 1fr; } }

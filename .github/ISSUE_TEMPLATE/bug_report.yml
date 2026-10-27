@@ -1,0 +1,28 @@
+name: Bug report
+description: Something does not work as expected
+labels: [ bug ]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead? Screenshots help.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      placeholder: "Plugin 1.4.0, WordPress 6.9, WooCommerce 10.3, PHP 8.2"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [ Order form, Delivery company, Delivery prices, Abandoned orders, Confirmation desk, Ads tracking, Google Sheets, Dashboard, Other ]
+  - type: textarea
+    id: errors
+    attributes:
+      label: Error messages
+      description: Order notes, browser console, or wp-content/debug.log. Remove API tokens and customer data first.

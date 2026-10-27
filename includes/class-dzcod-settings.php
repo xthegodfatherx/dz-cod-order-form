@@ -125,6 +125,10 @@ class DZCOD_Settings {
 			'order_status'       => 'processing',
 			'redirect_thankyou'  => 0,
 			'primary_color'      => '#16a34a',
+			'confirmed_status'   => 'processing',
+			'max_attempts'       => 3,
+			'auto_cancel'        => 0,
+			'whatsapp_template'  => __( 'Hello {name}, thank you for your order #{order} from {shop}: {product} — total {total}. Can you confirm it so we can ship it?', 'dz-cod-order-form' ),
 			'leads_enabled'      => 1,
 			'leads_retention'    => 30,
 			'leads_notice'       => __( 'Your number is only used to contact you about this order.', 'dz-cod-order-form' ),
@@ -139,6 +143,16 @@ class DZCOD_Settings {
 			'blocked_phones'     => '',
 			'rate_limit'         => 5,
 			'ip_source'          => 'remote',
+			'refusals_limit'     => 2,
+			'refusals_action'    => 'flag',
+			// Ads tracking (server side).
+			'purchase_on'        => 'order',
+			'meta_pixel_id'      => '',
+			'meta_token'         => '',
+			'meta_test_code'     => '',
+			'tiktok_pixel'       => '',
+			'tiktok_token'       => '',
+			'tiktok_test_code'   => '',
 			// Google Sheets.
 			'sheets_url'         => '',
 			'sheets_secret'      => '',
@@ -238,7 +252,7 @@ class DZCOD_Settings {
 		}
 
 		if ( 'general' === $tab ) {
-			foreach ( array( 'auto_insert', 'hide_add_to_cart', 'stopdesk_enabled', 'redirect_thankyou', 'leads_enabled' ) as $k ) {
+			foreach ( array( 'auto_insert', 'hide_add_to_cart', 'stopdesk_enabled', 'redirect_thankyou', 'leads_enabled', 'auto_cancel' ) as $k ) {
 				$out[ $k ] = empty( $input[ $k ] ) ? 0 : 1;
 			}
 			foreach ( array( 'form_title', 'button_text' ) as $k ) {
@@ -246,6 +260,16 @@ class DZCOD_Settings {
 			}
 			$out['success_message'] = isset( $input['success_message'] ) ? sanitize_textarea_field( $input['success_message'] ) : $current['success_message'];
 			$out['leads_retention'] = isset( $input['leads_retention'] ) ? min( 365, max( 1, absint( $input['leads_retention'] ) ) ) : 30;
+			$cs                       = isset( $input['confirmed_status'] ) ? sanitize_key( $input['confirmed_status'] ) : 'processing';
+			$valid                    = array_map(
+				function ( $k ) {
+					return substr( $k, 3 );
+				},
+				array_keys( wc_get_order_statuses() )
+			);
+			$out['confirmed_status']  = ( '' === $cs || in_array( $cs, $valid, true ) ) ? $cs : 'processing';
+			$out['max_attempts']      = isset( $input['max_attempts'] ) ? min( 10, absint( $input['max_attempts'] ) ) : 3;
+			$out['whatsapp_template'] = isset( $input['whatsapp_template'] ) ? sanitize_textarea_field( $input['whatsapp_template'] ) : $current['whatsapp_template'];
 			$out['leads_notice']    = isset( $input['leads_notice'] ) ? sanitize_text_field( $input['leads_notice'] ) : $current['leads_notice'];
 			$out['name_lang']       = ( isset( $input['name_lang'] ) && 'latin' === $input['name_lang'] ) ? 'latin' : 'ar';
 			$status                 = isset( $input['order_status'] ) ? sanitize_key( $input['order_status'] ) : 'processing';
@@ -306,11 +330,33 @@ class DZCOD_Settings {
 			$out['dup_hours']      = isset( $input['dup_hours'] ) ? max( 0, absint( $input['dup_hours'] ) ) : 24;
 			$out['dup_action']     = ( isset( $input['dup_action'] ) && 'flag' === $input['dup_action'] ) ? 'flag' : 'block';
 			$out['rate_limit']     = isset( $input['rate_limit'] ) ? absint( $input['rate_limit'] ) : 5;
+			$out['refusals_limit']  = isset( $input['refusals_limit'] ) ? min( 20, absint( $input['refusals_limit'] ) ) : 2;
+			$ra                     = isset( $input['refusals_action'] ) ? sanitize_key( $input['refusals_action'] ) : 'flag';
+			$out['refusals_action'] = in_array( $ra, array( 'off', 'flag', 'block' ), true ) ? $ra : 'flag';
 			$src                   = isset( $input['ip_source'] ) ? sanitize_key( $input['ip_source'] ) : 'remote';
 			$out['ip_source']      = in_array( $src, array( 'remote', 'cloudflare', 'proxy' ), true ) ? $src : 'remote';
 			$phones                = isset( $input['blocked_phones'] ) ? explode( "\n", (string) $input['blocked_phones'] ) : array();
 			$clean                 = array_filter( array_map( array( 'DZCOD_Antifraud', 'normalize_phone' ), $phones ) );
 			$out['blocked_phones'] = implode( "\n", array_unique( $clean ) );
+		}
+
+		if ( 'tracking' === $tab ) {
+			$out['purchase_on'] = ( isset( $input['purchase_on'] ) && 'confirmed' === $input['purchase_on'] ) ? 'confirmed' : 'order';
+			foreach ( array( 'meta_pixel_id', 'tiktok_pixel' ) as $k ) {
+				$out[ $k ] = isset( $input[ $k ] ) ? preg_replace( '/[^A-Za-z0-9]/', '', (string) $input[ $k ] ) : '';
+			}
+			foreach ( array( 'meta_test_code', 'tiktok_test_code' ) as $k ) {
+				$out[ $k ] = isset( $input[ $k ] ) ? sanitize_text_field( $input[ $k ] ) : '';
+			}
+			// Tokens: an empty field keeps the saved token; "-" removes it.
+			foreach ( array( 'meta_token', 'tiktok_token' ) as $k ) {
+				$v = isset( $input[ $k ] ) ? trim( sanitize_text_field( $input[ $k ] ) ) : '';
+				if ( '-' === $v ) {
+					$out[ $k ] = '';
+				} elseif ( '' !== $v ) {
+					$out[ $k ] = $v;
+				}
+			}
 		}
 
 		if ( 'sheets' === $tab ) {

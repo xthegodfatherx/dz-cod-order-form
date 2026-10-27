@@ -128,7 +128,31 @@ class DZCOD_Offers {
 			<?php endfor; ?>
 			</tbody>
 		</table>
+		<?php $up = self::upsell_settings( $post->ID ); ?>
+		<h4><?php esc_html_e( 'One-click upsell after the order', 'dz-cod-order-form' ); ?></h4>
+		<p class="description"><?php esc_html_e( 'After ordering this product, offer one more product at a discount. The customer adds it to the same order with one tap — no new form.', 'dz-cod-order-form' ); ?></p>
+		<p>
+			<label><?php esc_html_e( 'Product ID to offer', 'dz-cod-order-form' ); ?> <input type="number" min="0" style="width:100px" name="dzcod_upsell[product]" value="<?php echo esc_attr( $up['product'] ? $up['product'] : '' ); ?>"></label>
+			<label style="margin-inline-start:12px"><?php esc_html_e( 'Discount %', 'dz-cod-order-form' ); ?> <input type="number" min="0" max="90" step="any" style="width:70px" name="dzcod_upsell[discount]" value="<?php echo esc_attr( $up['discount'] ); ?>"></label>
+			<label style="margin-inline-start:12px"><?php esc_html_e( 'Headline', 'dz-cod-order-form' ); ?> <input type="text" class="regular-text" name="dzcod_upsell[title]" value="<?php echo esc_attr( $up['title'] ); ?>" placeholder="<?php esc_attr_e( 'Add a second one at a special price?', 'dz-cod-order-form' ); ?>"></label>
+		</p>
 		<?php
+	}
+
+	/**
+	 * Upsell settings of a product.
+	 *
+	 * @param int $product_id Product id.
+	 * @return array{product:int,discount:float,title:string}
+	 */
+	public static function upsell_settings( $product_id ) {
+		$u = get_post_meta( $product_id, '_dzcod_upsell', true );
+		$u = is_array( $u ) ? $u : array();
+		return array(
+			'product'  => isset( $u['product'] ) ? absint( $u['product'] ) : 0,
+			'discount' => isset( $u['discount'] ) ? min( 90, max( 0, (float) $u['discount'] ) ) : 0,
+			'title'    => isset( $u['title'] ) ? (string) $u['title'] : '',
+		);
 	}
 
 	/**
@@ -165,6 +189,22 @@ class DZCOD_Offers {
 			update_post_meta( $post_id, self::META, $out );
 		} else {
 			delete_post_meta( $post_id, self::META );
+		}
+
+		$u = isset( $_POST['dzcod_upsell'] ) ? (array) wp_unslash( $_POST['dzcod_upsell'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized per field below.
+		$up = isset( $u['product'] ) ? absint( $u['product'] ) : 0;
+		if ( $up && $up !== (int) $post_id ) {
+			update_post_meta(
+				$post_id,
+				'_dzcod_upsell',
+				array(
+					'product'  => $up,
+					'discount' => isset( $u['discount'] ) && is_numeric( $u['discount'] ) ? min( 90, max( 0, (float) $u['discount'] ) ) : 0,
+					'title'    => isset( $u['title'] ) ? sanitize_text_field( $u['title'] ) : '',
+				)
+			);
+		} else {
+			delete_post_meta( $post_id, '_dzcod_upsell' );
 		}
 	}
 }

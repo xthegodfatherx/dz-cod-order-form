@@ -15,6 +15,11 @@ Formulaire de commande paiement à la livraison pour les boutiques WooCommerce a
 - **Automatic delivery prices**: import from Yalidine / ZR Express / Ecotrack, or from a Google Sheet ([template](data/delivery-prices-template.csv)) with optional daily sync
 - **Quantity offers**: "1 for 3,500 · 2 for 6,000 · 3 for 8,000" packs per product (fixed price or % off, badge, free delivery)
 - **Abandoned orders**: call back visitors who typed their phone but did not confirm — WhatsApp button, one-click order creation, auto-cleanup
+- **Confirmation desk**: call new orders, one-click outcomes, WhatsApp template, agent stats
+- **Parcel tracking**: delivered / returned pulled from couriers every 3 h, "Returned (refused)" status
+- **Customer history**: delivered vs returned per phone, hold or refuse repeat refusers
+- **Meta CAPI + TikTok Events API** (server side, deduplicated), optional "purchase = confirmed order"
+- **One-click upsell** after the order · **COD dashboard** · **Arabic & French**
 - Live summary (product + delivery = total), simple & variable products, quantity
 - **Anti-fraud**: Algerian phone validation, duplicate detection (block or flag On hold), phone blocklist, IP rate limit, honeypot
 - **Delivery companies**: Yalidine, Yalitec, ZR Express + 22 Ecotrack couriers (DHD, Conexlog/UPS, Rex, Rocket, 48hr…) — one click, bulk, or automatic on a chosen status; tracking + label saved on the order
@@ -22,6 +27,15 @@ Formulaire de commande paiement à la livraison pour les boutiques WooCommerce a
 - Meta Pixel / TikTok / GA4 purchase events (if already installed) + `dzcod:order` JS event
 - Auto-insert on product pages, shortcode `[dzcod_form]`, **Elementor widget**
 - RTL, HPOS-compatible, works behind page caches
+
+## Development
+
+```bash
+php tests/unit/run.php          # unit tests, no WordPress needed
+composer install && composer test   # + integration tests in real WordPress/WooCommerce
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). CI runs on every push and pull request.
 
 ## Install
 
@@ -53,6 +67,10 @@ Formulaire de commande paiement à la livraison pour les boutiques WooCommerce a
 | `dzcod_courier_logo` | filter | Show your own logo image for a delivery company |
 | `dzcod_offers` | filter | Change a product's quantity offers |
 | `dzcod_lead_recovered` | action | An abandoned form was turned into an order |
+| `dzcod_order_confirmed` | action | An order was confirmed on the confirmation desk |
+| `dzcod_parcel_status` | action | A parcel changed status (delivered, returned…) |
+| `dzcod_upsell_accepted` | action | The customer accepted the one-click upsell |
+| `dzcod_ecotrack_hosts` | filter | Allow other Ecotrack host suffixes |
 
 ```js
 document.addEventListener('dzcod:order', e => console.log(e.detail)); // {id, total, currency, items}
@@ -62,11 +80,9 @@ document.addEventListener('dzcod:order', e => console.log(e.detail)); // {id, to
 
 - Noest and Maystro integrations (Noest's API is not publicly documented — help welcome)
 - Named entries (with verified addresses) for more Ecotrack couriers such as HHD Express
-- Parcel status sync back from couriers (delivered / returned)
 - Official stop-desk lists per courier
-- Arabic & French translation files
-- One-click upsell after ordering
-- Customer return-rate check before shipping
+- SMS notifications (order confirmed / out for delivery)
+- Delivery-attempted alerts to call the customer
 
 Good first issues are labelled [`good first issue`](../../issues?q=label%3A%22good+first+issue%22).
 

@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       DZ COD Order Form
  * Plugin URI:        https://github.com/xthegodfatherx/dz-cod-order-form
- * Description:       One-page cash-on-delivery order form for Algerian WooCommerce stores: all 69 wilayas and 1541 communes, per-wilaya delivery pricing (home / stop desk), duplicate and fake-order protection, Google Sheets export, and sending to Yalidine, ZR Express and Ecotrack couriers.
- * Version:           1.3.1
+ * Description:       Cash-on-delivery order form for Algerian WooCommerce stores: all 69 wilayas and 1541 communes, per-wilaya delivery pricing (home / stop desk), duplicate and fake-order protection, Google Sheets export, and sending to Yalidine, ZR Express and Ecotrack couriers.
+ * Version:           1.4.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Requires Plugins:  woocommerce
@@ -20,7 +20,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'DZCOD_VERSION', '1.3.1' );
+define( 'DZCOD_VERSION', '1.4.0' );
 define( 'DZCOD_FILE', __FILE__ );
 define( 'DZCOD_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DZCOD_URL', plugin_dir_url( __FILE__ ) );
@@ -37,6 +37,12 @@ require_once DZCOD_DIR . 'includes/class-dzcod-couriers.php';
 require_once DZCOD_DIR . 'includes/class-dzcod-prices.php';
 require_once DZCOD_DIR . 'includes/class-dzcod-offers.php';
 require_once DZCOD_DIR . 'includes/class-dzcod-leads.php';
+require_once DZCOD_DIR . 'includes/class-dzcod-tracking.php';
+require_once DZCOD_DIR . 'includes/class-dzcod-history.php';
+require_once DZCOD_DIR . 'includes/class-dzcod-desk.php';
+require_once DZCOD_DIR . 'includes/class-dzcod-pixels.php';
+require_once DZCOD_DIR . 'includes/class-dzcod-upsell.php';
+require_once DZCOD_DIR . 'includes/class-dzcod-dashboard.php';
 
 // Declare compatibility with WooCommerce High-Performance Order Storage.
 add_action(
@@ -46,6 +52,15 @@ add_action(
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
 		}
 	}
+);
+
+// Bundled Arabic and French translations (wordpress.org language packs take priority when installed).
+add_action(
+	'init',
+	function () {
+		load_plugin_textdomain( 'dz-cod-order-form', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+	},
+	0
 );
 
 add_action(
@@ -69,6 +84,12 @@ add_action(
 		DZCOD_Prices::init();
 		DZCOD_Offers::init();
 		DZCOD_Leads::init();
+		DZCOD_Tracking::init();
+		DZCOD_History::init();
+		DZCOD_Desk::init();
+		DZCOD_Pixels::init();
+		DZCOD_Upsell::init();
+		DZCOD_Dashboard::init();
 
 		add_action(
 			'elementor/widgets/register',
