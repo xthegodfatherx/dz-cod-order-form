@@ -19,6 +19,7 @@ class DZCOD_Sheets {
 		add_action( 'dzcod_order_created', array( __CLASS__, 'on_order_created' ), 10, 1 );
 		add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'on_status_changed' ), 10, 4 );
 		add_action( 'admin_post_dzcod_sheets_test', array( __CLASS__, 'send_test' ) );
+		add_action( 'dzcod_parcel_created', array( __CLASS__, 'on_parcel_created' ), 10, 2 );
 	}
 
 	/**
@@ -55,6 +56,7 @@ class DZCOD_Sheets {
 			'total'         => (float) $order->get_total(),
 			'status'        => $order->get_status(),
 			'duplicate_of'  => (int) $order->get_meta( '_dzcod_duplicate_of' ),
+			'tracking'      => (string) $order->get_meta( '_dzcod_tracking' ),
 		);
 		return (array) apply_filters( 'dzcod_sheets_row', $row, $order );
 	}
@@ -111,6 +113,24 @@ class DZCOD_Sheets {
 					'event'    => 'status',
 					'order_id' => (int) $order_id,
 					'status'   => $to,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Parcel created at the delivery company → write the tracking number.
+	 *
+	 * @param WC_Order $order    Order.
+	 * @param string   $tracking Tracking number.
+	 */
+	public static function on_parcel_created( $order, $tracking ) {
+		if ( self::enabled() && $order->get_meta( '_dzcod' ) ) {
+			self::send(
+				array(
+					'event'    => 'tracking',
+					'order_id' => (int) $order->get_id(),
+					'tracking' => (string) $tracking,
 				)
 			);
 		}

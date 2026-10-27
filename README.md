@@ -13,6 +13,7 @@ Formulaire de commande paiement à la livraison pour les boutiques WooCommerce a
 - **Delivery price per wilaya** — home delivery and stop desk, enable/disable wilayas, free delivery threshold
 - Live summary (product + delivery = total), simple & variable products, quantity
 - **Anti-fraud**: Algerian phone validation, duplicate detection (block or flag On hold), phone blocklist, IP rate limit, honeypot
+- **Delivery companies**: Yalidine, Yalitec, ZR Express + 22 Ecotrack couriers (DHD, Conexlog/UPS, Rex, Rocket, 48hr…) — one click, bulk, or automatic on a chosen status; tracking + label saved on the order
 - **Google Sheets** sync via Apps Script (new orders + status updates), **CSV export**
 - Meta Pixel / TikTok / GA4 purchase events (if already installed) + `dzcod:order` JS event
 - Auto-insert on product pages, shortcode `[dzcod_form]`, **Elementor widget**
@@ -41,7 +42,10 @@ Formulaire de commande paiement à la livraison pour les boutiques WooCommerce a
 | `dzcod_sheets_row` | filter | Add columns to the sheet/CSV |
 | `dzcod_client_ip` | filter | Behind Cloudflare/proxy: return the real IP |
 | `dzcod_before_order_save` | action | Modify the order before it is saved |
-| `dzcod_order_created` | action | Send to a courier API, SMS, CRM… |
+| `dzcod_order_created` | action | SMS, CRM, custom integrations… |
+| `dzcod_courier_providers` | filter | Add another delivery company |
+| `dzcod_courier_payload` | filter | Adjust the request sent to a courier |
+| `dzcod_parcel_created` | action | React to a new tracking number |
 
 ```js
 document.addEventListener('dzcod:order', e => console.log(e.detail)); // {id, total, currency, items}
@@ -49,7 +53,8 @@ document.addEventListener('dzcod:order', e => console.log(e.detail)); // {id, to
 
 ## Roadmap — contributions welcome
 
-- Courier integrations (Yalidine, ZR Express, Maystro, Noest…) using `dzcod_order_created`
+- Maystro and Noest integrations
+- Parcel status sync back from couriers (delivered / returned)
 - Official stop-desk lists per courier
 - Abandoned form capture (phone typed but not submitted)
 - Arabic & French translation files

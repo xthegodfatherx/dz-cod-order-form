@@ -8,15 +8,15 @@
  */
 var SECRET = 'change-me';
 var SHEET_NAME = 'Orders';
-var COLUMNS = ['order_id', 'date', 'name', 'phone', 'wilaya', 'commune', 'address', 'delivery_type', 'products', 'shipping', 'total', 'status', 'duplicate_of'];
+var COLUMNS = ['order_id', 'date', 'name', 'phone', 'wilaya', 'commune', 'address', 'delivery_type', 'products', 'shipping', 'total', 'status', 'duplicate_of', 'tracking'];
 
 function getSheet_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(COLUMNS);
+  // Create or upgrade the header row (new columns are added on the right).
+  if (sheet.getLastRow() === 0 || sheet.getLastColumn() < COLUMNS.length) {
+    sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]).setFontWeight('bold');
     sheet.setFrozenRows(1);
-    sheet.getRange(1, 1, 1, COLUMNS.length).setFontWeight('bold');
   }
   return sheet;
 }
@@ -45,11 +45,12 @@ function doPost(e) {
       sheet.appendRow(COLUMNS.map(function (c) { return safe_(row[c]); }));
       // Keep phone numbers as text so the leading 0 is not lost.
       sheet.getRange(sheet.getLastRow(), COLUMNS.indexOf('phone') + 1).setNumberFormat('@').setValue(String(row.phone || ''));
-    } else if (data.event === 'status') {
+    } else if (data.event === 'status' || data.event === 'tracking') {
+      var col = COLUMNS.indexOf(data.event) + 1;
       var ids = sheet.getRange(1, 1, Math.max(1, sheet.getLastRow()), 1).getValues();
       for (var i = ids.length - 1; i >= 1; i--) {
         if (String(ids[i][0]) === String(data.order_id)) {
-          sheet.getRange(i + 1, COLUMNS.indexOf('status') + 1).setValue(safe_(data.status));
+          sheet.getRange(i + 1, col).setNumberFormat('@').setValue(String(safe_(data[data.event])));
           break;
         }
       }

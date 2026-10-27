@@ -8,3 +8,4 @@
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
 delete_option( 'dzcod_settings' );
+delete_option( 'dzcod_couriers' );

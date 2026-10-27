@@ -69,6 +69,7 @@ class DZCOD_Admin {
 			'general'   => __( 'General', 'dz-cod-order-form' ),
 			'delivery'  => __( 'Delivery prices', 'dz-cod-order-form' ),
 			'antifraud' => __( 'Anti-fraud', 'dz-cod-order-form' ),
+			'couriers'  => __( 'Delivery company', 'dz-cod-order-form' ),
 			'sheets'    => __( 'Google Sheets & export', 'dz-cod-order-form' ),
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- tab switch only.
@@ -85,6 +86,13 @@ class DZCOD_Admin {
 				<?php endforeach; ?>
 			</nav>
 			<?php settings_errors(); ?>
+			<?php if ( 'couriers' === $tab ) : ?>
+				<?php DZCOD_Couriers::render_settings(); ?>
+		</div>
+				<?php
+				return;
+			endif;
+			?>
 			<form method="post" action="options.php">
 				<?php settings_fields( 'dzcod' ); ?>
 				<input type="hidden" name="<?php echo esc_attr( $n ); ?>[_tab]" value="<?php echo esc_attr( $tab ); ?>">

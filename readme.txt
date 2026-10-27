@@ -1,11 +1,11 @@
 === DZ COD Order Form ===
 Contributors: nedjai
-Tags: cash on delivery, algeria, order form, cod, wilaya
+Tags: cash on delivery, algeria, yalidine, zr express, wilaya
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,7 @@ Most Algerian online stores sell with cash on delivery (COD). Customers do not w
 * Simple and variable products, quantity selector.
 * **Anti-fraud**: Algerian phone validation (+213 accepted), duplicate detection by phone (block, or accept and put On hold), blocked phone list, per-IP rate limit, bot honeypot.
 * **Google Sheets export** through a small Google Apps Script (no Google account connection needed). Status changes update the sheet.
+* **Delivery companies**: send orders to **Yalidine, Yalitec (Guepex), ZR Express** and **22 Ecotrack couriers** (DHD, Conexlog/UPS, Rex, MSM Go, Rocket, 48hr, Speed Delivery, Golivri, Coyote, World Express, Negmar and more). One click per order, bulk sending from the orders list, or automatic sending when an order reaches a status you choose. Tracking number and label saved on the order and pushed to Google Sheets.
 * CSV export of form orders (opens correctly in Excel with Arabic).
 * Fires Meta Pixel `Purchase`, TikTok `CompletePayment` and GA4 `purchase` events if those pixels are already on your site, plus a `dzcod:order` JavaScript event for custom tracking.
 * Shortcode `[dzcod_form]`, automatic placement on product pages, and an **Elementor widget**.
@@ -32,10 +33,19 @@ Most Algerian online stores sell with cash on delivery (COD). Customers do not w
 
 **Developers**
 
-Filters: `dzcod_locations`, `dzcod_is_valid_phone`, `dzcod_antifraud_result`, `dzcod_sheets_row`, `dzcod_auto_insert_for_product`, `dzcod_client_ip`.
-Actions: `dzcod_before_order_save`, `dzcod_order_created`.
+Filters: `dzcod_locations`, `dzcod_is_valid_phone`, `dzcod_antifraud_result`, `dzcod_sheets_row`, `dzcod_auto_insert_for_product`, `dzcod_client_ip`, `dzcod_courier_providers`, `dzcod_courier_parcel`, `dzcod_courier_payload`.
+Actions: `dzcod_before_order_save`, `dzcod_order_created`, `dzcod_parcel_created`.
 
 Source code and issues: https://github.com/xthegodfatherx/dz-cod-order-form
+
+== External services ==
+
+This plugin only contacts outside services that you configure yourself:
+
+* **Google Apps Script** (Google): when you enter a web app URL, each new order (name, phone, wilaya, commune, address, products, totals, status) is sent to your own script so it can be written to your Google Sheet. [Terms](https://policies.google.com/terms), [Privacy](https://policies.google.com/privacy).
+* **Your delivery company**: when you connect one and send an order (manually, in bulk or automatically), the customer name, phone, wilaya, commune, address, products, order number and amount to collect are sent to that company's API so it can create the parcel. Depending on your choice this is Yalidine (api.yalidine.app), Yalitec (api.yalitec.me), ZR Express (procolis.com) or an Ecotrack-based courier (*.ecotrack.dz). Their terms and privacy policies are on each company's website.
+
+Nothing is sent anywhere until you configure these services.
 
 == Installation ==
 
@@ -54,11 +64,25 @@ From the geoalgeria dataset (MIT License), which follows the 69-wilaya administr
 
 Follow the steps on the "Google Sheets & export" tab. The script to paste is in `google-apps-script/Code.gs`.
 
+= Which delivery companies are supported? =
+
+Yalidine, Yalitec (Guepex), ZR Express, and these Ecotrack couriers: DHD, Conexlog/UPS, MSM Go, Rex Livraison, RB Livraison, Speed Delivery, Areex, Prest, Rocket Delivery, World Express, BA Consult, Packers, 48hr Livraison, Mono Hub, Anderson Delivery, Golivri, Coyote Express, Salva Delivery, Distazero, Fret Direct, TSL Express and Negmar Express. Any other courier on Ecotrack works with the "custom address" option. Maystro and Noest are planned.
+
+= A parcel was refused because of the commune name =
+
+Delivery companies sometimes spell communes differently. Open the order, correct the commune in the shipping address, save, and click Send again. The exact error from the company is shown on the order.
+
 = Does it replace the WooCommerce checkout? =
 
 No. It creates standard WooCommerce orders with the Cash on delivery payment method, so your existing order management, emails and delivery plugins keep working.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: Algerian delivery companies — Yalidine, Yalitec, ZR Express and 22 Ecotrack couriers. Send from the order screen, in bulk, or automatically on a chosen status (in the background with Action Scheduler).
+* New: tracking number column in the orders list, label link, tracking pushed to Google Sheets.
+* New wilayas (59–69) are sent to couriers under their former wilaya code.
+* Suspected duplicate orders are never sent automatically.
 
 = 1.0.1 =
 * Security: Google Sheets requests use wp_safe_remote_post (no requests to internal addresses).
