@@ -56,7 +56,7 @@ class DZCOD_Desk {
 				),
 			)
 		);
-		$now = time();
+		$now    = time();
 		return array_values(
 			array_filter(
 				$orders,
@@ -242,8 +242,8 @@ class DZCOD_Desk {
 			return;
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- view switch only.
-		$view  = isset( $_GET['view'] ) ? sanitize_key( $_GET['view'] ) : 'to_call';
-		$views = array(
+		$view   = isset( $_GET['view'] ) ? sanitize_key( $_GET['view'] ) : 'to_call';
+		$views  = array(
 			'to_call'   => __( 'To call', 'dz-cod-order-form' ),
 			'no_answer' => __( 'No answer', 'dz-cod-order-form' ),
 			'later'     => __( 'Call later', 'dz-cod-order-form' ),
@@ -269,7 +269,7 @@ class DZCOD_Desk {
 				foreach ( $views as $k => $label ) {
 					$links[] = '<li><a href="' . esc_url( admin_url( 'admin.php?page=dzcod-desk&view=' . $k ) ) . '"' . ( $k === $view ? ' class="current"' : '' ) . '>' . esc_html( $label ) . ( $k === $view ? ' <span class="count">(' . count( $orders ) . ')</span>' : '' ) . '</a></li>';
 				}
-				echo implode( ' | ', $links ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+				echo wp_kses_post( implode( ' | ', $links ) );
 				?>
 			</ul>
 			<table class="widefat striped" style="clear:both">
@@ -308,7 +308,7 @@ class DZCOD_Desk {
 							<?php if ( '' !== $phone ) : ?>
 								· <a href="<?php echo esc_url( DZCOD_Leads::whatsapp_url( $phone, self::whatsapp_text( $o ) ) ); ?>" target="_blank" rel="noopener">WhatsApp</a>
 							<?php endif; ?>
-							<br><?php echo DZCOD_History::badge( DZCOD_History::for_phone( $phone, $o->get_id() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in badge(). ?>
+							<br><?php echo wp_kses_post( DZCOD_History::badge( DZCOD_History::for_phone( $phone, $o->get_id() ) ) ); ?>
 						</td>
 						<td><?php echo esc_html( ( isset( $all[ $code ] ) ? $code . ' - ' . $all[ $code ]['n'] : '' ) . ' / ' . $o->get_billing_city() ); ?><br><small><?php echo esc_html( 'desk' === $o->get_meta( '_dzcod_delivery_type' ) ? __( 'Stop desk', 'dz-cod-order-form' ) : $o->get_billing_address_1() ); ?></small></td>
 						<td><?php echo esc_html( implode( ', ', $items ) ); ?></td>
@@ -346,21 +346,6 @@ class DZCOD_Desk {
 				</tbody>
 			</table>
 		</div>
-		<script>
-		(function(){
-			var nonce=<?php echo wp_json_encode( wp_create_nonce( 'dzcod_desk' ) ); ?>,ajax=<?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
-			document.querySelectorAll('.dzcod-outcomes button').forEach(function(b){b.addEventListener('click',function(){
-				var tr=b.closest('tr'),msg=tr.querySelector('.dzcod-outcome-msg'),o=b.getAttribute('data-outcome');
-				if(o==='cancel'&&!confirm(<?php echo wp_json_encode( __( 'Cancel this order?', 'dz-cod-order-form' ) ); ?>)){return;}
-				tr.querySelectorAll('button').forEach(function(x){x.disabled=true;});
-				var fd=new FormData();fd.append('action','dzcod_desk');fd.append('nonce',nonce);fd.append('order_id',tr.getAttribute('data-order'));fd.append('outcome',o);
-				fetch(ajax,{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(res){
-					msg.textContent=(res.data&&res.data.message)||'';tr.classList.add(res.success?'is-done':'is-error');
-					if(!res.success){tr.querySelectorAll('button').forEach(function(x){x.disabled=false;});}
-				}).catch(function(){msg.textContent='Error';tr.querySelectorAll('button').forEach(function(x){x.disabled=false;});});
-			});});
-		}());
-		</script>
 		<?php
 	}
 }

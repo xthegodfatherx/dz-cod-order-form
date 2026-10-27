@@ -73,12 +73,16 @@ class DZCOD_Dashboard {
 				'status'       => array_keys( wc_get_order_statuses() ),
 			)
 		);
-		$all   = DZCOD_Locations::all();
-		$t     = array_fill_keys( array( 'orders', 'new', 'confirmed', 'shipped', 'delivered', 'returned', 'cancelled', 'recovered', 'upsells' ), 0 );
-		$money = array( 'delivered' => 0.0, 'pipeline' => 0.0, 'returned_shipping' => 0.0 );
-		$prod  = array();
-		$wil   = array();
-		$daily = array();
+		$all    = DZCOD_Locations::all();
+		$t      = array_fill_keys( array( 'orders', 'new', 'confirmed', 'shipped', 'delivered', 'returned', 'cancelled', 'recovered', 'upsells' ), 0 );
+		$money  = array(
+			'delivered'         => 0.0,
+			'pipeline'          => 0.0,
+			'returned_shipping' => 0.0,
+		);
+		$prod   = array();
+		$wil    = array();
+		$daily  = array();
 		for ( $i = $days - 1; $i >= 0; $i-- ) {
 			$daily[ gmdate( 'Y-m-d', strtotime( current_time( 'Y-m-d' ) . ' -' . $i . ' days' ) ) ] = 0;
 		}
@@ -107,7 +111,13 @@ class DZCOD_Dashboard {
 			foreach ( $o->get_items() as $item ) {
 				$pid = $item->get_product_id();
 				if ( ! isset( $prod[ $pid ] ) ) {
-					$prod[ $pid ] = array( 'name' => $item->get_name(), 'orders' => 0, 'delivered' => 0, 'returned' => 0, 'revenue' => 0.0 );
+					$prod[ $pid ] = array(
+						'name'      => $item->get_name(),
+						'orders'    => 0,
+						'delivered' => 0,
+						'returned'  => 0,
+						'revenue'   => 0.0,
+					);
 				}
 				++$prod[ $pid ]['orders'];
 				if ( 'delivered' === $state ) {
@@ -121,7 +131,11 @@ class DZCOD_Dashboard {
 			if ( isset( $all[ $code ] ) ) {
 				$label = $code . ' - ' . $all[ $code ]['n'];
 				if ( ! isset( $wil[ $label ] ) ) {
-					$wil[ $label ] = array( 'orders' => 0, 'delivered' => 0, 'returned' => 0 );
+					$wil[ $label ] = array(
+						'orders'    => 0,
+						'delivered' => 0,
+						'returned'  => 0,
+					);
 				}
 				++$wil[ $label ]['orders'];
 				if ( 'delivered' === $state || 'returned' === $state ) {
@@ -172,13 +186,13 @@ class DZCOD_Dashboard {
 			return;
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- period switch only.
-		$days = isset( $_GET['days'] ) ? absint( $_GET['days'] ) : 30;
-		$days = in_array( $days, array( 7, 30, 90 ), true ) ? $days : 30;
-		$d    = self::data( $days );
-		$t    = $d['totals'];
-		$done = $t['delivered'] + $t['returned'];
-		$conf = $t['confirmed'] + $t['shipped'] + $done;
-		$max  = max( 1, max( $d['daily'] ) );
+		$days  = isset( $_GET['days'] ) ? absint( $_GET['days'] ) : 30;
+		$days  = in_array( $days, array( 7, 30, 90 ), true ) ? $days : 30;
+		$d     = self::data( $days );
+		$t     = $d['totals'];
+		$done  = $t['delivered'] + $t['returned'];
+		$conf  = $t['confirmed'] + $t['shipped'] + $done;
+		$max   = max( 1, max( $d['daily'] ) );
 		$cards = array(
 			array( __( 'Orders', 'dz-cod-order-form' ), number_format_i18n( $t['orders'] ), '' ),
 			/* translators: %s: count */
@@ -201,7 +215,7 @@ class DZCOD_Dashboard {
 					/* translators: %d: days */
 					$links[] = '<li><a href="' . esc_url( admin_url( 'admin.php?page=dzcod-dashboard&days=' . $p ) ) . '"' . ( $p === $days ? ' class="current"' : '' ) . '>' . esc_html( sprintf( __( 'Last %d days', 'dz-cod-order-form' ), $p ) ) . '</a></li>';
 				}
-				echo implode( ' | ', $links ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+				echo wp_kses_post( implode( ' | ', $links ) );
 				?>
 			</ul>
 			<div class="dzcod-cards">

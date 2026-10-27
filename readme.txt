@@ -1,11 +1,11 @@
 === DZ COD Order Form ===
 Contributors: nedjai
 Tags: cash on delivery, algeria, yalidine, zr express, wilaya
-Requires at least: 6.0
-Tested up to: 6.9
+Requires at least: 6.3
+Tested up to: 7.1
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,7 +49,7 @@ Most Algerian online stores sell with cash on delivery (COD). Customers do not w
 Filters: `dzcod_free_delivery`, `dzcod_ecotrack_hosts`, `dzcod_leads_per_hour`, `dzcod_meta_api_version`, `dzcod_locations`, `dzcod_is_valid_phone`, `dzcod_antifraud_result`, `dzcod_sheets_row`, `dzcod_auto_insert_for_product`, `dzcod_client_ip`, `dzcod_courier_providers`, `dzcod_courier_parcel`, `dzcod_courier_payload`, `dzcod_courier_logo`, `dzcod_offers`.
 Actions: `dzcod_before_order_save`, `dzcod_order_created`, `dzcod_order_confirmed`, `dzcod_parcel_created`, `dzcod_parcel_status`, `dzcod_lead_recovered`, `dzcod_upsell_accepted`.
 
-Source code and issues: https://github.com/xthegodfatherx/dz-cod-order-form
+Source code, build-free (no compiled files), and issues: https://github.com/xthegodfatherx/dz-cod-order-form
 
 == External services ==
 
@@ -61,6 +61,9 @@ This plugin only contacts outside services that you configure yourself:
 * **Parcel tracking**: when parcel tracking is on, the tracking numbers of your parcels are sent to the same delivery company every 3 hours to read their status.
 * **Meta Conversions API** (Meta Platforms): when you enter a dataset ID and access token, a Purchase event is sent to graph.facebook.com for each order (or each confirmed order). It contains the order value, currency, product IDs and quantities, the order number, the page address, the visitor's IP address and browser, the _fbp / _fbc cookies, and the phone number, first name and commune **hashed with SHA-256**. [Terms](https://www.facebook.com/legal/terms/businesstools), [Privacy](https://www.facebook.com/privacy/policy).
 * **TikTok Events API** (TikTok): when you enter a pixel code and access token, a CompletePayment event with the same kind of data (phone hashed with SHA-256, IP address, browser, _ttp cookie, order value and products) is sent to business-api.tiktok.com. [Terms](https://ads.tiktok.com/i18n/official/policy/business-products-terms), [Privacy](https://www.tiktok.com/legal/page/row/privacy-policy/en).
+
+* **Delivery price import**: when you click "Import", your delivery company's price list is read from its API, or your Google Sheet is downloaded from docs.google.com (or the CSV address you entered). With the daily sync option, the sheet is downloaded once a day. Nothing about your customers is sent.
+* **GitHub** (feature requests): the "Request a feature" screen does not contact any server. Only when you click "Continue on GitHub" does your browser open github.com with the text you typed (and, if you leave the box ticked, the plugin, WordPress, WooCommerce and PHP version numbers). [Terms](https://docs.github.com/site-policy/github-terms/github-terms-of-service), [Privacy](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement).
 
 Nothing is sent anywhere until you configure these services.
 
@@ -130,6 +133,13 @@ Delivery companies sometimes spell communes differently. Open the order, correct
 No. It creates standard WooCommerce orders with the Cash on delivery payment method, so your existing order management, emails and delivery plugins keep working.
 
 == Changelog ==
+
+= 1.5.1 =
+* WordPress.org review: all admin JavaScript moved to an enqueued file (no inline script tags); late escaping everywhere (the order form is filtered through an allow-list with wp_kses); array input sanitized with map_deep; bundled data read with wp_json_file_decode; scripts load deferred.
+* Suggested privacy policy text added under Settings → Privacy.
+* Uninstall also removes the call log and all scheduled jobs.
+* Coding standards: passes WordPress-Extra with no errors or warnings.
+* Tested up to WordPress 7.1, WooCommerce 10.8. Requires WordPress 6.3.
 
 = 1.5.0 =
 * New: free delivery per product — home, stop desk or both, everywhere or only in chosen wilayas — with a badge on the form, live price update and server-side pricing (also when recovering abandoned orders).

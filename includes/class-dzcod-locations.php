@@ -26,8 +26,7 @@ class DZCOD_Locations {
 	 */
 	public static function all() {
 		if ( null === self::$data ) {
-			$raw        = file_get_contents( DZCOD_DIR . 'data/algeria.json' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local bundled file.
-			self::$data = json_decode( (string) $raw, true );
+			self::$data = wp_json_file_decode( DZCOD_DIR . 'data/algeria.json', array( 'associative' => true ) );
 			if ( ! is_array( self::$data ) ) {
 				self::$data = array();
 			}

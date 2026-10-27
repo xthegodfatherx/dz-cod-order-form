@@ -18,6 +18,7 @@ class DZCOD_Admin {
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
+		add_action( 'admin_init', array( __CLASS__, 'privacy_policy' ) );
 		add_action( 'admin_post_dzcod_export_csv', array( __CLASS__, 'export_csv' ) );
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( __CLASS__, 'order_details' ) );
 	}
@@ -37,13 +38,58 @@ class DZCOD_Admin {
 	}
 
 	/**
-	 * Admin stylesheet on the plugin screen.
-	 *
-	 * @param string $hook Screen hook.
+	 * Suggested text for the site's privacy policy (Settings → Privacy → Policy guide).
 	 */
-	public static function assets( $hook ) {
+	public static function privacy_policy() {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+		$text  = '<p>' . __( 'When you order with the cash-on-delivery form, we collect your name, phone number, wilaya, commune and address (and any other details you type in the form) to process and deliver your order.', 'dz-cod-order-form' ) . '</p>';
+		$text .= '<p>' . __( 'If you type a valid phone number but do not confirm the order, these details may be kept for a limited time so that we can contact you about it, and are then deleted automatically.', 'dz-cod-order-form' ) . '</p>';
+		$text .= '<p>' . __( 'To deliver your order, your name, phone number, address and the amount to collect are shared with our delivery company. If we use advertising measurement, your phone number, first name and commune are sent in hashed form to Meta and/or TikTok together with the order value. If we use Google Sheets, order details are copied to our private spreadsheet.', 'dz-cod-order-form' ) . '</p>';
+		wp_add_privacy_policy_content( 'DZ COD Order Form', wp_kses_post( wpautop( $text, false ) ) );
+	}
+
+	/**
+	 * Admin stylesheet everywhere (badges on order screens), script on the plugin's own screens.
+	 */
+	public static function assets() {
 		// Small stylesheet: settings, desk, dashboard, and the badges on order screens.
 		wp_enqueue_style( 'dzcod-admin', DZCOD_URL . 'assets/admin.css', array(), DZCOD_VERSION );
+		// Script only on the plugin's own screens.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- screen check only.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		if ( 0 !== strpos( $page, 'dzcod' ) ) {
+			return;
+		}
+		wp_enqueue_script(
+			'dzcod-admin',
+			DZCOD_URL . 'assets/admin.js',
+			array(),
+			DZCOD_VERSION,
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
+		wp_localize_script(
+			'dzcod-admin',
+			'DZCOD_ADMIN',
+			array(
+				'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
+				'importNonce' => wp_create_nonce( 'dzcod_import_prices' ),
+				'deskNonce'   => wp_create_nonce( 'dzcod_desk' ),
+				'repo'        => DZCOD_Feedback::REPO,
+				'env'         => DZCOD_Feedback::environment(),
+				'i18n'        => array(
+					'reloading'     => __( 'Reloading…', 'dz-cod-order-form' ),
+					'failed'        => __( 'Request failed.', 'dz-cod-order-form' ),
+					'replacePrices' => __( 'This replaces the prices in the table below. Continue?', 'dz-cod-order-form' ),
+					'importing'     => __( 'Importing…', 'dz-cod-order-form' ),
+					'cancelOrder'   => __( 'Cancel this order?', 'dz-cod-order-form' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -272,9 +318,17 @@ class DZCOD_Admin {
 				<tr>
 					<td><strong><?php echo esc_html( $title ); ?></strong></td>
 					<td><input type="checkbox" name="<?php echo esc_attr( $base ); ?>[show]" value="1" <?php checked( (bool) $f['show'] ); ?> <?php disabled( $locked ); ?>></td>
-					<td><?php if ( 'qty' !== $key ) : ?><input type="checkbox" name="<?php echo esc_attr( $base ); ?>[required]" value="1" <?php checked( (bool) $f['required'] ); ?> <?php disabled( $locked ); ?>><?php endif; ?></td>
+					<td>
+					<?php
+					if ( 'qty' !== $key ) :
+						?>
+						<input type="checkbox" name="<?php echo esc_attr( $base ); ?>[required]" value="1" <?php checked( (bool) $f['required'] ); ?> <?php disabled( $locked ); ?>><?php endif; ?></td>
 					<td><input type="text" class="regular-text" name="<?php echo esc_attr( $base ); ?>[label]" value="<?php echo esc_attr( $f['label'] ); ?>"></td>
-					<td><?php if ( 'qty' !== $key ) : ?><input type="text" class="regular-text" name="<?php echo esc_attr( $base ); ?>[placeholder]" value="<?php echo esc_attr( $f['placeholder'] ); ?>"><?php endif; ?></td>
+					<td>
+					<?php
+					if ( 'qty' !== $key ) :
+						?>
+						<input type="text" class="regular-text" name="<?php echo esc_attr( $base ); ?>[placeholder]" value="<?php echo esc_attr( $f['placeholder'] ); ?>"><?php endif; ?></td>
 				</tr>
 			<?php endforeach; ?>
 			</tbody>
@@ -300,7 +354,16 @@ class DZCOD_Admin {
 				'checkbox' => __( 'Checkbox', 'dz-cod-order-form' ),
 			);
 			for ( $i = 0; $i < 6; $i++ ) :
-				$cf   = wp_parse_args( isset( $saved[ $i ] ) ? (array) $saved[ $i ] : array(), array( 'label' => '', 'type' => 'text', 'options' => '', 'placeholder' => '', 'required' => 0 ) );
+				$cf   = wp_parse_args(
+					isset( $saved[ $i ] ) ? (array) $saved[ $i ] : array(),
+					array(
+						'label'       => '',
+						'type'        => 'text',
+						'options'     => '',
+						'placeholder' => '',
+						'required'    => 0,
+					)
+				);
 				$base = $n . '[custom_fields][' . $i . ']';
 				?>
 				<tr>
@@ -342,7 +405,7 @@ class DZCOD_Admin {
 				}
 			}
 		}
-		$saved = esc_attr__( 'Saved — leave empty to keep, type - to remove', 'dz-cod-order-form' );
+		$saved = __( 'Saved — leave empty to keep, type - to remove', 'dz-cod-order-form' );
 		?>
 		<p><?php esc_html_e( 'Send Purchase events from your server as well as the browser. This recovers conversions lost to ad blockers and iPhones, so Meta and TikTok optimise your campaigns better. Browser and server events share the same ID, so nothing is counted twice.', 'dz-cod-order-form' ); ?></p>
 		<table class="form-table" role="presentation">
@@ -353,11 +416,11 @@ class DZCOD_Admin {
 			</td></tr>
 			<tr><th colspan="2"><h3 style="margin:0">Meta (Facebook / Instagram)</h3></th></tr>
 			<tr><th><label for="dzcod-mp"><?php esc_html_e( 'Pixel / dataset ID', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-mp" class="regular-text" name="<?php echo esc_attr( $n ); ?>[meta_pixel_id]" value="<?php echo esc_attr( $s['meta_pixel_id'] ); ?>" inputmode="numeric"></td></tr>
-			<tr><th><label for="dzcod-mt"><?php esc_html_e( 'Conversions API access token', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-mt" type="password" class="regular-text" name="<?php echo esc_attr( $n ); ?>[meta_token]" value="" placeholder="<?php echo $s['meta_token'] ? $saved : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" autocomplete="new-password"><p class="description"><?php esc_html_e( 'Events Manager → your dataset → Settings → Conversions API → Generate access token.', 'dz-cod-order-form' ); ?></p></td></tr>
+			<tr><th><label for="dzcod-mt"><?php esc_html_e( 'Conversions API access token', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-mt" type="password" class="regular-text" name="<?php echo esc_attr( $n ); ?>[meta_token]" value="" placeholder="<?php echo esc_attr( $s['meta_token'] ? $saved : '' ); ?>" autocomplete="new-password"><p class="description"><?php esc_html_e( 'Events Manager → your dataset → Settings → Conversions API → Generate access token.', 'dz-cod-order-form' ); ?></p></td></tr>
 			<tr><th><label for="dzcod-mtc"><?php esc_html_e( 'Test event code', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-mtc" class="regular-text" name="<?php echo esc_attr( $n ); ?>[meta_test_code]" value="<?php echo esc_attr( $s['meta_test_code'] ); ?>" placeholder="TEST12345"><p class="description"><?php esc_html_e( 'Only while testing — remove it when you go live, or real events are treated as tests.', 'dz-cod-order-form' ); ?></p></td></tr>
 			<tr><th colspan="2"><h3 style="margin:0">TikTok</h3></th></tr>
 			<tr><th><label for="dzcod-tp"><?php esc_html_e( 'Pixel code', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-tp" class="regular-text" name="<?php echo esc_attr( $n ); ?>[tiktok_pixel]" value="<?php echo esc_attr( $s['tiktok_pixel'] ); ?>"></td></tr>
-			<tr><th><label for="dzcod-tt"><?php esc_html_e( 'Events API access token', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-tt" type="password" class="regular-text" name="<?php echo esc_attr( $n ); ?>[tiktok_token]" value="" placeholder="<?php echo $s['tiktok_token'] ? $saved : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" autocomplete="new-password"><p class="description"><?php esc_html_e( 'TikTok Events Manager → your pixel → Settings → Generate access token.', 'dz-cod-order-form' ); ?></p></td></tr>
+			<tr><th><label for="dzcod-tt"><?php esc_html_e( 'Events API access token', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-tt" type="password" class="regular-text" name="<?php echo esc_attr( $n ); ?>[tiktok_token]" value="" placeholder="<?php echo esc_attr( $s['tiktok_token'] ? $saved : '' ); ?>" autocomplete="new-password"><p class="description"><?php esc_html_e( 'TikTok Events Manager → your pixel → Settings → Generate access token.', 'dz-cod-order-form' ); ?></p></td></tr>
 			<tr><th><label for="dzcod-ttc"><?php esc_html_e( 'Test event code', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-ttc" class="regular-text" name="<?php echo esc_attr( $n ); ?>[tiktok_test_code]" value="<?php echo esc_attr( $s['tiktok_test_code'] ); ?>"></td></tr>
 		</table>
 		<p class="description"><?php esc_html_e( 'The phone number, first name and commune are hashed (SHA-256) before they are sent, as Meta and TikTok require. The browser pixels themselves are not installed by this plugin — keep using your existing pixel setup.', 'dz-cod-order-form' ); ?></p>
@@ -403,25 +466,6 @@ class DZCOD_Admin {
 			</div>
 			<p class="dzcod-import-log" aria-live="polite"></p>
 		</div>
-		<script>
-		(function(){
-			var log=document.querySelector('.dzcod-import-log'),nonce=<?php echo wp_json_encode( wp_create_nonce( 'dzcod_import_prices' ) ); ?>,ajax=<?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
-			function run(source,offset,btn){
-				var fd=new FormData();fd.append('action','dzcod_import_prices');fd.append('nonce',nonce);fd.append('source',source);fd.append('offset',offset);
-				if(source==='sheet'){fd.append('url',document.getElementById('dzcod-sheet-url').value);}
-				fetch(ajax,{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(res){
-					var d=res.data||{};log.textContent=d.message||'';log.className='dzcod-import-log '+(d.ok?'is-ok':'is-error');
-					if(d.ok&&!d.done){run(source,d.next,btn);return;}
-					btn.disabled=false;
-					if(d.ok){log.textContent+=' <?php echo esc_js( __( 'Reloading…', 'dz-cod-order-form' ) ); ?>';setTimeout(function(){location.reload();},1200);}
-				}).catch(function(){btn.disabled=false;log.textContent='<?php echo esc_js( __( 'Request failed.', 'dz-cod-order-form' ) ); ?>';log.className='dzcod-import-log is-error';});
-			}
-			document.querySelectorAll('[data-dzcod-import]').forEach(function(b){b.addEventListener('click',function(){
-				if(!confirm('<?php echo esc_js( __( 'This replaces the prices in the table below. Continue?', 'dz-cod-order-form' ) ); ?>')){return;}
-				b.disabled=true;log.className='dzcod-import-log';log.textContent='<?php echo esc_js( __( 'Importing…', 'dz-cod-order-form' ) ); ?>';run(b.getAttribute('data-dzcod-import'),0,b);
-			});});
-		}());
-		</script>
 		<h2><?php esc_html_e( 'Prices per wilaya', 'dz-cod-order-form' ); ?></h2>
 		<p><?php esc_html_e( 'Set the delivery price for each wilaya. Untick a wilaya to stop delivering there.', 'dz-cod-order-form' ); ?></p>
 		<p>
@@ -455,13 +499,6 @@ class DZCOD_Admin {
 		<table class="form-table" role="presentation">
 			<tr><th><label for="dzcod-free"><?php esc_html_e( 'Free delivery from', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-free" type="number" min="0" step="1" name="<?php echo esc_attr( $n ); ?>[free_shipping_over]" value="<?php echo esc_attr( $s['free_shipping_over'] ); ?>"> <?php echo esc_html( $cur ); ?><p class="description"><?php esc_html_e( 'Order subtotal that makes delivery free. 0 = never.', 'dz-cod-order-form' ); ?></p></td></tr>
 		</table>
-		<script>
-		document.getElementById('dzcod-bulk-apply').addEventListener('click',function(){
-			var h=document.getElementById('dzcod-bulk-home').value,d=document.getElementById('dzcod-bulk-desk').value;
-			if(h!==''){document.querySelectorAll('.dzcod-home').forEach(function(i){i.value=h;});}
-			if(d!==''){document.querySelectorAll('.dzcod-desk').forEach(function(i){i.value=d;});}
-		});
-		</script>
 		<?php
 	}
 
@@ -486,7 +523,11 @@ class DZCOD_Admin {
 			<tr><th><?php esc_html_e( 'Repeat refusers', 'dz-cod-order-form' ); ?></th><td>
 				<label><?php esc_html_e( 'A phone number with at least', 'dz-cod-order-form' ); ?> <input type="number" min="0" max="20" style="width:60px" name="<?php echo esc_attr( $n ); ?>[refusals_limit]" value="<?php echo esc_attr( $s['refusals_limit'] ); ?>"> <?php esc_html_e( 'returned parcels, and more returns than deliveries:', 'dz-cod-order-form' ); ?></label><br>
 				<?php
-				foreach ( array( 'flag' => __( 'Accept the order but put it On hold and never send it automatically', 'dz-cod-order-form' ), 'block' => __( 'Refuse the order and ask the customer to contact you', 'dz-cod-order-form' ), 'off' => __( 'Do nothing (only show the history on the order)', 'dz-cod-order-form' ) ) as $val => $label ) :
+				foreach ( array(
+					'flag'  => __( 'Accept the order but put it On hold and never send it automatically', 'dz-cod-order-form' ),
+					'block' => __( 'Refuse the order and ask the customer to contact you', 'dz-cod-order-form' ),
+					'off'   => __( 'Do nothing (only show the history on the order)', 'dz-cod-order-form' ),
+				) as $val => $label ) :
 					?>
 					<label style="display:block"><input type="radio" name="<?php echo esc_attr( $n ); ?>[refusals_action]" value="<?php echo esc_attr( $val ); ?>" <?php checked( $s['refusals_action'], $val ); ?>> <?php echo esc_html( $label ); ?></label>
 				<?php endforeach; ?>

@@ -179,7 +179,7 @@ class DZCOD_Sheets {
 				),
 				true
 			);
-			$ok = ! is_wp_error( $res ) && false !== strpos( (string) wp_remote_retrieve_body( $res ), '"ok":true' );
+			$ok  = ! is_wp_error( $res ) && false !== strpos( (string) wp_remote_retrieve_body( $res ), '"ok":true' );
 		}
 		wp_safe_redirect( admin_url( 'admin.php?page=dzcod&tab=sheets&dzcod_test=' . ( $ok ? 'ok' : 'fail' ) ) );
 		exit;

@@ -34,7 +34,7 @@ class DZCOD_Feedback {
 	 *
 	 * @return string
 	 */
-	private static function environment() {
+	public static function environment() {
 		global $wp_version;
 		return sprintf(
 			'DZ COD Order Form %1$s · WordPress %2$s · WooCommerce %3$s · PHP %4$s',
@@ -87,20 +87,6 @@ class DZCOD_Feedback {
 				<li><a href="<?php echo esc_url( self::REPO . '/security/advisories/new' ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Report a security problem privately', 'dz-cod-order-form' ); ?></a></li>
 			</ul>
 		</div>
-		<script>
-		(function(){
-			var repo=<?php echo wp_json_encode( self::REPO ); ?>,env=<?php echo wp_json_encode( self::environment() ); ?>;
-			document.getElementById('dzcod-feedback').addEventListener('submit',function(e){
-				e.preventDefault();
-				var type=document.querySelector('#dzcod-feedback [name=type]:checked'),title=document.getElementById('dzcod-fb-title').value.trim(),body=document.getElementById('dzcod-fb-body').value.trim();
-				if(!title||!body){return;}
-				if(document.getElementById('dzcod-fb-env').checked){body+='\n\n---\n'+env;}
-				var field=type.value==='bug'?'what':(type.value==='courier'?'api':'details');
-				var url=repo+'/issues/new?template='+encodeURIComponent(type.getAttribute('data-template'))+'&title='+encodeURIComponent(title)+'&'+field+'='+encodeURIComponent(body);
-				window.open(url,'_blank','noopener');
-			});
-		}());
-		</script>
 		<?php
 	}
 }

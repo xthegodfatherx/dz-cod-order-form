@@ -106,7 +106,7 @@ class DZCOD_Order {
 		} elseif ( $fa['required'] && 'home' === $type && mb_strlen( $address ) < 4 ) {
 			self::fail( __( 'Please enter your delivery address.', 'dz-cod-order-form' ), 'invalid', 'address' );
 		}
-		$extras = self::read_extras();
+		$extras   = self::read_extras();
 		$shipping = DZCOD_Settings::delivery_price( $wilaya, $type );
 		if ( null === $shipping ) {
 			self::fail( __( 'Sorry, we do not deliver to this wilaya yet.', 'dz-cod-order-form' ), 'invalid', 'wilaya' );
@@ -235,13 +235,13 @@ class DZCOD_Order {
 		foreach ( DZCOD_Settings::custom_fields() as $cf ) {
 			$key = $cf['key'];
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce checked in ajax_place_order().
-			$raw = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below per type.
+			$raw = isset( $_POST[ $key ] ) ? sanitize_textarea_field( wp_unslash( (string) $_POST[ $key ] ) ) : '';
 			if ( 'checkbox' === $cf['type'] ) {
-				$value = ! empty( $raw ) ? __( 'Yes', 'dz-cod-order-form' ) : '';
+				$value = '' !== $raw ? __( 'Yes', 'dz-cod-order-form' ) : '';
 			} elseif ( 'textarea' === $cf['type'] ) {
-				$value = mb_substr( sanitize_textarea_field( (string) $raw ), 0, 500 );
+				$value = mb_substr( $raw, 0, 500 );
 			} else {
-				$value = mb_substr( sanitize_text_field( (string) $raw ), 0, 200 );
+				$value = mb_substr( sanitize_text_field( $raw ), 0, 200 );
 			}
 			// A dropdown only accepts one of its own options.
 			if ( 'select' === $cf['type'] && '' !== $value && ! in_array( $value, $cf['options'], true ) ) {
@@ -277,8 +277,8 @@ class DZCOD_Order {
 		$extras = wp_parse_args(
 			$extras,
 			array(
-				'phone2' => '',
-				'email'  => '',
+				'phone2'        => '',
+				'email'         => '',
 				'note'          => '',
 				'custom'        => array(),
 				'line_total'    => null,
@@ -288,7 +288,7 @@ class DZCOD_Order {
 				'risky'         => false,
 			)
 		);
-		$s = DZCOD_Settings::get();
+		$s      = DZCOD_Settings::get();
 
 		try {
 			$order = wc_create_order( array( 'created_via' => 'dzcod' ) );

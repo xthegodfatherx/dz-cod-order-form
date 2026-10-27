@@ -30,7 +30,12 @@ class DZCOD_History {
 	 */
 	public static function for_phone( $phone, $exclude_id = 0 ) {
 		$phone = DZCOD_Antifraud::normalize_phone( $phone );
-		$empty = array( 'orders' => 0, 'delivered' => 0, 'returned' => 0, 'rate' => null );
+		$empty = array(
+			'orders'    => 0,
+			'delivered' => 0,
+			'returned'  => 0,
+			'rate'      => null,
+		);
 		if ( '' === $phone ) {
 			return $empty;
 		}
@@ -139,7 +144,7 @@ class DZCOD_History {
 			return;
 		}
 		$h = self::for_phone( $order->get_billing_phone(), $order->get_id() );
-		echo '<p>' . self::badge( $h ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in badge().
+		echo '<p>' . wp_kses_post( self::badge( $h ) ) . '</p>';
 		if ( $h['orders'] ) {
 			/* translators: %d: number of orders */
 			echo '<p class="description">' . esc_html( sprintf( _n( '%d other order with this phone number.', '%d other orders with this phone number.', $h['orders'], 'dz-cod-order-form' ), $h['orders'] ) ) . '</p>';

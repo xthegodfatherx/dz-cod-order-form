@@ -103,7 +103,11 @@ class DZCOD_Prices {
 				continue;
 			}
 			$r      = $rows[ $src ];
-			$cur    = isset( $prices[ $code ] ) ? (array) $prices[ $code ] : array( 'home' => 0, 'desk' => 0, 'enabled' => 1 );
+			$cur    = isset( $prices[ $code ] ) ? (array) $prices[ $code ] : array(
+				'home'    => 0,
+				'desk'    => 0,
+				'enabled' => 1,
+			);
 			$home   = null !== $r[0] ? max( 0, (float) $r[0] ) : (float) $cur['home'];
 			$desk   = null !== $r[1] ? max( 0, (float) $r[1] ) : (float) $cur['desk'];
 			$enable = isset( $r[2] ) && null !== $r[2] ? (int) (bool) $r[2] : (int) ( $home > 0 || $desk > 0 || ! empty( $cur['enabled'] ) );
@@ -185,7 +189,7 @@ class DZCOD_Prices {
 			if ( '' === $code ) {
 				continue;
 			}
-			$num  = function ( $i ) use ( $cols ) {
+			$num = function ( $i ) use ( $cols ) {
 				if ( null === $i || ! isset( $cols[ $i ] ) ) {
 					return null;
 				}
@@ -193,7 +197,7 @@ class DZCOD_Prices {
 				$v = str_replace( ',', '.', $v );
 				return is_numeric( $v ) ? (float) $v : null;
 			};
-			$on   = null;
+			$on  = null;
 			if ( null !== $c_on && isset( $cols[ $c_on ] ) && '' !== trim( $cols[ $c_on ] ) ) {
 				$on = in_array( strtolower( trim( $cols[ $c_on ] ) ), array( '1', 'yes', 'oui', 'true', 'x', 'نعم' ), true ) ? 1 : 0;
 			}
@@ -260,10 +264,10 @@ class DZCOD_Prices {
 	 * @return array{ok:bool,message:string,done:bool,next:int}
 	 */
 	public static function import_courier( $offset ) {
-		$s     = DZCOD_Couriers::settings();
-		$prov  = DZCOD_Courier_API::providers();
-		$key   = $s['provider'];
-		$fail  = function ( $msg ) {
+		$s    = DZCOD_Couriers::settings();
+		$prov = DZCOD_Courier_API::providers();
+		$key  = $s['provider'];
+		$fail = function ( $msg ) {
 			return array(
 				'ok'      => false,
 				'message' => $msg,
@@ -367,11 +371,11 @@ class DZCOD_Prices {
 					$desk[] = (string) (float) $c['express_desk'];
 				}
 			}
-			$mode        = function ( $list ) {
-				if ( ! $list ) {
+			$mode        = function ( $values ) {
+				if ( ! $values ) {
 					return null;
 				}
-				$counts = array_count_values( $list );
+				$counts = array_count_values( $values );
 				arsort( $counts );
 				return (float) key( $counts );
 			};
@@ -399,13 +403,10 @@ class DZCOD_Prices {
 			wp_send_json_error( array( 'message' => __( 'Not allowed.', 'dz-cod-order-form' ) ) );
 		}
 		check_ajax_referer( 'dzcod_import_prices', 'nonce' );
-		if ( function_exists( 'set_time_limit' ) ) {
-			@set_time_limit( 60 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		}
 		$source = isset( $_POST['source'] ) ? sanitize_key( $_POST['source'] ) : '';
 		if ( 'sheet' === $source ) {
-			$url = isset( $_POST['url'] ) ? esc_url_raw( wp_unslash( $_POST['url'] ), array( 'https' ) ) : '';
-			$res = self::import_sheet( $url );
+			$url         = isset( $_POST['url'] ) ? esc_url_raw( wp_unslash( $_POST['url'] ), array( 'https' ) ) : '';
+			$res         = self::import_sheet( $url );
 			$res['done'] = true;
 		} else {
 			$res = self::import_courier( isset( $_POST['offset'] ) ? absint( $_POST['offset'] ) : 0 );
@@ -429,7 +430,11 @@ class DZCOD_Prices {
 		fwrite( $out, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
 		fputcsv( $out, array( 'wilaya_code', 'wilaya_name', 'wilaya_name_ar', 'home', 'desk', 'enabled' ), ',', '"', '\\' );
 		foreach ( DZCOD_Locations::all() as $code => $w ) {
-			$p = isset( $prices[ $code ] ) ? $prices[ $code ] : array( 'home' => 0, 'desk' => 0, 'enabled' => 0 );
+			$p = isset( $prices[ $code ] ) ? $prices[ $code ] : array(
+				'home'    => 0,
+				'desk'    => 0,
+				'enabled' => 0,
+			);
 			fputcsv( $out, array( $code, $w['n'], $w['ar'], $p['home'], $p['desk'], empty( $p['enabled'] ) ? 0 : 1 ), ',', '"', '\\' );
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose

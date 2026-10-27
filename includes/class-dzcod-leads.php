@@ -319,8 +319,8 @@ class DZCOD_Leads {
 			'recovered' => __( 'Recovered', 'dz-cod-order-form' ),
 			'lost'      => __( 'Lost', 'dz-cod-order-form' ),
 		);
-		$status = isset( $statuses[ $status ] ) ? $status : 'new';
-		$args   = array(
+		$status   = isset( $statuses[ $status ] ) ? $status : 'new';
+		$args     = array(
 			'post_type'      => self::CPT,
 			'post_status'    => 'publish',
 			'posts_per_page' => 30,
@@ -340,11 +340,11 @@ class DZCOD_Leads {
 		$q   = new WP_Query( $args );
 		$all = DZCOD_Locations::all();
 		$msg = array(
-			'created'  => array( 'success', __( 'Order created. You will find it in WooCommerce → Orders.', 'dz-cod-order-form' ) ),
-			'updated'  => array( 'success', __( 'Updated.', 'dz-cod-order-form' ) ),
-			'deleted'  => array( 'success', __( 'Deleted.', 'dz-cod-order-form' ) ),
+			'created'   => array( 'success', __( 'Order created. You will find it in WooCommerce → Orders.', 'dz-cod-order-form' ) ),
+			'updated'   => array( 'success', __( 'Updated.', 'dz-cod-order-form' ) ),
+			'deleted'   => array( 'success', __( 'Deleted.', 'dz-cod-order-form' ) ),
 			'noproduct' => array( 'error', __( 'The product is no longer available.', 'dz-cod-order-form' ) ),
-			'failed'   => array( 'error', __( 'The order could not be created.', 'dz-cod-order-form' ) ),
+			'failed'    => array( 'error', __( 'The order could not be created.', 'dz-cod-order-form' ) ),
 		);
 		?>
 		<div class="wrap">
@@ -367,7 +367,7 @@ class DZCOD_Leads {
 				foreach ( $statuses as $key => $label ) {
 					$links[] = '<li><a href="' . esc_url( admin_url( 'admin.php?page=dzcod-leads&status=' . $key ) ) . '"' . ( $key === $status ? ' class="current"' : '' ) . '>' . esc_html( $label ) . '</a></li>';
 				}
-				echo implode( ' | ', $links ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+				echo wp_kses_post( implode( ' | ', $links ) );
 				?>
 			</ul>
 			<table class="widefat striped" style="clear:both">
@@ -396,9 +396,9 @@ class DZCOD_Leads {
 					$pname   = $product ? $product->get_name() : '#' . $pid;
 					/* translators: 1: name, 2: product */
 					$wa_text = sprintf( __( 'Hello %1$s, we saw your order request for %2$s. Shall we confirm it for delivery?', 'dz-cod-order-form' ), $name, $pname );
-					$act     = function ( $do, $label, $class = 'button' ) use ( $id ) {
-						$url = wp_nonce_url( admin_url( 'admin-post.php?action=dzcod_lead&do=' . $do . '&lead=' . $id ), 'dzcod_lead_' . $id );
-						return '<a class="' . esc_attr( $class ) . '" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a> ';
+					$act     = function ( $lead_action, $text, $css = 'button' ) use ( $id ) {
+						$url = wp_nonce_url( admin_url( 'admin-post.php?action=dzcod_lead&do=' . $lead_action . '&lead=' . $id ), 'dzcod_lead_' . $id );
+						return '<a class="' . esc_attr( $css ) . '" href="' . esc_url( $url ) . '">' . esc_html( $text ) . '</a> ';
 					};
 					?>
 					<tr>
@@ -415,15 +415,15 @@ class DZCOD_Leads {
 							if ( $order ) {
 								echo '<a href="' . esc_url( class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' ) ? \Automattic\WooCommerce\Utilities\OrderUtil::get_order_admin_edit_url( $order ) : get_edit_post_link( $order ) ) . '">#' . esc_html( $order ) . '</a> ';
 							} else {
-								echo $act( 'create', __( 'Create order', 'dz-cod-order-form' ), 'button button-primary' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in $act.
+								echo wp_kses_post( $act( 'create', __( 'Create order', 'dz-cod-order-form' ), 'button button-primary' ) );
 								if ( 'contacted' !== $status ) {
-									echo $act( 'contacted', __( 'Called', 'dz-cod-order-form' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+									echo wp_kses_post( $act( 'contacted', __( 'Called', 'dz-cod-order-form' ) ) );
 								}
 								if ( 'lost' !== $status ) {
-									echo $act( 'lost', __( 'Lost', 'dz-cod-order-form' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+									echo wp_kses_post( $act( 'lost', __( 'Lost', 'dz-cod-order-form' ) ) );
 								}
 							}
-							echo $act( 'delete', __( 'Delete', 'dz-cod-order-form' ), 'button-link-delete' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo wp_kses_post( $act( 'delete', __( 'Delete', 'dz-cod-order-form' ), 'button-link-delete' ) );
 							?>
 						</td>
 					</tr>
@@ -503,18 +503,18 @@ class DZCOD_Leads {
 	 * @return string Message key.
 	 */
 	private static function do_create_order( $id ) {
-		$pid       = (int) get_post_meta( $id, '_dzcod_product_id', true );
-		$vid       = (int) get_post_meta( $id, '_dzcod_variation_id', true );
-		$product   = wc_get_product( $vid ? $vid : $pid );
+		$pid     = (int) get_post_meta( $id, '_dzcod_product_id', true );
+		$vid     = (int) get_post_meta( $id, '_dzcod_variation_id', true );
+		$product = wc_get_product( $vid ? $vid : $pid );
 		if ( ! $product || $product->is_type( 'variable' ) || ! $product->is_purchasable() ) {
 			return 'noproduct';
 		}
-		$wilaya  = (string) get_post_meta( $id, '_dzcod_wilaya', true );
-		$type    = (string) get_post_meta( $id, '_dzcod_delivery_type', true );
-		$qty     = max( 1, (int) get_post_meta( $id, '_dzcod_qty', true ) );
-		$extras  = array( 'from_admin' => true );
-		$offers  = DZCOD_Offers::get( $pid );
-		$oi      = (string) get_post_meta( $id, '_dzcod_offer', true );
+		$wilaya = (string) get_post_meta( $id, '_dzcod_wilaya', true );
+		$type   = (string) get_post_meta( $id, '_dzcod_delivery_type', true );
+		$qty    = max( 1, (int) get_post_meta( $id, '_dzcod_qty', true ) );
+		$extras = array( 'from_admin' => true );
+		$offers = DZCOD_Offers::get( $pid );
+		$oi     = (string) get_post_meta( $id, '_dzcod_offer', true );
 		if ( $offers && ctype_digit( $oi ) && isset( $offers[ (int) $oi ] ) ) {
 			$offer                   = $offers[ (int) $oi ];
 			$qty                     = $offer['qty'];
@@ -571,7 +571,7 @@ class DZCOD_Leads {
 			array(
 				'post_type'      => self::CPT,
 				'post_status'    => 'any',
-				'posts_per_page' => 500,
+				'posts_per_page' => 100,
 				'fields'         => 'ids',
 				'no_found_rows'  => true,
 				'date_query'     => array( array( 'before' => $days . ' days ago' ) ),

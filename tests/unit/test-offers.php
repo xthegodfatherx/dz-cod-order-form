@@ -1,4 +1,5 @@
 <?php
+function wp_json_file_decode($f,$o=array()){return json_decode(file_get_contents($f),true);}
 define('ABSPATH','/');define('DZCOD_DIR',dirname(__DIR__, 2) . '/');
 function __($s){return $s;} function apply_filters($h,$v){return $v;} function add_action(){} function wc_get_price_decimals(){return 0;} function absint($v){return abs((int)$v);}
 $GLOBALS['META']=[];function get_post_meta($id,$k,$single){return $GLOBALS['META'][$id][$k]??'';}

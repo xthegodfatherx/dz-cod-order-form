@@ -20,7 +20,7 @@ class DZCOD_Offers {
 	 */
 	public static function init() {
 		add_action( 'add_meta_boxes_product', array( __CLASS__, 'meta_box' ) );
-		add_action( 'save_post_product', array( __CLASS__, 'save' ), 10, 2 );
+		add_action( 'save_post_product', array( __CLASS__, 'save' ) );
 	}
 
 	/**
@@ -38,9 +38,9 @@ class DZCOD_Offers {
 			if ( $qty < 1 || $qty > 99 || isset( $out[ $qty ] ) ) {
 				continue;
 			}
-			$price         = ( isset( $o['price'] ) && '' !== $o['price'] && is_numeric( $o['price'] ) ) ? max( 0, (float) $o['price'] ) : null;
-			$percent       = ( isset( $o['percent'] ) && '' !== $o['percent'] && is_numeric( $o['percent'] ) ) ? min( 90, max( 0, (float) $o['percent'] ) ) : null;
-			$out[ $qty ]   = array(
+			$price       = ( isset( $o['price'] ) && '' !== $o['price'] && is_numeric( $o['price'] ) ) ? max( 0, (float) $o['price'] ) : null;
+			$percent     = ( isset( $o['percent'] ) && '' !== $o['percent'] && is_numeric( $o['percent'] ) ) ? min( 90, max( 0, (float) $o['percent'] ) ) : null;
+			$out[ $qty ] = array(
 				'qty'           => $qty,
 				'price'         => $price,
 				'percent'       => $percent,
@@ -175,7 +175,14 @@ class DZCOD_Offers {
 				$list[] = $c;
 			}
 		}
-		return (array) apply_filters( 'dzcod_free_delivery', array( 'mode' => $mode, 'wilayas' => array_values( array_unique( $list ) ) ), $product_id );
+		return (array) apply_filters(
+			'dzcod_free_delivery',
+			array(
+				'mode'    => $mode,
+				'wilayas' => array_values( array_unique( $list ) ),
+			),
+			$product_id
+		);
 	}
 
 	/**
@@ -213,16 +220,15 @@ class DZCOD_Offers {
 	 * Save offers.
 	 *
 	 * @param int     $post_id Post id.
-	 * @param WP_Post $post    Post.
 	 */
-	public static function save( $post_id, $post ) {
+	public static function save( $post_id ) {
 		if ( ! isset( $_POST['dzcod_offers_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['dzcod_offers_nonce'] ), 'dzcod_offers_save' ) ) {
 			return;
 		}
 		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || wp_is_post_revision( $post_id ) || ! current_user_can( 'edit_product', $post_id ) ) {
 			return;
 		}
-		$rows = isset( $_POST['dzcod_offers'] ) ? (array) wp_unslash( $_POST['dzcod_offers'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized per field below.
+		$rows = isset( $_POST['dzcod_offers'] ) ? map_deep( (array) wp_unslash( $_POST['dzcod_offers'] ), 'sanitize_text_field' ) : array();
 		$out  = array();
 		foreach ( array_slice( $rows, 0, self::MAX ) as $r ) {
 			$r   = (array) $r;
@@ -245,16 +251,23 @@ class DZCOD_Offers {
 			delete_post_meta( $post_id, self::META );
 		}
 
-		$fd   = isset( $_POST['dzcod_free_delivery'] ) ? (array) wp_unslash( $_POST['dzcod_free_delivery'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized per field below.
+		$fd   = isset( $_POST['dzcod_free_delivery'] ) ? map_deep( (array) wp_unslash( $_POST['dzcod_free_delivery'] ), 'sanitize_text_field' ) : array();
 		$mode = isset( $fd['mode'] ) ? sanitize_key( $fd['mode'] ) : '';
 		if ( in_array( $mode, array( 'all', 'home', 'desk' ), true ) ) {
 			$codes = array_filter( array_map( 'trim', explode( ',', isset( $fd['wilayas'] ) ? sanitize_text_field( $fd['wilayas'] ) : '' ) ), 'strlen' );
-			update_post_meta( $post_id, '_dzcod_free_delivery', array( 'mode' => $mode, 'wilayas' => array_values( $codes ) ) );
+			update_post_meta(
+				$post_id,
+				'_dzcod_free_delivery',
+				array(
+					'mode'    => $mode,
+					'wilayas' => array_values( $codes ),
+				)
+			);
 		} else {
 			delete_post_meta( $post_id, '_dzcod_free_delivery' );
 		}
 
-		$u = isset( $_POST['dzcod_upsell'] ) ? (array) wp_unslash( $_POST['dzcod_upsell'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized per field below.
+		$u  = isset( $_POST['dzcod_upsell'] ) ? map_deep( (array) wp_unslash( $_POST['dzcod_upsell'] ), 'sanitize_text_field' ) : array();
 		$up = isset( $u['product'] ) ? absint( $u['product'] ) : 0;
 		if ( $up && $up !== (int) $post_id ) {
 			update_post_meta(

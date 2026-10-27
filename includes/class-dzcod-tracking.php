@@ -110,11 +110,11 @@ class DZCOD_Tracking {
 	private static function open_orders( $limit ) {
 		$orders = wc_get_orders(
 			array(
-				'limit'      => 200,
-				'orderby'    => 'date',
-				'order'      => 'DESC',
+				'limit'        => 200,
+				'orderby'      => 'date',
+				'order'        => 'DESC',
 				'date_created' => '>' . ( time() - 60 * DAY_IN_SECONDS ),
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					'relation' => 'AND',
 					array(
 						'key'     => '_dzcod_tracking',
@@ -128,8 +128,8 @@ class DZCOD_Tracking {
 				),
 			)
 		);
-		$min = time() - 2 * HOUR_IN_SECONDS;
-		$due = array_filter(
+		$min    = time() - 2 * HOUR_IN_SECONDS;
+		$due    = array_filter(
 			$orders,
 			function ( $o ) use ( $min ) {
 				return (int) $o->get_meta( '_dzcod_parcel_checked' ) < $min;

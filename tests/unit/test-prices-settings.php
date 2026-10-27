@@ -1,4 +1,5 @@
 <?php
+function wp_json_file_decode($f,$o=array()){return json_decode(file_get_contents($f),true);}
 define('ABSPATH','/');define('DZCOD_DIR',dirname(__DIR__, 2) . '/');define('HOUR_IN_SECONDS',3600);define('DAY_IN_SECONDS',86400);define('MB_IN_BYTES',1048576);function wp_parse_url($u,$c){return parse_url($u,$c);}
 function __($s){return $s;} function apply_filters($h,$v){return $v;} function add_action(){} function add_filter(){}
 function wp_parse_args($a,$d){return array_merge($d,(array)$a);} function remove_accents($s){return iconv('UTF-8','ASCII//TRANSLIT',$s);}

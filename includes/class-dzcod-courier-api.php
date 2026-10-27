@@ -88,10 +88,10 @@ class DZCOD_Courier_API {
 	 */
 	private static function http( $method, $url, $headers, $body = null ) {
 		$args = array(
-			'method'  => $method,
+			'method'              => $method,
 			'timeout'             => 25,
 			'limit_response_size' => 5 * MB_IN_BYTES,
-			'headers' => array_merge(
+			'headers'             => array_merge(
 				array(
 					'Accept'       => 'application/json',
 					'Content-Type' => 'application/json',
@@ -186,7 +186,7 @@ class DZCOD_Courier_API {
 		$ok      = false;
 		foreach ( $allowed as $suffix ) {
 			$suffix = strtolower( (string) $suffix );
-			if ( '' !== $suffix && ( $host === ltrim( $suffix, '.' ) || substr( $host, -strlen( $suffix ) ) === $suffix ) ) {
+			if ( '' !== $suffix && ( ltrim( $suffix, '.' ) === $host || substr( $host, -strlen( $suffix ) ) === $suffix ) ) {
 				$ok = true;
 				break;
 			}
@@ -325,14 +325,22 @@ class DZCOD_Courier_API {
 		$trackings = array_values( array_filter( array_map( 'strval', (array) $trackings ) ) );
 		$out       = array();
 		if ( ! isset( $p[ $key ] ) || '' === $base || ! $trackings ) {
-			return array( 'ok' => false, 'error' => __( 'No delivery company configured.', 'dz-cod-order-form' ), 'status' => array() );
+			return array(
+				'ok'     => false,
+				'error'  => __( 'No delivery company configured.', 'dz-cod-order-form' ),
+				'status' => array(),
+			);
 		}
 		$platform = $p[ $key ][1];
 
 		if ( 'yalidine' === $platform ) {
 			$r = self::http( 'GET', $base . '/v1/parcels/?tracking=' . rawurlencode( implode( ',', $trackings ) ) . '&page_size=' . count( $trackings ), self::yalidine_headers( $settings ) );
 			if ( 200 !== $r['status'] || ! is_array( $r['json'] ) ) {
-				return array( 'ok' => false, 'error' => self::http_error( $r ), 'status' => array() );
+				return array(
+					'ok'     => false,
+					'error'  => self::http_error( $r ),
+					'status' => array(),
+				);
 			}
 			foreach ( (array) ( isset( $r['json']['data'] ) ? $r['json']['data'] : array() ) as $row ) {
 				if ( isset( $row['tracking'] ) ) {
@@ -346,7 +354,11 @@ class DZCOD_Courier_API {
 			}
 			$r = self::http( 'POST', $base . '/lire', self::procolis_headers( $settings ), array( 'Colis' => $colis ) );
 			if ( 200 !== $r['status'] ) {
-				return array( 'ok' => false, 'error' => self::http_error( $r ), 'status' => array() );
+				return array(
+					'ok'     => false,
+					'error'  => self::http_error( $r ),
+					'status' => array(),
+				);
 			}
 			foreach ( (array) ( is_array( $r['json'] ) && isset( $r['json']['Colis'] ) ? $r['json']['Colis'] : array() ) as $row ) {
 				if ( isset( $row['Tracking'] ) ) {
@@ -369,7 +381,11 @@ class DZCOD_Courier_API {
 				usleep( 200000 );
 			}
 		}
-		return array( 'ok' => true, 'error' => '', 'status' => $out );
+		return array(
+			'ok'     => true,
+			'error'  => '',
+			'status' => $out,
+		);
 	}
 
 	/**
@@ -528,7 +544,7 @@ class DZCOD_Courier_API {
 		if ( ! in_array( $r['status'], array( 200, 201 ), true ) || ! is_array( $r['json'] ) ) {
 			return self::result( false, self::http_error( $r ) );
 		}
-		$row = isset( $r['json'][ $parcel['reference'] ] ) ? $r['json'][ $parcel['reference'] ] : reset( $r['json'] );
+		$row     = isset( $r['json'][ $parcel['reference'] ] ) ? $r['json'][ $parcel['reference'] ] : reset( $r['json'] );
 		$success = is_array( $row ) && isset( $row['success'] ) && filter_var( $row['success'], FILTER_VALIDATE_BOOLEAN );
 		if ( ! $success ) {
 			$msg = is_array( $row ) && ! empty( $row['message'] ) ? (string) $row['message'] : __( 'Parcel refused.', 'dz-cod-order-form' );

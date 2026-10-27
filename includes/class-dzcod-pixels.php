@@ -43,8 +43,8 @@ class DZCOD_Pixels {
 		$cookie = function ( $k ) {
 			return isset( $_COOKIE[ $k ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ $k ] ) ) : '';
 		};
-		$url = wp_get_referer() ? wp_get_referer() : '';
-		$fbc = $cookie( '_fbc' );
+		$url    = wp_get_referer() ? wp_get_referer() : '';
+		$fbc    = $cookie( '_fbc' );
 		if ( '' === $fbc && $url ) {
 			$q = array();
 			wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $q );
@@ -323,7 +323,10 @@ class DZCOD_Pixels {
 			)
 		);
 		if ( is_wp_error( $res ) ) {
-			return array( 'ok' => false, 'error' => $res->get_error_message() );
+			return array(
+				'ok'    => false,
+				'error' => $res->get_error_message(),
+			);
 		}
 		$code = (int) wp_remote_retrieve_response_code( $res );
 		$json = json_decode( (string) wp_remote_retrieve_body( $res ), true );
@@ -333,9 +336,15 @@ class DZCOD_Pixels {
 			if ( is_array( $json ) ) {
 				$msg = isset( $json['error']['message'] ) ? $json['error']['message'] : ( isset( $json['message'] ) ? $json['message'] : '' );
 			}
-			return array( 'ok' => false, 'error' => 'HTTP ' . $code . ( $msg ? ' — ' . mb_substr( (string) $msg, 0, 200 ) : '' ) );
+			return array(
+				'ok'    => false,
+				'error' => 'HTTP ' . $code . ( $msg ? ' — ' . mb_substr( (string) $msg, 0, 200 ) : '' ),
+			);
 		}
-		return array( 'ok' => true, 'error' => '' );
+		return array(
+			'ok'    => true,
+			'error' => '',
+		);
 	}
 
 	/**

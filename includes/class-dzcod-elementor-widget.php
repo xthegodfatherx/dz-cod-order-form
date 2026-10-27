@@ -101,6 +101,6 @@ class DZCOD_Elementor_Widget extends \Elementor\Widget_Base {
 		if ( '' === $html && \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
 			$html = '<p>' . esc_html__( 'DZ COD Order Form: set a product ID, or use this widget in a single product template.', 'dz-cod-order-form' ) . '</p>';
 		}
-		echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in DZCOD_Form::render().
+		echo wp_kses( $html, DZCOD_Form::allowed_html() );
 	}
 }

@@ -76,6 +76,8 @@
 	function initForm(form) {
 		var C = readConfig(form);
 		if (!C) { return; }
+		var color = form.getAttribute('data-color');
+		if (color && /^#[0-9a-f]{3,8}$/i.test(color)) { form.style.setProperty('--dzcod-primary', color); }
 		var $ = function (sel) { return form.querySelector(sel); };
 		var wilaya = $('[name="wilaya"]');
 		var commune = $('[name="commune"]');

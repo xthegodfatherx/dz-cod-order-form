@@ -40,7 +40,7 @@ class DZCOD_Form {
 		add_action(
 			'woocommerce_single_product_summary',
 			function () {
-				echo self::render( get_queried_object_id() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in render().
+				echo wp_kses( self::render( get_queried_object_id() ), self::allowed_html() );
 			},
 			31
 		);
@@ -54,7 +54,16 @@ class DZCOD_Form {
 			wp_register_style( 'dzcod-form', DZCOD_URL . 'assets/form.css', array(), DZCOD_VERSION );
 		}
 		if ( ! wp_script_is( 'dzcod-form', 'registered' ) ) {
-			wp_register_script( 'dzcod-form', DZCOD_URL . 'assets/form.js', array(), DZCOD_VERSION, true );
+			wp_register_script(
+				'dzcod-form',
+				DZCOD_URL . 'assets/form.js',
+				array(),
+				DZCOD_VERSION,
+				array(
+					'in_footer' => true,
+					'strategy'  => 'defer',
+				)
+			);
 		}
 	}
 
@@ -84,7 +93,7 @@ class DZCOD_Form {
 			global $product;
 			$id = ( $product instanceof WC_Product ) ? $product->get_id() : get_queried_object_id();
 		}
-		return self::render( $id );
+		return wp_kses( self::render( $id ), self::allowed_html() );
 	}
 
 	/**
@@ -143,16 +152,75 @@ class DZCOD_Form {
 	}
 
 	/**
+	 * Tags and attributes the form uses — everything else is stripped when it is printed.
+	 *
+	 * @return array
+	 */
+	public static function allowed_html() {
+		$common = array(
+			'class'       => true,
+			'id'          => true,
+			'role'        => true,
+			'aria-hidden' => true,
+			'aria-live'   => true,
+			'aria-label'  => true,
+			'data-*'      => true,
+			'dir'         => true,
+		);
+		$field  = array_merge(
+			$common,
+			array(
+				'name'         => true,
+				'type'         => true,
+				'value'        => true,
+				'placeholder'  => true,
+				'required'     => true,
+				'disabled'     => true,
+				'checked'      => true,
+				'selected'     => true,
+				'minlength'    => true,
+				'maxlength'    => true,
+				'min'          => true,
+				'max'          => true,
+				'step'         => true,
+				'rows'         => true,
+				'inputmode'    => true,
+				'autocomplete' => true,
+				'tabindex'     => true,
+			)
+		);
+		return array(
+			'form'     => array_merge( $common, array( 'novalidate' => true ) ),
+			'div'      => $common,
+			'p'        => $common,
+			'span'     => $common,
+			'h3'       => $common,
+			'fieldset' => $common,
+			'legend'   => $common,
+			'label'    => array_merge( $common, array( 'for' => true ) ),
+			'input'    => $field,
+			'select'   => $field,
+			'option'   => $field,
+			'textarea' => $field,
+			'button'   => $field,
+			'b'        => $common,
+			's'        => $common,
+			'small'    => $common,
+			'strong'   => $common,
+		);
+	}
+
+	/**
 	 * Label HTML with an optional "(optional)" hint.
 	 *
-	 * @param string $for      Input id.
+	 * @param string $field_id Input id.
 	 * @param string $label    Label.
 	 * @param bool   $required Required.
 	 * @return string
 	 */
-	private static function label( $for, $label, $required ) {
+	private static function label( $field_id, $label, $required ) {
 		$hint = $required ? '' : ' <small>(' . esc_html__( 'optional', 'dz-cod-order-form' ) . ')</small>';
-		return '<label for="' . esc_attr( $for ) . '">' . esc_html( $label ) . $hint . '</label>';
+		return '<label for="' . esc_attr( $field_id ) . '">' . esc_html( $label ) . $hint . '</label>';
 	}
 
 	/**
@@ -222,7 +290,7 @@ class DZCOD_Form {
 
 		ob_start();
 		?>
-		<form class="dzcod-form" id="<?php echo esc_attr( $uid ); ?>" style="<?php echo esc_attr( '--dzcod-primary:' . $s['primary_color'] . ';' ); ?>" novalidate
+		<form class="dzcod-form" id="<?php echo esc_attr( $uid ); ?>" data-color="<?php echo esc_attr( $s['primary_color'] ); ?>" novalidate
 			data-product="<?php echo esc_attr( $product->get_id() ); ?>"
 			data-price="<?php echo esc_attr( $price ); ?>"
 			<?php $fd = DZCOD_Offers::free_delivery( $product->get_id() ); ?>
@@ -254,22 +322,22 @@ class DZCOD_Form {
 
 			<div class="dzcod-row">
 				<?php
-				echo self::input_row( $uid, 'name', 'text', 'autocomplete="name" minlength="3" maxlength="100"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in input_row().
-				echo self::input_row( $uid, 'phone', 'tel', 'inputmode="tel" autocomplete="tel" dir="ltr" maxlength="20"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo wp_kses( self::input_row( $uid, 'name', 'text', 'autocomplete="name" minlength="3" maxlength="100"' ), self::allowed_html() );
+				echo wp_kses( self::input_row( $uid, 'phone', 'tel', 'inputmode="tel" autocomplete="tel" dir="ltr" maxlength="20"' ), self::allowed_html() );
 				?>
 			</div>
 			<?php if ( DZCOD_Settings::field( 'phone2' )['show'] || DZCOD_Settings::field( 'email' )['show'] ) : ?>
 				<div class="dzcod-row">
 					<?php
-					echo self::input_row( $uid, 'phone2', 'tel', 'inputmode="tel" dir="ltr" maxlength="20"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					echo self::input_row( $uid, 'email', 'email', 'autocomplete="email" dir="ltr" maxlength="100"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo wp_kses( self::input_row( $uid, 'phone2', 'tel', 'inputmode="tel" dir="ltr" maxlength="20"' ), self::allowed_html() );
+					echo wp_kses( self::input_row( $uid, 'email', 'email', 'autocomplete="email" dir="ltr" maxlength="100"' ), self::allowed_html() );
 					?>
 				</div>
 			<?php endif; ?>
 
 			<div class="dzcod-row">
 				<div class="dzcod-field">
-					<?php echo self::label( $uid . '-wilaya', $wil['label'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wp_kses( self::label( $uid . '-wilaya', $wil['label'], true ), self::allowed_html() ); ?>
 					<select id="<?php echo esc_attr( $uid ); ?>-wilaya" name="wilaya" required>
 						<option value=""><?php echo esc_html( $wil['placeholder'] ); ?></option>
 						<?php
@@ -284,7 +352,7 @@ class DZCOD_Form {
 					</select>
 				</div>
 				<div class="dzcod-field">
-					<?php echo self::label( $uid . '-commune', $com['label'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wp_kses( self::label( $uid . '-commune', $com['label'], true ), self::allowed_html() ); ?>
 					<select id="<?php echo esc_attr( $uid ); ?>-commune" name="commune" required disabled><option value=""><?php echo esc_html( $com['placeholder'] ); ?></option></select>
 				</div>
 			</div>
@@ -303,7 +371,7 @@ class DZCOD_Form {
 
 			<?php if ( $address['show'] ) : ?>
 				<div class="dzcod-field dzcod-address">
-					<?php echo self::label( $uid . '-address', $address['label'], (bool) $address['required'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wp_kses( self::label( $uid . '-address', $address['label'], (bool) $address['required'] ), self::allowed_html() ); ?>
 					<input id="<?php echo esc_attr( $uid ); ?>-address" name="address" type="text" autocomplete="street-address" maxlength="200" placeholder="<?php echo esc_attr( $address['placeholder'] ); ?>">
 				</div>
 			<?php endif; ?>
@@ -314,7 +382,7 @@ class DZCOD_Form {
 					<?php if ( 'checkbox' === $cf['type'] ) : ?>
 						<label class="dzcod-check"><input type="checkbox" name="<?php echo esc_attr( $cf['key'] ); ?>" value="1" <?php echo $cf['required'] ? 'required' : ''; ?>> <span><?php echo esc_html( $cf['label'] ); ?></span></label>
 					<?php else : ?>
-						<?php echo self::label( $id, $cf['label'], $cf['required'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo wp_kses( self::label( $id, $cf['label'], $cf['required'] ), self::allowed_html() ); ?>
 						<?php if ( 'select' === $cf['type'] ) : ?>
 							<select id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $cf['key'] ); ?>" <?php echo $cf['required'] ? 'required' : ''; ?>>
 								<option value=""><?php echo esc_html( '' !== $cf['placeholder'] ? $cf['placeholder'] : '—' ); ?></option>
@@ -333,7 +401,7 @@ class DZCOD_Form {
 
 			<?php if ( $note['show'] ) : ?>
 				<div class="dzcod-field dzcod-f-note">
-					<?php echo self::label( $uid . '-note', $note['label'], (bool) $note['required'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wp_kses( self::label( $uid . '-note', $note['label'], (bool) $note['required'] ), self::allowed_html() ); ?>
 					<textarea id="<?php echo esc_attr( $uid ); ?>-note" name="note" rows="2" maxlength="500" placeholder="<?php echo esc_attr( $note['placeholder'] ); ?>" <?php echo $note['required'] ? 'required' : ''; ?>></textarea>
 				</div>
 			<?php endif; ?>
