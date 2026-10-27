@@ -28,6 +28,11 @@ tests_add_filter(
 	'setup_theme',
 	function () {
 		WC_Install::install();
+		// Create the HPOS tables now, as real tables: tables created inside a test become
+		// TEMPORARY, and MySQL cannot open a temporary table twice in one query.
+		update_option( 'woocommerce_custom_orders_table_enabled', 'yes' );
+		update_option( 'woocommerce_custom_orders_table_data_sync_enabled', 'no' );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer::class )->create_database_tables();
 		$GLOBALS['wp_roles'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		wp_roles();
 	}
