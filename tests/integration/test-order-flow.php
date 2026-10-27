@@ -75,11 +75,19 @@ class Test_Order_Flow extends WP_Ajax_UnitTestCase {
 			),
 			$fields
 		);
+		if ( ! has_action( 'wp_ajax_dzcod_place_order' ) ) {
+			DZCOD_Order::init();
+		}
 		$this->_last_response = '';
+		$note                 = '';
 		try {
 			$this->_handleAjax( 'dzcod_place_order' );
-		} catch ( WPAjaxDieContinueException $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+		} catch ( WPAjaxDieContinueException $e ) {
+			$note = 'continue:' . $e->getMessage();
+		} catch ( WPAjaxDieStopException $e ) {
+			$note = 'stop:' . $e->getMessage();
 		}
+		$this->assertNotSame( '', $this->_last_response, 'Empty AJAX response (' . $note . ')' );
 		return json_decode( $this->_last_response, true );
 	}
 
