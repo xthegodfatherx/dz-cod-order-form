@@ -1,0 +1,73 @@
+/* DZ COD Order Form — works in LTR and RTL themes. */
+.dzcod-form {
+	--dzcod-primary: #16a34a;
+	--dzcod-border: #d4d4d8;
+	--dzcod-radius: 10px;
+	box-sizing: border-box;
+	margin: 1.25em 0;
+	padding: 18px;
+	border: 2px solid var(--dzcod-primary);
+	border-radius: 14px;
+	background: #fff;
+	color: #18181b;
+	font-size: 15px;
+	line-height: 1.4;
+}
+.dzcod-form *, .dzcod-form *::before, .dzcod-form *::after { box-sizing: border-box; }
+.dzcod-title { margin: 0 0 14px; font-size: 1.15em; text-align: center; }
+.dzcod-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .dzcod-row { grid-template-columns: 1fr; } }
+.dzcod-field { margin: 0 0 12px; min-width: 0; }
+.dzcod-field > label, .dzcod-field > legend { display: block; margin: 0 0 5px; font-weight: 600; font-size: .92em; }
+.dzcod-field small { font-weight: 400; opacity: .7; }
+.dzcod-form input[type="text"], .dzcod-form input[type="tel"], .dzcod-form input[type="number"], .dzcod-form select {
+	width: 100%;
+	min-height: 46px;
+	margin: 0;
+	padding: 8px 12px;
+	border: 1px solid var(--dzcod-border);
+	border-radius: var(--dzcod-radius);
+	background: #fff;
+	color: inherit;
+	font: inherit;
+}
+.dzcod-form input:focus, .dzcod-form select:focus { outline: 2px solid var(--dzcod-primary); outline-offset: 1px; border-color: var(--dzcod-primary); }
+.dzcod-form .is-invalid { border-color: #dc2626 !important; background: #fef2f2 !important; }
+.dzcod-form select:disabled { opacity: .6; }
+.dzcod-delivery { border: 0; padding: 0; }
+.dzcod-choice { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; padding: 10px 12px; border: 1px solid var(--dzcod-border); border-radius: var(--dzcod-radius); cursor: pointer; }
+.dzcod-choice:has(input:checked) { border-color: var(--dzcod-primary); background: color-mix(in srgb, var(--dzcod-primary) 8%, #fff); }
+.dzcod-choice b { margin-inline-start: auto; white-space: nowrap; }
+.dzcod-qty-box { display: inline-flex; align-items: stretch; }
+.dzcod-qty-box input[type="number"] { width: 64px; text-align: center; border-radius: 0; -moz-appearance: textfield; }
+.dzcod-qty-box input::-webkit-outer-spin-button, .dzcod-qty-box input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.dzcod-qty-btn { width: 46px; min-height: 46px; padding: 0; border: 1px solid var(--dzcod-border); background: #f4f4f5; color: inherit; font-size: 20px; cursor: pointer; }
+.dzcod-qty-btn:first-child { border-start-start-radius: var(--dzcod-radius); border-end-start-radius: var(--dzcod-radius); }
+.dzcod-qty-btn:last-child { border-start-end-radius: var(--dzcod-radius); border-end-end-radius: var(--dzcod-radius); }
+.dzcod-hp { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; overflow: hidden; }
+.dzcod-summary { margin: 4px 0 12px; padding: 12px; border-radius: var(--dzcod-radius); background: #f4f4f5; }
+.dzcod-summary > div { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
+.dzcod-sum-total-row { margin-top: 4px; padding-top: 8px !important; border-top: 1px dashed var(--dzcod-border); font-size: 1.1em; }
+.dzcod-sum-total { color: var(--dzcod-primary); }
+.dzcod-message:empty { display: none; }
+.dzcod-message { margin: 0 0 12px; padding: 10px 12px; border-radius: var(--dzcod-radius); }
+.dzcod-message.is-error { background: #fef2f2; color: #991b1b; }
+.dzcod-message.is-success { background: #f0fdf4; color: #166534; font-weight: 600; text-align: center; }
+.dzcod-submit {
+	display: block;
+	width: 100%;
+	min-height: 52px;
+	border: 0;
+	border-radius: var(--dzcod-radius);
+	background: var(--dzcod-primary);
+	color: #fff;
+	font: inherit;
+	font-size: 1.1em;
+	font-weight: 700;
+	cursor: pointer;
+	animation: dzcod-pulse 2.4s ease-in-out infinite;
+}
+.dzcod-submit:disabled { opacity: .7; cursor: wait; animation: none; }
+@keyframes dzcod-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+@media (prefers-reduced-motion: reduce) { .dzcod-submit { animation: none; } }
+.dzcod-form.is-done > *:not(.dzcod-message):not(.dzcod-title) { display: none !important; }
