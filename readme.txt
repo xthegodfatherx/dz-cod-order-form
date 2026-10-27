@@ -5,7 +5,7 @@ Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,6 +22,8 @@ Most Algerian online stores sell with cash on delivery (COD). Customers do not w
 * **Delivery price per wilaya**, separately for home delivery and stop desk (office pickup). Disable wilayas you do not deliver to. Optional free delivery above an amount.
 * **Form fields you control**: show/hide, required, label and placeholder for every field, plus optional second phone, email and order note, and up to 6 **custom fields** (text, long text, dropdown, checkbox) saved on the order.
 * **Import delivery prices automatically** from Yalidine, ZR Express or your Ecotrack courier, or from a **Google Sheet** (template included, optional daily sync). New wilayas get their former wilaya's price.
+* **Quantity offers** per product: clickable packs like "1 for 3,500 · 2 for 6,000 · 3 for 8,000", with a fixed pack price or a % discount, optional badge ("Best value") and free delivery per pack. Prices are always recalculated on the server.
+* **Abandoned orders**: visitors who type a valid phone number but do not confirm are saved (after a 15-minute grace period) in WooCommerce → Abandoned orders, with call and WhatsApp buttons and one-click "Create order". Automatically deleted after a period you choose.
 * Live order summary: product, delivery, total.
 * Simple and variable products, quantity selector.
 * **Anti-fraud**: Algerian phone validation (+213 accepted), duplicate detection by phone (block, or accept and put On hold), blocked phone list, per-IP rate limit, bot honeypot.
@@ -35,8 +37,8 @@ Most Algerian online stores sell with cash on delivery (COD). Customers do not w
 
 **Developers**
 
-Filters: `dzcod_locations`, `dzcod_is_valid_phone`, `dzcod_antifraud_result`, `dzcod_sheets_row`, `dzcod_auto_insert_for_product`, `dzcod_client_ip`, `dzcod_courier_providers`, `dzcod_courier_parcel`, `dzcod_courier_payload`, `dzcod_courier_logo`.
-Actions: `dzcod_before_order_save`, `dzcod_order_created`, `dzcod_parcel_created`.
+Filters: `dzcod_locations`, `dzcod_is_valid_phone`, `dzcod_antifraud_result`, `dzcod_sheets_row`, `dzcod_auto_insert_for_product`, `dzcod_client_ip`, `dzcod_courier_providers`, `dzcod_courier_parcel`, `dzcod_courier_payload`, `dzcod_courier_logo`, `dzcod_offers`.
+Actions: `dzcod_before_order_save`, `dzcod_order_created`, `dzcod_parcel_created`, `dzcod_lead_recovered`.
 
 Source code and issues: https://github.com/xthegodfatherx/dz-cod-order-form
 
@@ -78,6 +80,14 @@ On the Delivery prices tab, download the template, open it in Google Sheets (Fil
 
 The plugin shows a coloured badge with each company's initials, because company logos are trademarks we cannot ship. To show your own logo files, use the `dzcod_courier_logo` filter: `add_filter( 'dzcod_courier_logo', function ( $url, $key ) { return 'yalidine' === $key ? 'https://your-site/logos/yalidine.png' : $url; }, 10, 2 );`
 
+= Does the abandoned-order feature store personal data? =
+
+Yes: the name, phone, wilaya, commune and address a visitor typed, plus the product. It is stored only in your own WordPress database, is shown only to shop managers, is deleted automatically after the number of days you set (30 by default), and is removed completely when you delete the plugin. A short notice under the form tells visitors their number may be saved; you can edit it or switch the feature off in General settings. Check what your local data-protection law requires.
+
+= How do quantity offers work? =
+
+Edit a product and fill in the "COD form — quantity offers" box: quantity, then either a fixed pack price or a % discount. The form then shows packs instead of the quantity selector. The pack with a badge is selected by default.
+
 = Is Noest supported? =
 
 Not yet. Noest's API is not publicly documented; it is on the roadmap. Contributions are welcome on GitHub.
@@ -91,6 +101,11 @@ Delivery companies sometimes spell communes differently. Open the order, correct
 No. It creates standard WooCommerce orders with the Cash on delivery payment method, so your existing order management, emails and delivery plugins keep working.
 
 == Changelog ==
+
+= 1.3.0 =
+* New: quantity offers per product (fixed pack price or % off, badge, free delivery per pack), shown as cards with the crossed-out normal price.
+* New: abandoned orders — capture after a valid phone number is typed, admin list with call/WhatsApp buttons, "Create order" in one click, automatic deletion after N days, privacy notice under the form.
+* Orders created by staff from an abandoned form do not record the staff member's IP or account.
 
 = 1.2.0 =
 * New: Form fields tab — show/hide, required, label and placeholder for each field; second phone, email and note fields; up to 6 custom fields saved on the order, shown on the order screen and sent to Google Sheets.

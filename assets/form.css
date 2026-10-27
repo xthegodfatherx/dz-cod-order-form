@@ -78,6 +78,19 @@
 .dzcod-submit:disabled { opacity: .7; cursor: wait; animation: none; }
 @keyframes dzcod-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
 @media (prefers-reduced-motion: reduce) { .dzcod-submit { animation: none; } }
+.dzcod-privacy { margin: 4px 0 0; text-align: center; font-size: .75em; opacity: .6; }
 .dzcod-trust { margin: 10px 0 0; text-align: center; font-size: .85em; opacity: .75; }
 .dzcod-form.is-done > *:not(.dzcod-message):not(.dzcod-title) { display: none !important; }
 .dzcod-form.is-done .dzcod-message.is-success { padding: 22px 14px; font-size: 1.05em; }
+
+/* Quantity offers */
+.dzcod-offers { border: 0; padding: 0; }
+.dzcod-offer { position: relative; display: flex; align-items: center; gap: 10px; margin: 0 0 8px; padding: 13px 14px; border: 1.5px solid var(--dzcod-border); border-radius: var(--dzcod-radius); cursor: pointer; transition: border-color .15s, background-color .15s; }
+.dzcod-offer.is-selected, .dzcod-offer:has(input:checked) { border-color: var(--dzcod-primary); background: color-mix(in srgb, var(--dzcod-primary) 8%, #fff); }
+.dzcod-offer input { margin: 0; accent-color: var(--dzcod-primary); }
+.dzcod-offer-main { display: flex; flex-direction: column; gap: 2px; }
+.dzcod-offer-free { color: var(--dzcod-primary); font-weight: 600; }
+.dzcod-offer-price { margin-inline-start: auto; display: flex; flex-direction: column; align-items: flex-end; white-space: nowrap; }
+.dzcod-offer-total { font-size: 1.05em; }
+.dzcod-offer-was { font-size: .85em; opacity: .55; }
+.dzcod-offer-badge { position: absolute; top: -9px; inset-inline-end: 12px; padding: 1px 8px; border-radius: 20px; background: var(--dzcod-primary); color: #fff; font-size: .75em; font-weight: 700; }

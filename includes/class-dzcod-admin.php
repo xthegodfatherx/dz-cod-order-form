@@ -199,6 +199,12 @@ class DZCOD_Admin {
 				</select>
 				<p class="description"><?php esc_html_e( 'Suspected duplicates are always set to On hold.', 'dz-cod-order-form' ); ?></p>
 			</td></tr>
+			<tr><th><?php esc_html_e( 'Abandoned orders', 'dz-cod-order-form' ); ?></th><td>
+				<?php self::checkbox( $s, $n, 'leads_enabled', __( 'Save visitors who type a valid phone number but do not confirm, so you can call them back', 'dz-cod-order-form' ) ); ?>
+				<p><label><?php esc_html_e( 'Delete them after', 'dz-cod-order-form' ); ?> <input type="number" min="1" max="365" style="width:70px" name="<?php echo esc_attr( $n ); ?>[leads_retention]" value="<?php echo esc_attr( $s['leads_retention'] ); ?>"> <?php esc_html_e( 'days', 'dz-cod-order-form' ); ?></label></p>
+				<p><label><?php esc_html_e( 'Notice under the form', 'dz-cod-order-form' ); ?><br><input type="text" class="large-text" name="<?php echo esc_attr( $n ); ?>[leads_notice]" value="<?php echo esc_attr( $s['leads_notice'] ); ?>"></label></p>
+				<p class="description"><?php esc_html_e( 'Tell visitors their number may be saved before they confirm. Check what your local data-protection law requires.', 'dz-cod-order-form' ); ?></p>
+			</td></tr>
 			<tr><th><?php esc_html_e( 'After ordering', 'dz-cod-order-form' ); ?></th><td><?php self::checkbox( $s, $n, 'redirect_thankyou', __( 'Redirect to the WooCommerce thank-you page (otherwise show the success message in place)', 'dz-cod-order-form' ) ); ?></td></tr>
 			<tr><th><label for="dzcod-color"><?php esc_html_e( 'Main color', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-color" type="color" name="<?php echo esc_attr( $n ); ?>[primary_color]" value="<?php echo esc_attr( $s['primary_color'] ); ?>"></td></tr>
 		</table>

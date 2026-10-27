@@ -99,11 +99,32 @@
 			return r ? r.value : 'home';
 		}
 
+		function offerTotal(input, unit) {
+			var q = parseInt(input.getAttribute('data-qty'), 10) || 1;
+			var fixed = input.getAttribute('data-price'), pct = input.getAttribute('data-percent');
+			if (fixed !== '' && fixed !== null) { return parseFloat(fixed); }
+			var t = unit * q;
+			if (pct !== '' && pct !== null) { t = t * (1 - parseFloat(pct) / 100); }
+			var d = parseInt(C.currency.decimals, 10) || 0;
+			return Math.round(t * Math.pow(10, d)) / Math.pow(10, d);
+		}
+
 		function update() {
+			var unit = unitPrice();
+			var offer = form.querySelector('[name="offer"]:checked');
+			// Pack cards: show each pack's price and the crossed-out normal price.
+			Array.prototype.forEach.call(form.querySelectorAll('[name="offer"]'), function (o) {
+				var card = o.closest('.dzcod-offer');
+				var total = offerTotal(o, unit), normal = unit * (parseInt(o.getAttribute('data-qty'), 10) || 1);
+				card.querySelector('.dzcod-offer-total').textContent = money(C, total);
+				card.querySelector('.dzcod-offer-was').textContent = normal > total + 0.009 ? money(C, normal) : '';
+				card.classList.toggle('is-selected', o.checked);
+			});
+			if (offer) { qty.value = offer.getAttribute('data-qty'); }
 			var q = Math.max(1, Math.min(99, parseInt(qty.value, 10) || 1));
-			var sub = unitPrice() * q;
+			var sub = offer ? offerTotal(offer, unit) : unit * q;
 			var p = C.prices[wilaya.value];
-			var free = C.freeOver > 0 && sub >= C.freeOver;
+			var free = (offer && offer.getAttribute('data-free') === '1') || (C.freeOver > 0 && sub >= C.freeOver);
 			var home = form.querySelector('.dzcod-price-home');
 			var desk = form.querySelector('.dzcod-price-desk');
 			if (home) { home.textContent = p ? (free ? C.i18n.free : money(C, p[0])) : ''; }
@@ -151,6 +172,43 @@
 				update();
 			});
 		});
+		// Abandoned-order capture: once a valid phone is typed, save the form (debounced),
+		// so the shop can call back visitors who leave without confirming.
+		var leadToken = '', lastSent = '', leadTimer = null, done = false;
+		function makeToken() {
+			var a = new Uint8Array(16), out = '';
+			(window.crypto || window.msCrypto).getRandomValues(a);
+			for (var i = 0; i < a.length; i++) { out += ('0' + a[i].toString(16)).slice(-2); }
+			return out;
+		}
+		function captureLead(leaving) {
+			if (!C.leads || done || !validPhone(val('phone'))) { return; }
+			if (!leadToken) { leadToken = makeToken(); }
+			var fd = new FormData(form);
+			fd.delete('dzcod_website');
+			var sig = [];
+			fd.forEach(function (v, k) { sig.push(k + '=' + v); });
+			sig = sig.join('&');
+			if (sig === lastSent) { return; }
+			lastSent = sig;
+			fd.append('action', 'dzcod_capture');
+			fd.append('nonce', C.nonce);
+			fd.append('lead_token', leadToken);
+			fd.append('product_id', form.getAttribute('data-product'));
+			fd.set('phone', normalizePhone(fd.get('phone')));
+			fd.append('dzcod_website', ($('[name="dzcod_website"]') || {}).value || '');
+			try { fetch(C.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin', keepalive: !!leaving }).catch(function () {}); } catch (ignore) {}
+		}
+		function scheduleLead() {
+			clearTimeout(leadTimer);
+			leadTimer = setTimeout(function () { captureLead(false); }, 2000);
+		}
+		form.addEventListener('input', scheduleLead);
+		form.addEventListener('change', scheduleLead);
+		document.addEventListener('visibilitychange', function () {
+			if (document.visibilityState === 'hidden') { clearTimeout(leadTimer); captureLead(true); }
+		});
+
 		// Browser back/forward cache can restore a chosen wilaya with an empty commune list.
 		if (wilaya.value) { loadCommunes(); }
 		update();
@@ -219,6 +277,8 @@
 					showError(d.message || C.i18n.error, d.field);
 					return;
 				}
+				done = true;
+				clearTimeout(leadTimer);
 				var o = res.data.order;
 				document.dispatchEvent(new CustomEvent('dzcod:order', { detail: o }));
 				// Ad pixels, if the site already loads them. eventID lets you dedupe with server events.

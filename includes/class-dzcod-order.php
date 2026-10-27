@@ -127,6 +127,20 @@ class DZCOD_Order {
 		if ( $product->is_sold_individually() ) {
 			$qty = 1;
 		}
+		// Quantity offers: the pack decides the quantity and the price, never the browser.
+		$offers = $product->is_sold_individually() ? array() : DZCOD_Offers::get( $product_id );
+		if ( $offers ) {
+			$idx = self::field( 'offer' );
+			if ( '' === $idx || ! ctype_digit( $idx ) || ! isset( $offers[ (int) $idx ] ) ) {
+				self::fail( __( 'Please choose a pack.', 'dz-cod-order-form' ), 'invalid', 'offer' );
+			}
+			$offer                   = $offers[ (int) $idx ];
+			$qty                     = $offer['qty'];
+			$extras['line_total']    = DZCOD_Offers::total( $offer, (float) $product->get_price() );
+			$extras['free_shipping'] = $offer['free_shipping'];
+			/* translators: %d: quantity */
+			$extras['offer'] = '' !== $offer['label'] ? $offer['label'] : sprintf( _n( '%d piece', '%d pieces', $qty, 'dz-cod-order-form' ), $qty );
+		}
 		if ( ! $product->is_purchasable() || ! $product->is_in_stock() || ! $product->has_enough_stock( $qty ) ) {
 			self::fail( __( 'Sorry, this product is out of stock.', 'dz-cod-order-form' ), 'stock' );
 		}
@@ -258,8 +272,12 @@ class DZCOD_Order {
 			array(
 				'phone2' => '',
 				'email'  => '',
-				'note'   => '',
-				'custom' => array(),
+				'note'          => '',
+				'custom'        => array(),
+				'line_total'    => null,
+				'free_shipping' => false,
+				'offer'         => '',
+				'from_admin'    => false,
 			)
 		);
 		$s = DZCOD_Settings::get();
@@ -270,7 +288,18 @@ class DZCOD_Order {
 				return $order;
 			}
 
-			$order->add_product( $product, $qty );
+			if ( null !== $extras['line_total'] ) {
+				$order->add_product(
+					$product,
+					$qty,
+					array(
+						'subtotal' => $extras['line_total'],
+						'total'    => $extras['line_total'],
+					)
+				);
+			} else {
+				$order->add_product( $product, $qty );
+			}
 
 			$label  = DZCOD_Locations::wilaya_label( $wilaya, 'latin' );
 			$states = WC()->countries->get_states( 'DZ' );
@@ -295,7 +324,7 @@ class DZCOD_Order {
 			// Delivery.
 			$subtotal = (float) $order->get_subtotal();
 			$free     = (float) $s['free_shipping_over'];
-			if ( $free > 0 && $subtotal >= $free ) {
+			if ( $extras['free_shipping'] || ( $free > 0 && $subtotal >= $free ) ) {
 				$shipping = 0;
 			}
 			$ship = new WC_Order_Item_Shipping();
@@ -315,10 +344,13 @@ class DZCOD_Order {
 			$order->set_payment_method( 'cod' );
 			$order->set_payment_method_title( isset( $gateways['cod'] ) ? $gateways['cod']->get_title() : __( 'Cash on delivery', 'dz-cod-order-form' ) );
 
-			$order->set_customer_ip_address( DZCOD_Antifraud::client_ip() );
-			$order->set_customer_user_agent( isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '' );
-			if ( get_current_user_id() ) {
-				$order->set_customer_id( get_current_user_id() );
+			// Orders created by staff (recovered leads) must not carry the staff member's IP or account.
+			if ( ! $extras['from_admin'] ) {
+				$order->set_customer_ip_address( DZCOD_Antifraud::client_ip() );
+				$order->set_customer_user_agent( isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '' );
+				if ( get_current_user_id() ) {
+					$order->set_customer_id( get_current_user_id() );
+				}
 			}
 
 			$order->update_meta_data( '_dzcod', 1 );
@@ -330,6 +362,9 @@ class DZCOD_Order {
 			}
 			if ( '' !== $extras['note'] ) {
 				$order->set_customer_note( $extras['note'] );
+			}
+			if ( '' !== $extras['offer'] ) {
+				$order->update_meta_data( '_dzcod_offer', $extras['offer'] );
 			}
 			if ( $extras['custom'] ) {
 				$order->update_meta_data( '_dzcod_extra', $extras['custom'] );

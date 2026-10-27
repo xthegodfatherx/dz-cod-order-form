@@ -125,6 +125,9 @@ class DZCOD_Settings {
 			'order_status'       => 'processing',
 			'redirect_thankyou'  => 0,
 			'primary_color'      => '#16a34a',
+			'leads_enabled'      => 1,
+			'leads_retention'    => 30,
+			'leads_notice'       => __( 'Your number is only used to contact you about this order.', 'dz-cod-order-form' ),
 			// Delivery.
 			'prices'             => $prices,
 			'free_shipping_over' => 0,
@@ -235,13 +238,15 @@ class DZCOD_Settings {
 		}
 
 		if ( 'general' === $tab ) {
-			foreach ( array( 'auto_insert', 'hide_add_to_cart', 'stopdesk_enabled', 'redirect_thankyou' ) as $k ) {
+			foreach ( array( 'auto_insert', 'hide_add_to_cart', 'stopdesk_enabled', 'redirect_thankyou', 'leads_enabled' ) as $k ) {
 				$out[ $k ] = empty( $input[ $k ] ) ? 0 : 1;
 			}
 			foreach ( array( 'form_title', 'button_text' ) as $k ) {
 				$out[ $k ] = isset( $input[ $k ] ) ? sanitize_text_field( $input[ $k ] ) : $current[ $k ];
 			}
 			$out['success_message'] = isset( $input['success_message'] ) ? sanitize_textarea_field( $input['success_message'] ) : $current['success_message'];
+			$out['leads_retention'] = isset( $input['leads_retention'] ) ? min( 365, max( 1, absint( $input['leads_retention'] ) ) ) : 30;
+			$out['leads_notice']    = isset( $input['leads_notice'] ) ? sanitize_text_field( $input['leads_notice'] ) : $current['leads_notice'];
 			$out['name_lang']       = ( isset( $input['name_lang'] ) && 'latin' === $input['name_lang'] ) ? 'latin' : 'ar';
 			$status                 = isset( $input['order_status'] ) ? sanitize_key( $input['order_status'] ) : 'processing';
 			$out['order_status']    = in_array( $status, array( 'processing', 'pending', 'on-hold' ), true ) ? $status : 'processing';

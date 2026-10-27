@@ -1,0 +1,170 @@
+<?php
+/**
+ * Quantity offers ("1 for 3,500 / 2 for 6,000 / 3 for 8,000"), set per product.
+ *
+ * @package DZCOD
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Per-product quantity offers.
+ */
+class DZCOD_Offers {
+
+	const META = '_dzcod_offers';
+	const MAX  = 6;
+
+	/**
+	 * Hook registration.
+	 */
+	public static function init() {
+		add_action( 'add_meta_boxes_product', array( __CLASS__, 'meta_box' ) );
+		add_action( 'save_post_product', array( __CLASS__, 'save' ), 10, 2 );
+	}
+
+	/**
+	 * Clean list of offers for a product (parent id for variations), sorted by quantity.
+	 * Each offer: qty, price (fixed pack total or null), percent (discount or null), label, badge, free_shipping.
+	 *
+	 * @param int $product_id Product id.
+	 * @return array
+	 */
+	public static function get( $product_id ) {
+		$raw = get_post_meta( $product_id, self::META, true );
+		$out = array();
+		foreach ( is_array( $raw ) ? $raw : array() as $o ) {
+			$qty = isset( $o['qty'] ) ? absint( $o['qty'] ) : 0;
+			if ( $qty < 1 || $qty > 99 || isset( $out[ $qty ] ) ) {
+				continue;
+			}
+			$price         = ( isset( $o['price'] ) && '' !== $o['price'] && is_numeric( $o['price'] ) ) ? max( 0, (float) $o['price'] ) : null;
+			$percent       = ( isset( $o['percent'] ) && '' !== $o['percent'] && is_numeric( $o['percent'] ) ) ? min( 90, max( 0, (float) $o['percent'] ) ) : null;
+			$out[ $qty ]   = array(
+				'qty'           => $qty,
+				'price'         => $price,
+				'percent'       => $percent,
+				'label'         => isset( $o['label'] ) ? (string) $o['label'] : '',
+				'badge'         => isset( $o['badge'] ) ? (string) $o['badge'] : '',
+				'free_shipping' => ! empty( $o['free_shipping'] ),
+			);
+		}
+		ksort( $out );
+		return (array) apply_filters( 'dzcod_offers', array_values( array_slice( $out, 0, self::MAX ) ), $product_id );
+	}
+
+	/**
+	 * Total price of an offer for a given unit price.
+	 * A fixed pack price wins; otherwise the percentage discount; otherwise unit × qty.
+	 *
+	 * @param array $offer Offer.
+	 * @param float $unit  Unit price.
+	 * @return float
+	 */
+	public static function total( $offer, $unit ) {
+		if ( null !== $offer['price'] ) {
+			return (float) $offer['price'];
+		}
+		$total = (float) $unit * (int) $offer['qty'];
+		if ( null !== $offer['percent'] ) {
+			$total = $total * ( 1 - $offer['percent'] / 100 );
+		}
+		return round( $total, wc_get_price_decimals() );
+	}
+
+	/**
+	 * Product edit screen meta box.
+	 */
+	public static function meta_box() {
+		add_meta_box( 'dzcod-offers', __( 'COD form — quantity offers', 'dz-cod-order-form' ), array( __CLASS__, 'render' ), 'product', 'normal', 'default' );
+	}
+
+	/**
+	 * Meta box content.
+	 *
+	 * @param WP_Post $post Product post.
+	 */
+	public static function render( $post ) {
+		$saved = get_post_meta( $post->ID, self::META, true );
+		$saved = is_array( $saved ) ? array_values( $saved ) : array();
+		$cur   = get_woocommerce_currency_symbol();
+		wp_nonce_field( 'dzcod_offers_save', 'dzcod_offers_nonce' );
+		?>
+		<p class="description"><?php esc_html_e( 'Show clickable packs instead of the quantity selector, e.g. 1 for 3,500 · 2 for 6,000 · 3 for 8,000. Use a fixed pack price, or a % discount (works with every variation). Leave the quantity empty to remove a row.', 'dz-cod-order-form' ); ?></p>
+		<table class="widefat striped" style="max-width:900px">
+			<thead><tr>
+				<th><?php esc_html_e( 'Quantity', 'dz-cod-order-form' ); ?></th>
+				<?php /* translators: %s: currency */ ?>
+				<th><?php echo esc_html( sprintf( __( 'Pack price (%s)', 'dz-cod-order-form' ), $cur ) ); ?></th>
+				<th><?php esc_html_e( 'or % off', 'dz-cod-order-form' ); ?></th>
+				<th><?php esc_html_e( 'Title (optional)', 'dz-cod-order-form' ); ?></th>
+				<th><?php esc_html_e( 'Badge (optional)', 'dz-cod-order-form' ); ?></th>
+				<th><?php esc_html_e( 'Free delivery', 'dz-cod-order-form' ); ?></th>
+			</tr></thead>
+			<tbody>
+			<?php
+			for ( $i = 0; $i < self::MAX; $i++ ) :
+				$o = wp_parse_args(
+					isset( $saved[ $i ] ) ? (array) $saved[ $i ] : array(),
+					array(
+						'qty'           => '',
+						'price'         => '',
+						'percent'       => '',
+						'label'         => '',
+						'badge'         => '',
+						'free_shipping' => 0,
+					)
+				);
+				$b = 'dzcod_offers[' . $i . ']';
+				?>
+				<tr>
+					<td><input type="number" min="1" max="99" step="1" style="width:70px" name="<?php echo esc_attr( $b ); ?>[qty]" value="<?php echo esc_attr( $o['qty'] ); ?>"></td>
+					<td><input type="number" min="0" step="any" style="width:110px" name="<?php echo esc_attr( $b ); ?>[price]" value="<?php echo esc_attr( $o['price'] ); ?>"></td>
+					<td><input type="number" min="0" max="90" step="any" style="width:70px" name="<?php echo esc_attr( $b ); ?>[percent]" value="<?php echo esc_attr( $o['percent'] ); ?>"></td>
+					<td><input type="text" name="<?php echo esc_attr( $b ); ?>[label]" value="<?php echo esc_attr( $o['label'] ); ?>" placeholder="<?php esc_attr_e( 'Family pack', 'dz-cod-order-form' ); ?>"></td>
+					<td><input type="text" name="<?php echo esc_attr( $b ); ?>[badge]" value="<?php echo esc_attr( $o['badge'] ); ?>" placeholder="<?php esc_attr_e( 'Best value', 'dz-cod-order-form' ); ?>"></td>
+					<td><input type="checkbox" name="<?php echo esc_attr( $b ); ?>[free_shipping]" value="1" <?php checked( ! empty( $o['free_shipping'] ) ); ?>></td>
+				</tr>
+			<?php endfor; ?>
+			</tbody>
+		</table>
+		<?php
+	}
+
+	/**
+	 * Save offers.
+	 *
+	 * @param int     $post_id Post id.
+	 * @param WP_Post $post    Post.
+	 */
+	public static function save( $post_id, $post ) {
+		if ( ! isset( $_POST['dzcod_offers_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['dzcod_offers_nonce'] ), 'dzcod_offers_save' ) ) {
+			return;
+		}
+		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || wp_is_post_revision( $post_id ) || ! current_user_can( 'edit_product', $post_id ) ) {
+			return;
+		}
+		$rows = isset( $_POST['dzcod_offers'] ) ? (array) wp_unslash( $_POST['dzcod_offers'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized per field below.
+		$out  = array();
+		foreach ( array_slice( $rows, 0, self::MAX ) as $r ) {
+			$r   = (array) $r;
+			$qty = isset( $r['qty'] ) ? absint( $r['qty'] ) : 0;
+			if ( $qty < 1 ) {
+				continue;
+			}
+			$out[] = array(
+				'qty'           => min( 99, $qty ),
+				'price'         => ( isset( $r['price'] ) && is_numeric( $r['price'] ) ) ? (string) max( 0, (float) $r['price'] ) : '',
+				'percent'       => ( isset( $r['percent'] ) && is_numeric( $r['percent'] ) ) ? (string) min( 90, max( 0, (float) $r['percent'] ) ) : '',
+				'label'         => isset( $r['label'] ) ? sanitize_text_field( $r['label'] ) : '',
+				'badge'         => isset( $r['badge'] ) ? sanitize_text_field( $r['badge'] ) : '',
+				'free_shipping' => empty( $r['free_shipping'] ) ? 0 : 1,
+			);
+		}
+		if ( $out ) {
+			update_post_meta( $post_id, self::META, $out );
+		} else {
+			delete_post_meta( $post_id, self::META );
+		}
+	}
+}

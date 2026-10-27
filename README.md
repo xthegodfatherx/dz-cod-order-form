@@ -13,6 +13,8 @@ Formulaire de commande paiement à la livraison pour les boutiques WooCommerce a
 - **Delivery price per wilaya** — home delivery and stop desk, enable/disable wilayas, free delivery threshold
 - **Field controls**: show/hide, required, labels for every field + up to 6 custom fields (text, dropdown, checkbox…)
 - **Automatic delivery prices**: import from Yalidine / ZR Express / Ecotrack, or from a Google Sheet ([template](data/delivery-prices-template.csv)) with optional daily sync
+- **Quantity offers**: "1 for 3,500 · 2 for 6,000 · 3 for 8,000" packs per product (fixed price or % off, badge, free delivery)
+- **Abandoned orders**: call back visitors who typed their phone but did not confirm — WhatsApp button, one-click order creation, auto-cleanup
 - Live summary (product + delivery = total), simple & variable products, quantity
 - **Anti-fraud**: Algerian phone validation, duplicate detection (block or flag On hold), phone blocklist, IP rate limit, honeypot
 - **Delivery companies**: Yalidine, Yalitec, ZR Express + 22 Ecotrack couriers (DHD, Conexlog/UPS, Rex, Rocket, 48hr…) — one click, bulk, or automatic on a chosen status; tracking + label saved on the order
@@ -49,6 +51,8 @@ Formulaire de commande paiement à la livraison pour les boutiques WooCommerce a
 | `dzcod_courier_payload` | filter | Adjust the request sent to a courier |
 | `dzcod_parcel_created` | action | React to a new tracking number |
 | `dzcod_courier_logo` | filter | Show your own logo image for a delivery company |
+| `dzcod_offers` | filter | Change a product's quantity offers |
+| `dzcod_lead_recovered` | action | An abandoned form was turned into an order |
 
 ```js
 document.addEventListener('dzcod:order', e => console.log(e.detail)); // {id, total, currency, items}
@@ -60,9 +64,9 @@ document.addEventListener('dzcod:order', e => console.log(e.detail)); // {id, to
 - Named entries (with verified addresses) for more Ecotrack couriers such as HHD Express
 - Parcel status sync back from couriers (delivered / returned)
 - Official stop-desk lists per courier
-- Abandoned form capture (phone typed but not submitted)
 - Arabic & French translation files
-- Upsells / quantity offers
+- One-click upsell after ordering
+- Customer return-rate check before shipping
 
 Good first issues are labelled [`good first issue`](../../issues?q=label%3A%22good+first+issue%22).
 

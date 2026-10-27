@@ -114,6 +114,7 @@ class DZCOD_Form {
 			'prices'   => $prices,
 			'freeOver' => (float) $s['free_shipping_over'],
 			'required' => $req,
+			'leads'    => DZCOD_Leads::enabled(),
 			'currency' => array(
 				'symbol'   => html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES, 'UTF-8' ),
 				'decimals' => wc_get_price_decimals(),
@@ -325,7 +326,42 @@ class DZCOD_Form {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( $qty['show'] && ! $product->is_sold_individually() ) : ?>
+			<?php
+			$offers = $product->is_sold_individually() ? array() : DZCOD_Offers::get( $product->get_id() );
+			if ( $offers ) :
+				$default = 0;
+				foreach ( $offers as $i => $o ) {
+					if ( '' !== $o['badge'] ) {
+						$default = $i;
+						break;
+					}
+				}
+				?>
+				<fieldset class="dzcod-field dzcod-offers">
+					<legend><?php esc_html_e( 'Choose your pack', 'dz-cod-order-form' ); ?></legend>
+					<?php foreach ( $offers as $i => $o ) : ?>
+						<label class="dzcod-offer">
+							<input type="radio" name="offer" value="<?php echo esc_attr( $i ); ?>" <?php checked( $default, $i ); ?>
+								data-qty="<?php echo esc_attr( $o['qty'] ); ?>"
+								data-price="<?php echo esc_attr( null === $o['price'] ? '' : $o['price'] ); ?>"
+								data-percent="<?php echo esc_attr( null === $o['percent'] ? '' : $o['percent'] ); ?>"
+								data-free="<?php echo $o['free_shipping'] ? '1' : ''; ?>">
+							<span class="dzcod-offer-main">
+								<?php /* translators: %d: quantity */ ?>
+								<strong><?php echo esc_html( '' !== $o['label'] ? $o['label'] : sprintf( _n( '%d piece', '%d pieces', $o['qty'], 'dz-cod-order-form' ), $o['qty'] ) ); ?></strong>
+								<?php if ( $o['free_shipping'] ) : ?>
+									<small class="dzcod-offer-free"><?php esc_html_e( 'Free delivery', 'dz-cod-order-form' ); ?></small>
+								<?php endif; ?>
+							</span>
+							<span class="dzcod-offer-price"><b class="dzcod-offer-total"></b><s class="dzcod-offer-was"></s></span>
+							<?php if ( '' !== $o['badge'] ) : ?>
+								<span class="dzcod-offer-badge"><?php echo esc_html( $o['badge'] ); ?></span>
+							<?php endif; ?>
+						</label>
+					<?php endforeach; ?>
+				</fieldset>
+				<input type="hidden" name="qty" value="<?php echo esc_attr( $offers[ $default ]['qty'] ); ?>">
+			<?php elseif ( $qty['show'] && ! $product->is_sold_individually() ) : ?>
 				<div class="dzcod-field dzcod-qty">
 					<label for="<?php echo esc_attr( $uid ); ?>-qty"><?php echo esc_html( $qty['label'] ); ?></label>
 					<div class="dzcod-qty-box">
@@ -351,6 +387,9 @@ class DZCOD_Form {
 			<div class="dzcod-message" role="alert" aria-live="polite"></div>
 			<button type="submit" class="dzcod-submit"><?php echo esc_html( $s['button_text'] ); ?></button>
 			<p class="dzcod-trust"><span aria-hidden="true">🔒</span> <?php esc_html_e( 'Pay on delivery — nothing to pay now', 'dz-cod-order-form' ); ?></p>
+			<?php if ( DZCOD_Leads::enabled() && '' !== $s['leads_notice'] ) : ?>
+				<p class="dzcod-privacy"><?php echo esc_html( $s['leads_notice'] ); ?></p>
+			<?php endif; ?>
 		</form>
 		<?php
 		return (string) ob_get_clean();
