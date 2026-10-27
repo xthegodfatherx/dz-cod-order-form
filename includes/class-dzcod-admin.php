@@ -17,6 +17,7 @@ class DZCOD_Admin {
 	 */
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_action( 'admin_post_dzcod_export_csv', array( __CLASS__, 'export_csv' ) );
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( __CLASS__, 'order_details' ) );
 	}
@@ -36,6 +37,18 @@ class DZCOD_Admin {
 	}
 
 	/**
+	 * Admin stylesheet on the plugin screen.
+	 *
+	 * @param string $hook Screen hook.
+	 */
+	public static function assets( $hook ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- screen check only.
+		if ( isset( $_GET['page'] ) && 'dzcod' === $_GET['page'] ) {
+			wp_enqueue_style( 'dzcod-admin', DZCOD_URL . 'assets/admin.css', array(), DZCOD_VERSION );
+		}
+	}
+
+	/**
 	 * Show wilaya, delivery type and duplicate warning on the order screen.
 	 *
 	 * @param WC_Order $order Order.
@@ -47,6 +60,13 @@ class DZCOD_Admin {
 		$type = 'desk' === $order->get_meta( '_dzcod_delivery_type' ) ? __( 'Stop desk', 'dz-cod-order-form' ) : __( 'Home delivery', 'dz-cod-order-form' );
 		echo '<p><strong>' . esc_html__( 'Wilaya:', 'dz-cod-order-form' ) . '</strong> ' . esc_html( $order->get_meta( '_dzcod_wilaya_label' ) ) . '<br>';
 		echo '<strong>' . esc_html__( 'Delivery:', 'dz-cod-order-form' ) . '</strong> ' . esc_html( $type ) . '</p>';
+		$p2 = (string) $order->get_meta( '_dzcod_phone2' );
+		if ( '' !== $p2 ) {
+			echo '<p><strong>' . esc_html__( 'Second phone:', 'dz-cod-order-form' ) . '</strong> <a href="tel:' . esc_attr( $p2 ) . '">' . esc_html( $p2 ) . '</a></p>';
+		}
+		foreach ( (array) $order->get_meta( '_dzcod_extra' ) as $label => $value ) {
+			echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html( $value ) . '</p>';
+		}
 		$dup = (int) $order->get_meta( '_dzcod_duplicate_of' );
 		if ( $dup ) {
 			$link = get_edit_post_link( $dup );
@@ -67,6 +87,7 @@ class DZCOD_Admin {
 		}
 		$tabs = array(
 			'general'   => __( 'General', 'dz-cod-order-form' ),
+			'fields'    => __( 'Form fields', 'dz-cod-order-form' ),
 			'delivery'  => __( 'Delivery prices', 'dz-cod-order-form' ),
 			'antifraud' => __( 'Anti-fraud', 'dz-cod-order-form' ),
 			'couriers'  => __( 'Delivery company', 'dz-cod-order-form' ),
@@ -98,6 +119,9 @@ class DZCOD_Admin {
 				<input type="hidden" name="<?php echo esc_attr( $n ); ?>[_tab]" value="<?php echo esc_attr( $tab ); ?>">
 				<?php
 				switch ( $tab ) {
+					case 'fields':
+						self::tab_fields( $s, $n );
+						break;
 					case 'delivery':
 						self::tab_delivery( $s, $n );
 						break;
@@ -163,13 +187,9 @@ class DZCOD_Admin {
 					<option value="latin" <?php selected( $s['name_lang'], 'latin' ); ?>><?php esc_html_e( 'Latin (Français)', 'dz-cod-order-form' ); ?></option>
 				</select>
 			</td></tr>
-			<tr><th><?php esc_html_e( 'Fields', 'dz-cod-order-form' ); ?></th><td>
-				<?php
-				self::checkbox( $s, $n, 'show_address', __( 'Show address field', 'dz-cod-order-form' ) );
-				self::checkbox( $s, $n, 'require_address', __( 'Require address for home delivery', 'dz-cod-order-form' ) );
-				self::checkbox( $s, $n, 'show_quantity', __( 'Show quantity selector', 'dz-cod-order-form' ) );
-				self::checkbox( $s, $n, 'stopdesk_enabled', __( 'Offer stop desk (office pickup) delivery', 'dz-cod-order-form' ) );
-				?>
+			<tr><th><?php esc_html_e( 'Delivery options', 'dz-cod-order-form' ); ?></th><td>
+				<?php self::checkbox( $s, $n, 'stopdesk_enabled', __( 'Offer stop desk (office pickup) delivery', 'dz-cod-order-form' ) ); ?>
+				<p class="description"><a href="<?php echo esc_url( admin_url( 'admin.php?page=dzcod&tab=fields' ) ); ?>"><?php esc_html_e( 'Choose which fields the form shows in the Form fields tab →', 'dz-cod-order-form' ); ?></a></p>
 			</td></tr>
 			<tr><th><?php esc_html_e( 'New order status', 'dz-cod-order-form' ); ?></th><td>
 				<select name="<?php echo esc_attr( $n ); ?>[order_status]">
@@ -186,14 +206,151 @@ class DZCOD_Admin {
 	}
 
 	/**
+	 * Form fields tab: built-in fields and custom fields.
+	 *
+	 * @param array  $s Settings.
+	 * @param string $n Option name.
+	 */
+	private static function tab_fields( $s, $n ) {
+		$names = array(
+			'name'    => __( 'Full name', 'dz-cod-order-form' ),
+			'phone'   => __( 'Phone', 'dz-cod-order-form' ),
+			'phone2'  => __( 'Second phone (given to the courier)', 'dz-cod-order-form' ),
+			'email'   => __( 'Email', 'dz-cod-order-form' ),
+			'wilaya'  => __( 'Wilaya', 'dz-cod-order-form' ),
+			'commune' => __( 'Commune', 'dz-cod-order-form' ),
+			'address' => __( 'Address (hidden for stop desk)', 'dz-cod-order-form' ),
+			'note'    => __( 'Order note', 'dz-cod-order-form' ),
+			'qty'     => __( 'Quantity selector', 'dz-cod-order-form' ),
+		);
+		?>
+		<h2><?php esc_html_e( 'Built-in fields', 'dz-cod-order-form' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Name, phone, wilaya and commune are always shown and required — orders and couriers need them.', 'dz-cod-order-form' ); ?></p>
+		<table class="widefat striped dzcod-fields-table">
+			<thead><tr>
+				<th><?php esc_html_e( 'Field', 'dz-cod-order-form' ); ?></th>
+				<th><?php esc_html_e( 'Show', 'dz-cod-order-form' ); ?></th>
+				<th><?php esc_html_e( 'Required', 'dz-cod-order-form' ); ?></th>
+				<th><?php esc_html_e( 'Label', 'dz-cod-order-form' ); ?></th>
+				<th><?php esc_html_e( 'Placeholder', 'dz-cod-order-form' ); ?></th>
+			</tr></thead>
+			<tbody>
+			<?php
+			foreach ( $names as $key => $title ) :
+				$f      = DZCOD_Settings::field( $key );
+				$locked = in_array( $key, DZCOD_Settings::LOCKED_FIELDS, true );
+				$base   = $n . '[fields][' . $key . ']';
+				?>
+				<tr>
+					<td><strong><?php echo esc_html( $title ); ?></strong></td>
+					<td><input type="checkbox" name="<?php echo esc_attr( $base ); ?>[show]" value="1" <?php checked( (bool) $f['show'] ); ?> <?php disabled( $locked ); ?>></td>
+					<td><?php if ( 'qty' !== $key ) : ?><input type="checkbox" name="<?php echo esc_attr( $base ); ?>[required]" value="1" <?php checked( (bool) $f['required'] ); ?> <?php disabled( $locked ); ?>><?php endif; ?></td>
+					<td><input type="text" class="regular-text" name="<?php echo esc_attr( $base ); ?>[label]" value="<?php echo esc_attr( $f['label'] ); ?>"></td>
+					<td><?php if ( 'qty' !== $key ) : ?><input type="text" class="regular-text" name="<?php echo esc_attr( $base ); ?>[placeholder]" value="<?php echo esc_attr( $f['placeholder'] ); ?>"><?php endif; ?></td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+
+		<h2><?php esc_html_e( 'Custom fields', 'dz-cod-order-form' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Add your own questions (size, color, preferred call time…). Answers are saved on the order, shown on the order screen and sent to Google Sheets. Leave the label empty to remove a field.', 'dz-cod-order-form' ); ?></p>
+		<table class="widefat striped dzcod-fields-table">
+			<thead><tr>
+				<th><?php esc_html_e( 'Label', 'dz-cod-order-form' ); ?></th>
+				<th><?php esc_html_e( 'Type', 'dz-cod-order-form' ); ?></th>
+				<th><?php esc_html_e( 'Choices (for dropdown, comma-separated)', 'dz-cod-order-form' ); ?></th>
+				<th><?php esc_html_e( 'Placeholder', 'dz-cod-order-form' ); ?></th>
+				<th><?php esc_html_e( 'Required', 'dz-cod-order-form' ); ?></th>
+			</tr></thead>
+			<tbody>
+			<?php
+			$saved = (array) $s['custom_fields'];
+			$types = array(
+				'text'     => __( 'Text', 'dz-cod-order-form' ),
+				'textarea' => __( 'Long text', 'dz-cod-order-form' ),
+				'select'   => __( 'Dropdown', 'dz-cod-order-form' ),
+				'checkbox' => __( 'Checkbox', 'dz-cod-order-form' ),
+			);
+			for ( $i = 0; $i < 6; $i++ ) :
+				$cf   = wp_parse_args( isset( $saved[ $i ] ) ? (array) $saved[ $i ] : array(), array( 'label' => '', 'type' => 'text', 'options' => '', 'placeholder' => '', 'required' => 0 ) );
+				$base = $n . '[custom_fields][' . $i . ']';
+				?>
+				<tr>
+					<td><input type="text" class="regular-text" name="<?php echo esc_attr( $base ); ?>[label]" value="<?php echo esc_attr( $cf['label'] ); ?>" placeholder="<?php esc_attr_e( 'e.g. Size', 'dz-cod-order-form' ); ?>"></td>
+					<td><select name="<?php echo esc_attr( $base ); ?>[type]">
+						<?php foreach ( $types as $t => $tl ) : ?>
+							<option value="<?php echo esc_attr( $t ); ?>" <?php selected( $cf['type'], $t ); ?>><?php echo esc_html( $tl ); ?></option>
+						<?php endforeach; ?>
+					</select></td>
+					<td><input type="text" class="regular-text" name="<?php echo esc_attr( $base ); ?>[options]" value="<?php echo esc_attr( $cf['options'] ); ?>" placeholder="S, M, L, XL"></td>
+					<td><input type="text" name="<?php echo esc_attr( $base ); ?>[placeholder]" value="<?php echo esc_attr( $cf['placeholder'] ); ?>"></td>
+					<td><input type="checkbox" name="<?php echo esc_attr( $base ); ?>[required]" value="1" <?php checked( ! empty( $cf['required'] ) ); ?>></td>
+				</tr>
+			<?php endfor; ?>
+			</tbody>
+		</table>
+		<?php
+	}
+
+	/**
 	 * Delivery prices tab.
 	 *
 	 * @param array  $s Settings.
 	 * @param string $n Option name.
 	 */
 	private static function tab_delivery( $s, $n ) {
-		$cur = get_woocommerce_currency_symbol();
+		$cur     = get_woocommerce_currency_symbol();
+		$courier = DZCOD_Couriers::provider_title();
 		?>
+		<div class="dzcod-import">
+			<h2><?php esc_html_e( 'Fill prices automatically', 'dz-cod-order-form' ); ?></h2>
+			<div class="dzcod-import-grid">
+				<div class="dzcod-import-card">
+					<h3><span class="dashicons dashicons-cloud-saved"></span> <?php esc_html_e( 'From your delivery company', 'dz-cod-order-form' ); ?></h3>
+					<?php if ( '' !== $courier ) : ?>
+						<?php /* translators: %s: company */ ?>
+						<p><?php echo esc_html( sprintf( __( 'Download your current %s rates (home and stop desk) for every wilaya.', 'dz-cod-order-form' ), $courier ) ); ?></p>
+						<button type="button" class="button button-primary" data-dzcod-import="courier"><?php /* translators: %s: company */ echo esc_html( sprintf( __( 'Import from %s', 'dz-cod-order-form' ), $courier ) ); ?></button>
+					<?php else : ?>
+						<p><?php esc_html_e( 'Connect Yalidine, ZR Express or an Ecotrack courier first.', 'dz-cod-order-form' ); ?></p>
+						<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=dzcod&tab=couriers' ) ); ?>"><?php esc_html_e( 'Connect a delivery company', 'dz-cod-order-form' ); ?></a>
+					<?php endif; ?>
+				</div>
+				<div class="dzcod-import-card">
+					<h3><span class="dashicons dashicons-media-spreadsheet"></span> <?php esc_html_e( 'From a Google Sheet', 'dz-cod-order-form' ); ?></h3>
+					<ol>
+						<li><a href="<?php echo esc_url( DZCOD_URL . 'data/delivery-prices-template.csv' ); ?>" download><?php esc_html_e( 'Download the template', 'dz-cod-order-form' ); ?></a> <?php esc_html_e( '(or export your current prices below) and open it in Google Sheets (File → Import).', 'dz-cod-order-form' ); ?></li>
+						<li><?php esc_html_e( 'Edit the home and desk columns. Set enabled to 0 for wilayas you do not deliver to.', 'dz-cod-order-form' ); ?></li>
+						<li><?php esc_html_e( 'Share → “Anyone with the link can view”, then paste the link here.', 'dz-cod-order-form' ); ?></li>
+					</ol>
+					<input type="url" class="large-text" id="dzcod-sheet-url" name="<?php echo esc_attr( $n ); ?>[prices_sheet_url]" value="<?php echo esc_attr( $s['prices_sheet_url'] ); ?>" placeholder="https://docs.google.com/spreadsheets/d/…">
+					<p><label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[prices_sheet_auto]" value="1" <?php checked( ! empty( $s['prices_sheet_auto'] ) ); ?>> <?php esc_html_e( 'Sync from this sheet every day (save the settings to switch on)', 'dz-cod-order-form' ); ?></label></p>
+					<button type="button" class="button button-primary" data-dzcod-import="sheet"><?php esc_html_e( 'Import from sheet now', 'dz-cod-order-form' ); ?></button>
+					<a class="button-link" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=dzcod_export_prices' ), 'dzcod_export_prices' ) ); ?>"><?php esc_html_e( 'Export current prices (CSV)', 'dz-cod-order-form' ); ?></a>
+				</div>
+			</div>
+			<p class="dzcod-import-log" aria-live="polite"></p>
+		</div>
+		<script>
+		(function(){
+			var log=document.querySelector('.dzcod-import-log'),nonce=<?php echo wp_json_encode( wp_create_nonce( 'dzcod_import_prices' ) ); ?>,ajax=<?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
+			function run(source,offset,btn){
+				var fd=new FormData();fd.append('action','dzcod_import_prices');fd.append('nonce',nonce);fd.append('source',source);fd.append('offset',offset);
+				if(source==='sheet'){fd.append('url',document.getElementById('dzcod-sheet-url').value);}
+				fetch(ajax,{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(res){
+					var d=res.data||{};log.textContent=d.message||'';log.className='dzcod-import-log '+(d.ok?'is-ok':'is-error');
+					if(d.ok&&!d.done){run(source,d.next,btn);return;}
+					btn.disabled=false;
+					if(d.ok){log.textContent+=' <?php echo esc_js( __( 'Reloading…', 'dz-cod-order-form' ) ); ?>';setTimeout(function(){location.reload();},1200);}
+				}).catch(function(){btn.disabled=false;log.textContent='<?php echo esc_js( __( 'Request failed.', 'dz-cod-order-form' ) ); ?>';log.className='dzcod-import-log is-error';});
+			}
+			document.querySelectorAll('[data-dzcod-import]').forEach(function(b){b.addEventListener('click',function(){
+				if(!confirm('<?php echo esc_js( __( 'This replaces the prices in the table below. Continue?', 'dz-cod-order-form' ) ); ?>')){return;}
+				b.disabled=true;log.className='dzcod-import-log';log.textContent='<?php echo esc_js( __( 'Importing…', 'dz-cod-order-form' ) ); ?>';run(b.getAttribute('data-dzcod-import'),0,b);
+			});});
+		}());
+		</script>
+		<h2><?php esc_html_e( 'Prices per wilaya', 'dz-cod-order-form' ); ?></h2>
 		<p><?php esc_html_e( 'Set the delivery price for each wilaya. Untick a wilaya to stop delivering there.', 'dz-cod-order-form' ); ?></p>
 		<p>
 			<?php esc_html_e( 'Apply to all:', 'dz-cod-order-form' ); ?>
@@ -366,7 +523,7 @@ class DZCOD_Admin {
 			fputcsv( $out, $values );
 		}
 		if ( ! $header ) {
-			fputcsv( $out, array( 'order_id', 'date', 'name', 'phone', 'wilaya', 'commune', 'address', 'delivery_type', 'products', 'shipping', 'total', 'status', 'duplicate_of' ) );
+			fputcsv( $out, array( 'order_id', 'date', 'name', 'phone', 'wilaya', 'commune', 'address', 'delivery_type', 'products', 'shipping', 'total', 'status', 'duplicate_of', 'tracking', 'phone2', 'note', 'extra' ) );
 		}
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		exit;

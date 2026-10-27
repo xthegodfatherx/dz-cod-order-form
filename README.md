@@ -11,6 +11,8 @@ Formulaire de commande paiement à la livraison pour les boutiques WooCommerce a
 
 - **69 wilayas** (incl. the 11 created in 2025) and **1,541 communes**, Arabic or Latin names
 - **Delivery price per wilaya** — home delivery and stop desk, enable/disable wilayas, free delivery threshold
+- **Field controls**: show/hide, required, labels for every field + up to 6 custom fields (text, dropdown, checkbox…)
+- **Automatic delivery prices**: import from Yalidine / ZR Express / Ecotrack, or from a Google Sheet ([template](data/delivery-prices-template.csv)) with optional daily sync
 - Live summary (product + delivery = total), simple & variable products, quantity
 - **Anti-fraud**: Algerian phone validation, duplicate detection (block or flag On hold), phone blocklist, IP rate limit, honeypot
 - **Delivery companies**: Yalidine, Yalitec, ZR Express + 22 Ecotrack couriers (DHD, Conexlog/UPS, Rex, Rocket, 48hr…) — one click, bulk, or automatic on a chosen status; tracking + label saved on the order
@@ -46,6 +48,7 @@ Formulaire de commande paiement à la livraison pour les boutiques WooCommerce a
 | `dzcod_courier_providers` | filter | Add another delivery company |
 | `dzcod_courier_payload` | filter | Adjust the request sent to a courier |
 | `dzcod_parcel_created` | action | React to a new tracking number |
+| `dzcod_courier_logo` | filter | Show your own logo image for a delivery company |
 
 ```js
 document.addEventListener('dzcod:order', e => console.log(e.detail)); // {id, total, currency, items}
@@ -53,7 +56,8 @@ document.addEventListener('dzcod:order', e => console.log(e.detail)); // {id, to
 
 ## Roadmap — contributions welcome
 
-- Maystro and Noest integrations
+- Noest and Maystro integrations (Noest's API is not publicly documented — help welcome)
+- Named entries (with verified addresses) for more Ecotrack couriers such as HHD Express
 - Parcel status sync back from couriers (delivered / returned)
 - Official stop-desk lists per courier
 - Abandoned form capture (phone typed but not submitted)

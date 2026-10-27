@@ -51,6 +51,15 @@ class DZCOD_Courier_API {
 	}
 
 	/**
+	 * Couriers known to run on Ecotrack (names only; used for guidance in the settings).
+	 *
+	 * @return array
+	 */
+	public static function ecotrack_known() {
+		return array( '48Hr Livraison', 'AB Delivery', 'Alania Express', 'Allo Livraison', 'Amana Speed', 'Aranex', 'Assil Delivery', 'Atlas Express', 'BFK Express', 'Champion Logistics', 'Chronorex', 'Cirta Express', 'Colex', 'Colizone', 'Delivromail', 'Eco Rapide Express', 'El Guide Delivery', 'Expedia Chrono', 'Fast Horse Express', 'FZ Delivery', 'GS Ecommerce', 'HHD Express', 'Imir Logistics', 'Jaguar Livraison', 'Jo Express', 'LIH LIH Express', 'Lynx Express', 'Majorex', 'Mazaya Logistics', 'Med Express', 'Navex Delivery', 'OKS Box', 'OM Express', 'On Time Express', 'One Express', 'PDEX', 'Quick Delivery DZ', 'Red Ex', 'Rihal Express', 'RJ 360 Express', 'RM Express', 'Royaume Delivery', 'RS Express', 'Ruta Express', 'Samex', 'SBL Express', 'SI Express', 'Speed Mail', 'Sultan Colis Express', 'Swift Express', 'Tawsil Star', 'Ultra Express', 'Univer Delivery', 'Vitrans', 'Wassim Express', 'Wee Wee Delivery', 'Win Delivery', 'Zinya Tec' );
+	}
+
+	/**
 	 * Result helper.
 	 *
 	 * @param bool   $ok       Success.
@@ -227,6 +236,68 @@ class DZCOD_Courier_API {
 		}
 	}
 
+	/**
+	 * Raw delivery price list from Ecotrack (GET /api/v1/get/fees → "livraison")
+	 * or ZR Express (POST /tarification).
+	 *
+	 * @param string $key      Provider key.
+	 * @param array  $settings Courier settings.
+	 * @return array{ok:bool,error:string,data:array}
+	 */
+	public static function fees( $key, $settings ) {
+		$p    = self::providers();
+		$base = self::base_url( $key, $settings );
+		if ( 'procolis' === $p[ $key ][1] ) {
+			$r = self::http( 'POST', $base . '/tarification', self::procolis_headers( $settings ) );
+		} else {
+			$r = self::http( 'GET', $base . '/api/v1/get/fees', self::ecotrack_headers( $settings ) );
+		}
+		if ( 200 !== $r['status'] || ! is_array( $r['json'] ) ) {
+			return array(
+				'ok'    => false,
+				'error' => self::http_error( $r ),
+				'data'  => array(),
+			);
+		}
+		$data = $r['json'];
+		foreach ( array( 'livraison', 'data', 'tarifs' ) as $k ) {
+			if ( isset( $data[ $k ] ) && is_array( $data[ $k ] ) ) {
+				$data = $data[ $k ];
+				break;
+			}
+		}
+		return array(
+			'ok'    => true,
+			'error' => '',
+			'data'  => array_values( (array) $data ),
+		);
+	}
+
+	/**
+	 * Yalidine fees between two wilayas (GET /v1/fees/).
+	 *
+	 * @param string $base Base URL.
+	 * @param array  $s    Settings.
+	 * @param int    $from From wilaya id.
+	 * @param int    $to   To wilaya id.
+	 * @return array{ok:bool,error:string,data:array}
+	 */
+	public static function yalidine_fees( $base, $s, $from, $to ) {
+		$r = self::http( 'GET', $base . '/v1/fees/?from_wilaya_id=' . (int) $from . '&to_wilaya_id=' . (int) $to, self::yalidine_headers( $s ) );
+		if ( 200 !== $r['status'] || ! is_array( $r['json'] ) ) {
+			return array(
+				'ok'    => false,
+				'error' => self::http_error( $r ),
+				'data'  => array(),
+			);
+		}
+		return array(
+			'ok'    => true,
+			'error' => '',
+			'data'  => $r['json'],
+		);
+	}
+
 	/* ---------------------------------------------------------------- Yalidine */
 
 	/**
@@ -371,7 +442,7 @@ class DZCOD_Courier_API {
 			'Confrimee'     => empty( $s['procolis_confirmed'] ) ? '' : '1',
 			'Client'        => $parcel['name'],
 			'MobileA'       => $parcel['phone'],
-			'MobileB'       => '',
+			'MobileB'       => isset( $parcel['phone2'] ) ? $parcel['phone2'] : '',
 			'Adresse'       => $parcel['address'],
 			'IDWilaya'      => (string) (int) $parcel['wilaya_code'],
 			'Commune'       => $parcel['commune'],
@@ -420,6 +491,7 @@ class DZCOD_Courier_API {
 			'reference'   => $parcel['reference'],
 			'nom_client'  => mb_substr( $parcel['name'], 0, 255 ),
 			'telephone'   => $parcel['phone'],
+			'telephone_2' => isset( $parcel['phone2'] ) ? $parcel['phone2'] : '',
 			'adresse'     => mb_substr( $parcel['address'], 0, 255 ),
 			'commune'     => $parcel['commune'],
 			'code_wilaya' => (int) $parcel['wilaya_code'],

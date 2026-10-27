@@ -15,6 +15,89 @@ class DZCOD_Settings {
 	const OPTION = 'dzcod_settings';
 
 	/**
+	 * Merged settings cache.
+	 *
+	 * @var array|null
+	 */
+	private static $cache = null;
+
+	/**
+	 * Fields that are always shown and required (orders cannot work without them).
+	 */
+	const LOCKED_FIELDS = array( 'name', 'phone', 'wilaya', 'commune' );
+
+	/**
+	 * Default configuration of the built-in form fields.
+	 *
+	 * @return array
+	 */
+	public static function default_fields() {
+		return array(
+			'name'    => array( 'label' => __( 'Full name', 'dz-cod-order-form' ), 'placeholder' => '', 'show' => 1, 'required' => 1 ),
+			'phone'   => array( 'label' => __( 'Phone number', 'dz-cod-order-form' ), 'placeholder' => '05XX XX XX XX', 'show' => 1, 'required' => 1 ),
+			'phone2'  => array( 'label' => __( 'Second phone', 'dz-cod-order-form' ), 'placeholder' => '', 'show' => 0, 'required' => 0 ),
+			'email'   => array( 'label' => __( 'Email', 'dz-cod-order-form' ), 'placeholder' => '', 'show' => 0, 'required' => 0 ),
+			'wilaya'  => array( 'label' => __( 'Wilaya', 'dz-cod-order-form' ), 'placeholder' => __( 'Choose your wilaya', 'dz-cod-order-form' ), 'show' => 1, 'required' => 1 ),
+			'commune' => array( 'label' => __( 'Commune', 'dz-cod-order-form' ), 'placeholder' => __( 'Choose your commune', 'dz-cod-order-form' ), 'show' => 1, 'required' => 1 ),
+			'address' => array( 'label' => __( 'Address', 'dz-cod-order-form' ), 'placeholder' => '', 'show' => 1, 'required' => 0 ),
+			'note'    => array( 'label' => __( 'Note', 'dz-cod-order-form' ), 'placeholder' => '', 'show' => 0, 'required' => 0 ),
+			'qty'     => array( 'label' => __( 'Quantity', 'dz-cod-order-form' ), 'placeholder' => '', 'show' => 1, 'required' => 0 ),
+		);
+	}
+
+	/**
+	 * Configuration of one built-in field.
+	 *
+	 * @param string $key Field key.
+	 * @return array{label:string,placeholder:string,show:int,required:int}
+	 */
+	public static function field( $key ) {
+		$fields = (array) self::get( 'fields' );
+		$def    = self::default_fields();
+		$f      = isset( $fields[ $key ] ) ? wp_parse_args( (array) $fields[ $key ], $def[ $key ] ) : $def[ $key ];
+		if ( in_array( $key, self::LOCKED_FIELDS, true ) ) {
+			$f['show']     = 1;
+			$f['required'] = 1;
+		}
+		if ( '' === trim( (string) $f['label'] ) ) {
+			$f['label'] = $def[ $key ]['label'];
+		}
+		return $f;
+	}
+
+	/**
+	 * Custom fields: list of [ key, label, type, options[], required, placeholder ].
+	 *
+	 * @return array
+	 */
+	public static function custom_fields() {
+		$out = array();
+		foreach ( (array) self::get( 'custom_fields' ) as $i => $cf ) {
+			if ( empty( $cf['label'] ) ) {
+				continue;
+			}
+			$opts  = array_values( array_filter( array_map( 'trim', explode( ',', (string) ( isset( $cf['options'] ) ? $cf['options'] : '' ) ) ), 'strlen' ) );
+			$type  = isset( $cf['type'] ) ? $cf['type'] : 'text';
+			$out[] = array(
+				'key'         => 'dzcod_cf_' . (int) $i,
+				'label'       => (string) $cf['label'],
+				'type'        => ( 'select' === $type && ! $opts ) ? 'text' : $type,
+				'options'     => $opts,
+				'required'    => ! empty( $cf['required'] ),
+				'placeholder' => isset( $cf['placeholder'] ) ? (string) $cf['placeholder'] : '',
+			);
+		}
+		return $out;
+	}
+
+	/**
+	 * Forget cached settings (after programmatic updates).
+	 */
+	public static function flush() {
+		self::$cache = null;
+	}
+
+	/**
 	 * Default settings.
 	 *
 	 * @return array
@@ -36,9 +119,8 @@ class DZCOD_Settings {
 			'button_text'        => __( 'Confirm order', 'dz-cod-order-form' ),
 			'success_message'    => __( 'Thank you! Your order has been received. We will call you shortly to confirm it.', 'dz-cod-order-form' ),
 			'name_lang'          => 'ar',
-			'show_address'       => 1,
-			'require_address'    => 0,
-			'show_quantity'      => 1,
+			'fields'             => self::default_fields(),
+			'custom_fields'      => array(),
 			'stopdesk_enabled'   => 1,
 			'order_status'       => 'processing',
 			'redirect_thankyou'  => 0,
@@ -46,6 +128,8 @@ class DZCOD_Settings {
 			// Delivery.
 			'prices'             => $prices,
 			'free_shipping_over' => 0,
+			'prices_sheet_url'   => '',
+			'prices_sheet_auto'  => 0,
 			// Anti-fraud.
 			'dup_hours'          => 24,
 			'dup_action'         => 'block',
@@ -78,13 +162,25 @@ class DZCOD_Settings {
 	 * @return mixed
 	 */
 	public static function get( $key = null ) {
-		static $merged = null;
-		if ( null === $merged ) {
-			$saved  = get_option( self::OPTION, array() );
-			$merged = wp_parse_args( is_array( $saved ) ? $saved : array(), self::defaults() );
+		if ( null === self::$cache ) {
+			$saved = get_option( self::OPTION, array() );
+			$saved = is_array( $saved ) ? $saved : array();
+			// 1.1 and earlier: address / quantity switches lived in the General tab.
+			if ( ! isset( $saved['fields'] ) && ( isset( $saved['show_address'] ) || isset( $saved['show_quantity'] ) ) ) {
+				$fields                        = self::default_fields();
+				$fields['address']['show']     = empty( $saved['show_address'] ) ? 0 : 1;
+				$fields['address']['required'] = empty( $saved['require_address'] ) ? 0 : 1;
+				$fields['qty']['show']         = ( isset( $saved['show_quantity'] ) && empty( $saved['show_quantity'] ) ) ? 0 : 1;
+				$saved['fields']               = $fields;
+			}
+			$defaults = self::defaults();
+			$merged   = wp_parse_args( $saved, $defaults );
 			// Make sure every wilaya has a price row (new wilayas, partial saves).
-			$merged['prices'] = wp_parse_args( (array) $merged['prices'], self::defaults()['prices'] );
+			// "+" and not wp_parse_args(): array_merge() renumbers numeric keys such as "16".
+			$merged['prices'] = (array) $merged['prices'] + $defaults['prices'];
+			self::$cache      = $merged;
 		}
+		$merged = self::$cache;
 		if ( null === $key ) {
 			return $merged;
 		}
@@ -139,7 +235,7 @@ class DZCOD_Settings {
 		}
 
 		if ( 'general' === $tab ) {
-			foreach ( array( 'auto_insert', 'hide_add_to_cart', 'show_address', 'require_address', 'show_quantity', 'stopdesk_enabled', 'redirect_thankyou' ) as $k ) {
+			foreach ( array( 'auto_insert', 'hide_add_to_cart', 'stopdesk_enabled', 'redirect_thankyou' ) as $k ) {
 				$out[ $k ] = empty( $input[ $k ] ) ? 0 : 1;
 			}
 			foreach ( array( 'form_title', 'button_text' ) as $k ) {
@@ -151,6 +247,38 @@ class DZCOD_Settings {
 			$out['order_status']    = in_array( $status, array( 'processing', 'pending', 'on-hold' ), true ) ? $status : 'processing';
 			$color                  = isset( $input['primary_color'] ) ? sanitize_hex_color( $input['primary_color'] ) : '';
 			$out['primary_color']   = $color ? $color : '#16a34a';
+		}
+
+		if ( 'fields' === $tab ) {
+			$fields = array();
+			foreach ( self::default_fields() as $key => $def ) {
+				$row            = isset( $input['fields'][ $key ] ) ? (array) $input['fields'][ $key ] : array();
+				$fields[ $key ] = array(
+					'label'       => isset( $row['label'] ) ? sanitize_text_field( $row['label'] ) : $def['label'],
+					'placeholder' => isset( $row['placeholder'] ) ? sanitize_text_field( $row['placeholder'] ) : $def['placeholder'],
+					'show'        => in_array( $key, self::LOCKED_FIELDS, true ) || ! empty( $row['show'] ) ? 1 : 0,
+					'required'    => in_array( $key, self::LOCKED_FIELDS, true ) || ! empty( $row['required'] ) ? 1 : 0,
+				);
+			}
+			$fields['qty']['required'] = 0;
+			$out['fields']             = $fields;
+
+			$custom = array();
+			$rows   = isset( $input['custom_fields'] ) ? (array) $input['custom_fields'] : array();
+			foreach ( array_slice( $rows, 0, 10, true ) as $i => $row ) {
+				$row   = (array) $row;
+				$label = isset( $row['label'] ) ? sanitize_text_field( $row['label'] ) : '';
+				$type  = isset( $row['type'] ) ? sanitize_key( $row['type'] ) : 'text';
+				// Keep the row index stable so saved order data keeps matching its field.
+				$custom[ absint( $i ) ] = array(
+					'label'       => $label,
+					'type'        => in_array( $type, array( 'text', 'textarea', 'select', 'checkbox' ), true ) ? $type : 'text',
+					'options'     => isset( $row['options'] ) ? sanitize_text_field( $row['options'] ) : '',
+					'placeholder' => isset( $row['placeholder'] ) ? sanitize_text_field( $row['placeholder'] ) : '',
+					'required'    => empty( $row['required'] ) ? 0 : 1,
+				);
+			}
+			$out['custom_fields'] = $custom;
 		}
 
 		if ( 'delivery' === $tab ) {
@@ -165,6 +293,8 @@ class DZCOD_Settings {
 			}
 			$out['prices']             = $prices;
 			$out['free_shipping_over'] = isset( $input['free_shipping_over'] ) ? max( 0, (float) $input['free_shipping_over'] ) : 0;
+			$out['prices_sheet_url']   = isset( $input['prices_sheet_url'] ) ? esc_url_raw( trim( $input['prices_sheet_url'] ), array( 'https' ) ) : '';
+			$out['prices_sheet_auto']  = empty( $input['prices_sheet_auto'] ) ? 0 : 1;
 		}
 
 		if ( 'antifraud' === $tab ) {
@@ -183,7 +313,8 @@ class DZCOD_Settings {
 			$out['sheets_secret'] = isset( $input['sheets_secret'] ) ? sanitize_text_field( $input['sheets_secret'] ) : '';
 		}
 
-		unset( $out['_tab'] );
+		unset( $out['_tab'], $out['show_address'], $out['require_address'], $out['show_quantity'] );
+		self::flush();
 		return $out;
 	}
 }

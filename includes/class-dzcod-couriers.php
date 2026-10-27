@@ -165,6 +165,7 @@ class DZCOD_Couriers {
 			'reference'   => (string) $order->get_order_number(),
 			'name'        => $name,
 			'phone'       => DZCOD_Antifraud::normalize_phone( $order->get_billing_phone() ),
+			'phone2'      => (string) $order->get_meta( '_dzcod_phone2' ),
 			'wilaya_code' => $legacy,
 			'wilaya_name' => isset( $all[ $legacy ] ) ? $all[ $legacy ]['n'] : '',
 			'commune'     => (string) $commune,
@@ -471,6 +472,29 @@ class DZCOD_Couriers {
 	}
 
 	/**
+	 * Brand badge: the company's logo when one is supplied through the
+	 * `dzcod_courier_logo` filter, otherwise its initials on a stable colour.
+	 *
+	 * @param string $key   Provider key.
+	 * @param string $title Provider name.
+	 * @return string HTML.
+	 */
+	public static function badge( $key, $title ) {
+		$logo = (string) apply_filters( 'dzcod_courier_logo', '', $key );
+		if ( '' !== $logo ) {
+			return '<span class="dzcod-courier-badge has-logo"><img src="' . esc_url( $logo ) . '" alt=""></span>';
+		}
+		$colors = array( 'yalidine' => '#e11d2a', 'yalitec' => '#f97316', 'zrexpress' => '#0f766e', 'ecotrack' => '#16a34a', 'dhd' => '#1d4ed8' );
+		$color  = isset( $colors[ $key ] ) ? $colors[ $key ] : 'hsl(' . ( abs( crc32( $key ) ) % 360 ) . ',55%,42%)';
+		$words  = preg_split( '/[\s\/()]+/', preg_replace( '/\(.*\)/', '', $title ), -1, PREG_SPLIT_NO_EMPTY );
+		$ini    = strtoupper( mb_substr( $words[0], 0, 1 ) . ( isset( $words[1] ) ? mb_substr( $words[1], 0, 1 ) : mb_substr( $words[0], 1, 1 ) ) );
+		if ( 'ecotrack' === $key ) {
+			$ini = 'ET';
+		}
+		return '<span class="dzcod-courier-badge" style="background:' . esc_attr( $color ) . '">' . esc_html( $ini ) . '</span>';
+	}
+
+	/**
 	 * Settings tab content (called from DZCOD_Admin).
 	 */
 	public static function render_settings() {
@@ -496,13 +520,22 @@ class DZCOD_Couriers {
 		<form method="post" action="options.php">
 			<?php settings_fields( 'dzcod_couriers' ); ?>
 			<table class="form-table" role="presentation">
-				<tr><th><label for="dzcod-prov"><?php esc_html_e( 'Delivery company', 'dz-cod-order-form' ); ?></label></th><td>
-					<select id="dzcod-prov" name="<?php echo esc_attr( $n ); ?>[provider]">
-						<option value=""><?php esc_html_e( '— None —', 'dz-cod-order-form' ); ?></option>
+				<tr><th><?php esc_html_e( 'Delivery company', 'dz-cod-order-form' ); ?></th><td>
+					<div class="dzcod-couriers" role="radiogroup">
+						<label class="dzcod-courier">
+							<input type="radio" name="<?php echo esc_attr( $n ); ?>[provider]" value="" data-platform="" <?php checked( $s['provider'], '' ); ?>>
+							<span class="dzcod-courier-badge" style="background:#9ca3af">—</span>
+							<span class="dzcod-courier-name"><?php esc_html_e( 'None', 'dz-cod-order-form' ); ?></span>
+						</label>
 						<?php foreach ( $prov as $key => $p ) : ?>
-							<option value="<?php echo esc_attr( $key ); ?>" data-platform="<?php echo esc_attr( $p[1] ); ?>" <?php selected( $s['provider'], $key ); ?>><?php echo esc_html( $p[0] ); ?></option>
+							<label class="dzcod-courier<?php echo 'ecotrack' === $key ? ' dzcod-courier-wide' : ''; ?>">
+								<input type="radio" name="<?php echo esc_attr( $n ); ?>[provider]" value="<?php echo esc_attr( $key ); ?>" data-platform="<?php echo esc_attr( $p[1] ); ?>" <?php checked( $s['provider'], $key ); ?>>
+								<?php echo self::badge( $key, $p[0] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in badge(). ?>
+								<span class="dzcod-courier-name"><?php echo esc_html( $p[0] ); ?></span>
+								<span class="dzcod-courier-platform"><?php echo esc_html( 'ecotrack' === $p[1] ? 'Ecotrack' : ( 'procolis' === $p[1] ? 'Procolis' : 'API' ) ); ?></span>
+							</label>
 						<?php endforeach; ?>
-					</select>
+					</div>
 					<p class="description"><?php esc_html_e( 'Get your API credentials from your delivery company account (developer / API section).', 'dz-cod-order-form' ); ?></p>
 				</td></tr>
 
@@ -512,7 +545,7 @@ class DZCOD_Couriers {
 					<select id="dzcod-yfrom" name="<?php echo esc_attr( $n ); ?>[yalidine_from_wilaya]">
 						<?php foreach ( DZCOD_Locations::all() as $code => $w ) : ?>
 							<?php
-							if ( $w['l'] !== $code ) {
+							if ( (string) $w['l'] !== (string) $code ) {
 								continue;
 							}
 							?>
@@ -525,6 +558,7 @@ class DZCOD_Couriers {
 				<tr class="dzcod-p dzcod-p-procolis"><th><label for="dzcod-pkey"><?php esc_html_e( 'Key', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-pkey" type="password" class="regular-text" name="<?php echo esc_attr( $n ); ?>[procolis_key]" value="" placeholder="<?php echo $s['procolis_key'] ? $saved : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" autocomplete="new-password"></td></tr>
 				<tr class="dzcod-p dzcod-p-procolis"><th><?php esc_html_e( 'Parcel status', 'dz-cod-order-form' ); ?></th><td><label><input type="checkbox" name="<?php echo esc_attr( $n ); ?>[procolis_confirmed]" value="1" <?php checked( ! empty( $s['procolis_confirmed'] ) ); ?>> <?php esc_html_e( 'Send parcels as confirmed (ready for pickup)', 'dz-cod-order-form' ); ?></label></td></tr>
 
+				<tr class="dzcod-p dzcod-p-ecotrack-custom"><th></th><td><p class="description"><?php echo esc_html( __( 'Works with every courier that uses Ecotrack, for example:', 'dz-cod-order-form' ) . ' ' . implode( ', ', DZCOD_Courier_API::ecotrack_known() ) . '.' ); ?></p></td></tr>
 				<tr class="dzcod-p dzcod-p-ecotrack-custom"><th><label for="dzcod-eurl"><?php esc_html_e( 'Ecotrack address', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-eurl" type="url" class="regular-text" name="<?php echo esc_attr( $n ); ?>[ecotrack_url]" value="<?php echo esc_attr( $s['ecotrack_url'] ); ?>" placeholder="https://yourcourier.ecotrack.dz"><p class="description"><?php esc_html_e( 'The address you use to log in to your courier’s Ecotrack account, e.g. https://ecorapide-express.ecotrack.dz', 'dz-cod-order-form' ); ?></p></td></tr>
 				<tr class="dzcod-p dzcod-p-ecotrack"><th><label for="dzcod-etk"><?php esc_html_e( 'API token', 'dz-cod-order-form' ); ?></label></th><td><input id="dzcod-etk" type="password" class="regular-text" name="<?php echo esc_attr( $n ); ?>[ecotrack_token]" value="" placeholder="<?php echo $s['ecotrack_token'] ? $saved : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" autocomplete="new-password"></td></tr>
 
@@ -552,15 +586,16 @@ class DZCOD_Couriers {
 		<p class="description"><?php esc_html_e( 'Orders from the 11 wilayas created in 2025 are sent under their former wilaya (e.g. Bou Saâda → 28 M’Sila), because delivery companies still use the 58 codes.', 'dz-cod-order-form' ); ?></p>
 		<script>
 		(function(){
-			var sel=document.getElementById('dzcod-prov');
+			var radios=document.querySelectorAll('.dzcod-couriers input[type=radio]');
 			function sync(){
-				var o=sel.options[sel.selectedIndex],p=o?o.getAttribute('data-platform'):'';
+				var cur=document.querySelector('.dzcod-couriers input[type=radio]:checked'),p=cur?cur.getAttribute('data-platform'):'',v=cur?cur.value:'';
 				document.querySelectorAll('.dzcod-p').forEach(function(r){
-					var show=r.classList.contains('dzcod-p-'+p)||(r.classList.contains('dzcod-p-ecotrack-custom')&&sel.value==='ecotrack');
+					var show=r.classList.contains('dzcod-p-'+p)||(r.classList.contains('dzcod-p-ecotrack-custom')&&v==='ecotrack');
 					r.style.display=show?'':'none';
 				});
+				document.querySelectorAll('.dzcod-courier').forEach(function(l){l.classList.toggle('is-selected',l.querySelector('input').checked);});
 			}
-			sel.addEventListener('change',sync);sync();
+			radios.forEach(function(r){r.addEventListener('change',sync);});sync();
 		}());
 		</script>
 		<?php

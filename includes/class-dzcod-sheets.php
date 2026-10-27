@@ -57,8 +57,25 @@ class DZCOD_Sheets {
 			'status'        => $order->get_status(),
 			'duplicate_of'  => (int) $order->get_meta( '_dzcod_duplicate_of' ),
 			'tracking'      => (string) $order->get_meta( '_dzcod_tracking' ),
+			'phone2'        => (string) $order->get_meta( '_dzcod_phone2' ),
+			'note'          => $order->get_customer_note(),
+			'extra'         => self::extra_string( $order ),
 		);
 		return (array) apply_filters( 'dzcod_sheets_row', $row, $order );
+	}
+
+	/**
+	 * Custom field answers as "Label: value; Label: value".
+	 *
+	 * @param WC_Order $order Order.
+	 * @return string
+	 */
+	public static function extra_string( $order ) {
+		$parts = array();
+		foreach ( (array) $order->get_meta( '_dzcod_extra' ) as $label => $value ) {
+			$parts[] = $label . ': ' . $value;
+		}
+		return implode( '; ', $parts );
 	}
 
 	/**

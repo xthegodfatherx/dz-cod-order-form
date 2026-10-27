@@ -100,9 +100,13 @@ class DZCOD_Order {
 		if ( ! DZCOD_Locations::commune_exists( $wilaya, $commune ) ) {
 			self::fail( __( 'Please choose your commune.', 'dz-cod-order-form' ), 'invalid', 'commune' );
 		}
-		if ( $s['show_address'] && $s['require_address'] && 'home' === $type && mb_strlen( $address ) < 4 ) {
+		$fa = DZCOD_Settings::field( 'address' );
+		if ( ! $fa['show'] ) {
+			$address = '';
+		} elseif ( $fa['required'] && 'home' === $type && mb_strlen( $address ) < 4 ) {
 			self::fail( __( 'Please enter your delivery address.', 'dz-cod-order-form' ), 'invalid', 'address' );
 		}
+		$extras = self::read_extras();
 		$shipping = DZCOD_Settings::delivery_price( $wilaya, $type );
 		if ( null === $shipping ) {
 			self::fail( __( 'Sorry, we do not deliver to this wilaya yet.', 'dz-cod-order-form' ), 'invalid', 'wilaya' );
@@ -133,7 +137,7 @@ class DZCOD_Order {
 			self::fail( $check['error'], 'fraud', 'phone' );
 		}
 
-		$order = self::create_order( $product, $qty, $name, $phone, $wilaya, $commune, $address, $type, (float) $shipping, (int) $check['duplicate_of'] );
+		$order = self::create_order( $product, $qty, $name, $phone, $wilaya, $commune, $address, $type, (float) $shipping, (int) $check['duplicate_of'], $extras );
 		if ( is_wp_error( $order ) ) {
 			self::fail( __( 'Your order could not be saved. Please try again.', 'dz-cod-order-form' ), 'save' );
 		}
@@ -165,6 +169,74 @@ class DZCOD_Order {
 	}
 
 	/**
+	 * Read and validate the optional built-in fields and the custom fields.
+	 * Sends a JSON error and stops on invalid input.
+	 *
+	 * @return array{phone2:string,email:string,note:string,custom:array}
+	 */
+	private static function read_extras() {
+		$out = array(
+			'phone2' => '',
+			'email'  => '',
+			'note'   => '',
+			'custom' => array(),
+		);
+
+		$f = DZCOD_Settings::field( 'phone2' );
+		if ( $f['show'] ) {
+			$p2 = DZCOD_Antifraud::normalize_phone( self::field( 'phone2' ) );
+			if ( ( '' !== $p2 || $f['required'] ) && ! DZCOD_Antifraud::is_valid_phone( $p2 ) ) {
+				self::fail( __( 'Please enter a valid Algerian phone number (e.g. 0555 12 34 56).', 'dz-cod-order-form' ), 'invalid', 'phone2' );
+			}
+			$out['phone2'] = $p2;
+		}
+
+		$f = DZCOD_Settings::field( 'email' );
+		if ( $f['show'] ) {
+			$email = sanitize_email( self::field( 'email' ) );
+			if ( ( '' !== self::field( 'email' ) || $f['required'] ) && ! is_email( $email ) ) {
+				self::fail( __( 'Please enter a valid email address.', 'dz-cod-order-form' ), 'invalid', 'email' );
+			}
+			$out['email'] = $email;
+		}
+
+		$f = DZCOD_Settings::field( 'note' );
+		if ( $f['show'] ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce checked in ajax_place_order().
+			$note = isset( $_POST['note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['note'] ) ) : '';
+			$note = mb_substr( $note, 0, 500 );
+			if ( $f['required'] && '' === trim( $note ) ) {
+				self::fail( __( 'Please fill in this field.', 'dz-cod-order-form' ), 'invalid', 'note' );
+			}
+			$out['note'] = $note;
+		}
+
+		foreach ( DZCOD_Settings::custom_fields() as $cf ) {
+			$key = $cf['key'];
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce checked in ajax_place_order().
+			$raw = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below per type.
+			if ( 'checkbox' === $cf['type'] ) {
+				$value = ! empty( $raw ) ? __( 'Yes', 'dz-cod-order-form' ) : '';
+			} elseif ( 'textarea' === $cf['type'] ) {
+				$value = mb_substr( sanitize_textarea_field( (string) $raw ), 0, 500 );
+			} else {
+				$value = mb_substr( sanitize_text_field( (string) $raw ), 0, 200 );
+			}
+			// A dropdown only accepts one of its own options.
+			if ( 'select' === $cf['type'] && '' !== $value && ! in_array( $value, $cf['options'], true ) ) {
+				$value = '';
+			}
+			if ( $cf['required'] && '' === trim( $value ) ) {
+				self::fail( __( 'Please fill in this field.', 'dz-cod-order-form' ), 'invalid', $key );
+			}
+			if ( '' !== $value ) {
+				$out['custom'][ $cf['label'] ] = $value;
+			}
+		}
+		return $out;
+	}
+
+	/**
 	 * Build and save the WooCommerce order.
 	 *
 	 * @param WC_Product $product      Product or variation.
@@ -177,9 +249,19 @@ class DZCOD_Order {
 	 * @param string     $type         home|desk.
 	 * @param float      $shipping     Delivery price.
 	 * @param int        $duplicate_of Earlier order id from the same phone, 0 if none.
+	 * @param array      $extras       phone2, email, note, custom (label => value).
 	 * @return WC_Order|WP_Error
 	 */
-	public static function create_order( $product, $qty, $name, $phone, $wilaya, $commune, $address, $type, $shipping, $duplicate_of ) {
+	public static function create_order( $product, $qty, $name, $phone, $wilaya, $commune, $address, $type, $shipping, $duplicate_of, $extras = array() ) {
+		$extras = wp_parse_args(
+			$extras,
+			array(
+				'phone2' => '',
+				'email'  => '',
+				'note'   => '',
+				'custom' => array(),
+			)
+		);
 		$s = DZCOD_Settings::get();
 
 		try {
@@ -202,7 +284,11 @@ class DZCOD_Order {
 				'city'       => $commune,
 				'address_1'  => ( '' !== $address ) ? $address : $commune,
 			);
+			if ( '' !== $extras['email'] ) {
+				$address_fields['email'] = $extras['email'];
+			}
 			$order->set_address( $address_fields, 'billing' );
+			unset( $address_fields['email'] );
 			unset( $address_fields['phone'] );
 			$order->set_address( $address_fields, 'shipping' );
 
@@ -239,6 +325,15 @@ class DZCOD_Order {
 			$order->update_meta_data( '_dzcod_wilaya', $wilaya );
 			$order->update_meta_data( '_dzcod_wilaya_label', $label );
 			$order->update_meta_data( '_dzcod_delivery_type', $type );
+			if ( '' !== $extras['phone2'] ) {
+				$order->update_meta_data( '_dzcod_phone2', $extras['phone2'] );
+			}
+			if ( '' !== $extras['note'] ) {
+				$order->set_customer_note( $extras['note'] );
+			}
+			if ( $extras['custom'] ) {
+				$order->update_meta_data( '_dzcod_extra', $extras['custom'] );
+			}
 			if ( $duplicate_of ) {
 				$order->update_meta_data( '_dzcod_duplicate_of', $duplicate_of );
 			}

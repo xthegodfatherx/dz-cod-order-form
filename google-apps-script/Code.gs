@@ -8,7 +8,7 @@
  */
 var SECRET = 'change-me';
 var SHEET_NAME = 'Orders';
-var COLUMNS = ['order_id', 'date', 'name', 'phone', 'wilaya', 'commune', 'address', 'delivery_type', 'products', 'shipping', 'total', 'status', 'duplicate_of', 'tracking'];
+var COLUMNS = ['order_id', 'date', 'name', 'phone', 'wilaya', 'commune', 'address', 'delivery_type', 'products', 'shipping', 'total', 'status', 'duplicate_of', 'tracking', 'phone2', 'note', 'extra'];
 
 function getSheet_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();

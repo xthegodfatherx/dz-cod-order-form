@@ -1,0 +1,64 @@
+/* DZ COD Order Form — settings screen. */
+.dzcod-couriers {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+	gap: 10px;
+	max-width: 980px;
+}
+.dzcod-courier {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	border: 1px solid #dcdcde;
+	border-radius: 10px;
+	background: #fff;
+	cursor: pointer;
+	transition: border-color .15s, box-shadow .15s;
+}
+.dzcod-courier:hover { border-color: #8c8f94; }
+.dzcod-courier.is-selected { border-color: #2271b1; box-shadow: 0 0 0 1px #2271b1; background: #f0f6fc; }
+.dzcod-courier input { position: absolute; opacity: 0; pointer-events: none; }
+.dzcod-courier:focus-within { outline: 2px solid #2271b1; outline-offset: 2px; }
+.dzcod-courier-wide { grid-column: span 2; }
+.dzcod-courier-badge {
+	flex: 0 0 36px;
+	width: 36px;
+	height: 36px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 9px;
+	color: #fff;
+	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: .02em;
+}
+.dzcod-courier-badge.has-logo { background: #fff; border: 1px solid #dcdcde; }
+.dzcod-courier-badge img { max-width: 30px; max-height: 30px; }
+.dzcod-courier-name { font-weight: 600; line-height: 1.25; }
+.dzcod-courier-platform {
+	margin-inline-start: auto;
+	padding: 1px 6px;
+	border-radius: 20px;
+	background: #f0f0f1;
+	color: #50575e;
+	font-size: 10px;
+	text-transform: uppercase;
+}
+
+.dzcod-import { max-width: 980px; }
+.dzcod-import-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 900px) { .dzcod-import-grid, .dzcod-courier-wide { grid-template-columns: 1fr; grid-column: auto; } }
+.dzcod-import-card { padding: 4px 16px 16px; border: 1px solid #dcdcde; border-radius: 10px; background: #fff; }
+.dzcod-import-card h3 { display: flex; align-items: center; gap: 6px; }
+.dzcod-import-card ol { margin-inline-start: 1.2em; }
+.dzcod-import-card .button-link { margin-inline-start: 10px; }
+.dzcod-import-log { min-height: 1.4em; font-weight: 600; }
+.dzcod-import-log.is-ok { color: #00a32a; }
+.dzcod-import-log.is-error { color: #d63638; }
+
+.dzcod-fields-table { max-width: 980px; margin-bottom: 18px; }
+.dzcod-fields-table td, .dzcod-fields-table th { vertical-align: middle; }
+.dzcod-fields-table input[type="text"] { width: 100%; }

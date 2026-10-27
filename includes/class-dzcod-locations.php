@@ -36,6 +36,12 @@ class DZCOD_Locations {
 	}
 
 	/**
+	 * Note for callers: PHP stores keys such as "16" as the integer 16, so always
+	 * compare wilaya codes as strings ( (string) $a === (string) $b ) and never merge
+	 * code-keyed arrays with array_merge() / wp_parse_args(), which renumber them.
+	 */
+
+	/**
 	 * Display label of a wilaya, e.g. "16 - Alger".
 	 *
 	 * @param string $code Two-digit wilaya code.
