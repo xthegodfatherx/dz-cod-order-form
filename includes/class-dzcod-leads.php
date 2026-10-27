@@ -122,6 +122,13 @@ class DZCOD_Leads {
 				wp_send_json_error();
 			}
 			set_transient( $key, (int) get_transient( $key ) + 1, HOUR_IN_SECONDS );
+			// Site-wide ceiling so many IPs cannot flood the database.
+			$global = (int) get_transient( 'dzcod_lead_global' );
+			if ( $global >= (int) apply_filters( 'dzcod_leads_per_hour', 300 ) ) {
+				wp_send_json_error();
+			}
+			set_transient( 'dzcod_lead_global', $global + 1, HOUR_IN_SECONDS );
+			self::flush_counts();
 		}
 
 		$name    = self::post( 'name', 100 );
@@ -203,6 +210,9 @@ class DZCOD_Leads {
 		foreach ( $ids as $id ) {
 			wp_delete_post( $id, true );
 		}
+		if ( $ids ) {
+			self::flush_counts();
+		}
 	}
 
 	/**
@@ -211,6 +221,10 @@ class DZCOD_Leads {
 	 * @return int
 	 */
 	public static function count_new() {
+		$cached = get_transient( 'dzcod_lead_count_new' );
+		if ( false !== $cached ) {
+			return (int) $cached;
+		}
 		$q = new WP_Query(
 			array(
 				'post_type'      => self::CPT,
@@ -226,7 +240,16 @@ class DZCOD_Leads {
 				),
 			)
 		);
+		set_transient( 'dzcod_lead_count_new', (int) $q->found_posts, 5 * MINUTE_IN_SECONDS );
 		return (int) $q->found_posts;
+	}
+
+	/**
+	 * Forget cached counts after a change.
+	 */
+	public static function flush_counts() {
+		delete_transient( 'dzcod_lead_count_new' );
+		delete_transient( 'dzcod_lead_count_any' );
 	}
 
 	/**
@@ -250,6 +273,10 @@ class DZCOD_Leads {
 	 * @return bool
 	 */
 	private static function count_any() {
+		$cached = get_transient( 'dzcod_lead_count_any' );
+		if ( false !== $cached ) {
+			return (bool) $cached;
+		}
 		$ids = get_posts(
 			array(
 				'post_type'      => self::CPT,
@@ -259,6 +286,7 @@ class DZCOD_Leads {
 				'no_found_rows'  => true,
 			)
 		);
+		set_transient( 'dzcod_lead_count_any', $ids ? 1 : 0, HOUR_IN_SECONDS );
 		return ! empty( $ids );
 	}
 
@@ -434,9 +462,11 @@ class DZCOD_Leads {
 
 		if ( 'delete' === $do ) {
 			wp_delete_post( $id, true );
+			self::flush_counts();
 			$msg = 'deleted';
 		} elseif ( in_array( $do, array( 'contacted', 'lost' ), true ) ) {
 			update_post_meta( $id, '_dzcod_status', $do );
+			self::flush_counts();
 		} elseif ( 'create' === $do ) {
 			$msg = self::create_order( $id );
 		}
@@ -451,6 +481,28 @@ class DZCOD_Leads {
 	 * @return string Message key.
 	 */
 	private static function create_order( $id ) {
+		// One order per lead: refuse a second click and parallel clicks from two staff members.
+		if ( (int) get_post_meta( $id, '_dzcod_order_id', true ) ) {
+			return 'created';
+		}
+		$lock = 'dzcod_lead_lock_' . $id;
+		if ( get_transient( $lock ) ) {
+			return 'failed';
+		}
+		set_transient( $lock, 1, MINUTE_IN_SECONDS );
+		$result = self::do_create_order( $id );
+		delete_transient( $lock );
+		self::flush_counts();
+		return $result;
+	}
+
+	/**
+	 * Build the order for a lead (called under a lock).
+	 *
+	 * @param int $id Lead id.
+	 * @return string Message key.
+	 */
+	private static function do_create_order( $id ) {
 		$pid       = (int) get_post_meta( $id, '_dzcod_product_id', true );
 		$vid       = (int) get_post_meta( $id, '_dzcod_variation_id', true );
 		$product   = wc_get_product( $vid ? $vid : $pid );
@@ -492,6 +544,8 @@ class DZCOD_Leads {
 		$order->save();
 		update_post_meta( $id, '_dzcod_status', 'recovered' );
 		update_post_meta( $id, '_dzcod_order_id', $order->get_id() );
+		// Same follow-up as a normal form order (Google Sheets, integrations).
+		do_action( 'dzcod_order_created', $order );
 		do_action( 'dzcod_lead_recovered', $order, $id );
 		return 'created';
 	}

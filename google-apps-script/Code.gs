@@ -2,7 +2,8 @@
  * DZ COD Order Form → Google Sheets
  *
  * 1. Open your Google Sheet → Extensions → Apps Script, paste this file.
- * 2. Set SECRET to the same value as in WooCommerce → DZ COD Form → Google Sheets.
+ * 2. Set SECRET to the same value as in WooCommerce → DZ COD Form → Google Sheets
+ *    (at least 12 characters; the script refuses to run with 'change-me').
  * 3. Deploy → New deployment → Web app. Execute as: Me. Who has access: Anyone.
  * 4. Copy the web app URL into the plugin settings and click "Send a test row".
  */
@@ -34,6 +35,8 @@ function json_(obj) {
 function doPost(e) {
   var data;
   try { data = JSON.parse(e.postData.contents); } catch (err) { return json_({ ok: false, error: 'bad json' }); }
+  // Refuse to run with the example secret: anyone could write to the sheet.
+  if (!SECRET || SECRET === 'change-me' || SECRET.length < 12) { return json_({ ok: false, error: 'set SECRET first' }); }
   if (!data || data.secret !== SECRET) { return json_({ ok: false, error: 'forbidden' }); }
 
   var lock = LockService.getScriptLock();

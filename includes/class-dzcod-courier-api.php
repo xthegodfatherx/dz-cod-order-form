@@ -89,7 +89,8 @@ class DZCOD_Courier_API {
 	private static function http( $method, $url, $headers, $body = null ) {
 		$args = array(
 			'method'  => $method,
-			'timeout' => 25,
+			'timeout'             => 25,
+			'limit_response_size' => 5 * MB_IN_BYTES,
 			'headers' => array_merge(
 				array(
 					'Accept'       => 'application/json',
@@ -179,8 +180,18 @@ class DZCOD_Courier_API {
 		if ( '' !== $url && ! preg_match( '#^https?://#i', $url ) ) {
 			$url = 'https://' . $url;
 		}
-		$host = wp_parse_url( $url, PHP_URL_HOST );
-		return $host ? 'https://' . strtolower( $host ) : '';
+		$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+		// Only Ecotrack tenants: the API token and customer data must not go to any other server.
+		$allowed = (array) apply_filters( 'dzcod_ecotrack_hosts', array( '.ecotrack.dz' ) );
+		$ok      = false;
+		foreach ( $allowed as $suffix ) {
+			$suffix = strtolower( (string) $suffix );
+			if ( '' !== $suffix && ( $host === ltrim( $suffix, '.' ) || substr( $host, -strlen( $suffix ) ) === $suffix ) ) {
+				$ok = true;
+				break;
+			}
+		}
+		return ( $ok && preg_match( '/^[a-z0-9.-]+$/', $host ) ) ? 'https://' . $host : '';
 	}
 
 	/**

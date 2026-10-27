@@ -28,7 +28,8 @@ class DZCOD_Sheets {
 	 * @return bool
 	 */
 	public static function enabled() {
-		return '' !== (string) DZCOD_Settings::get( 'sheets_url' );
+		// A secret is required: without one anybody could write to the sheet.
+		return '' !== (string) DZCOD_Settings::get( 'sheets_url' ) && strlen( (string) DZCOD_Settings::get( 'sheets_secret' ) ) >= 12;
 	}
 
 	/**

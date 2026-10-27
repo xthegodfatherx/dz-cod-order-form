@@ -315,7 +315,13 @@ class DZCOD_Settings {
 
 		if ( 'sheets' === $tab ) {
 			$out['sheets_url']    = isset( $input['sheets_url'] ) ? esc_url_raw( trim( $input['sheets_url'] ), array( 'https' ) ) : '';
-			$out['sheets_secret'] = isset( $input['sheets_secret'] ) ? sanitize_text_field( $input['sheets_secret'] ) : '';
+			$secret = isset( $input['sheets_secret'] ) ? sanitize_text_field( $input['sheets_secret'] ) : '';
+			if ( '' !== $out['sheets_url'] && strlen( $secret ) < 12 ) {
+				// Generate a strong secret rather than leave the sheet writable by anyone.
+				$secret = wp_generate_password( 32, false, false );
+				add_settings_error( self::OPTION, 'dzcod_secret', __( 'A secret of at least 12 characters is required. A random one was generated — copy it into your Apps Script (SECRET).', 'dz-cod-order-form' ), 'warning' );
+			}
+			$out['sheets_secret'] = $secret;
 		}
 
 		unset( $out['_tab'], $out['show_address'], $out['require_address'], $out['show_quantity'] );

@@ -5,7 +5,7 @@ Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,16 @@ Delivery companies sometimes spell communes differently. Open the order, correct
 No. It creates standard WooCommerce orders with the Cash on delivery payment method, so your existing order management, emails and delivery plugins keep working.
 
 == Changelog ==
+
+= 1.3.1 =
+* Security: Google Sheets sync now requires a secret of at least 12 characters (a random one is generated if missing), and the Apps Script refuses to run with the example secret.
+* Security: the generic Ecotrack option only accepts *.ecotrack.dz addresses, so your API token and customer data cannot be sent to another server (filter `dzcod_ecotrack_hosts` to extend).
+* Security: size limits on responses from delivery companies and price sheets.
+* Security: site-wide hourly limit on new abandoned-order records (filter `dzcod_leads_per_hour`).
+* Fix: "Create order" on an abandoned order can no longer create two orders (double click or two staff members).
+* Fix: orders recovered from abandoned forms are now sent to Google Sheets like other orders.
+* Fix: orders with no wilaya or commune are not sent to the delivery company; a clear message is shown instead.
+* Performance: abandoned-order counts are cached instead of queried on every admin page.
 
 = 1.3.0 =
 * New: quantity offers per product (fixed pack price or % off, badge, free delivery per pack), shown as cards with the crossed-out normal price.

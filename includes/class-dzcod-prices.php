@@ -219,8 +219,9 @@ class DZCOD_Prices {
 		$res = wp_safe_remote_get(
 			$csv_url,
 			array(
-				'timeout'     => 20,
-				'redirection' => 5,
+				'timeout'             => 20,
+				'redirection'         => 5,
+				'limit_response_size' => 2 * MB_IN_BYTES,
 			)
 		);
 		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {

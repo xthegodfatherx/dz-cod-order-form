@@ -3,7 +3,7 @@
  * Plugin Name:       DZ COD Order Form
  * Plugin URI:        https://github.com/xthegodfatherx/dz-cod-order-form
  * Description:       One-page cash-on-delivery order form for Algerian WooCommerce stores: all 69 wilayas and 1541 communes, per-wilaya delivery pricing (home / stop desk), duplicate and fake-order protection, Google Sheets export, and sending to Yalidine, ZR Express and Ecotrack couriers.
- * Version:           1.3.0
+ * Version:           1.3.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Requires Plugins:  woocommerce
@@ -20,7 +20,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'DZCOD_VERSION', '1.3.0' );
+define( 'DZCOD_VERSION', '1.3.1' );
 define( 'DZCOD_FILE', __FILE__ );
 define( 'DZCOD_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DZCOD_URL', plugin_dir_url( __FILE__ ) );

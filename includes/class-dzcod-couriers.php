@@ -122,7 +122,11 @@ class DZCOD_Couriers {
 			}
 		}
 		$out['procolis_confirmed'] = empty( $in['procolis_confirmed'] ) ? 0 : 1;
-		$out['ecotrack_url']       = DZCOD_Courier_API::ecotrack_origin( $out['ecotrack_url'] );
+		$typed                     = (string) $out['ecotrack_url'];
+		$out['ecotrack_url']       = DZCOD_Courier_API::ecotrack_origin( $typed );
+		if ( '' !== trim( $typed ) && '' === $out['ecotrack_url'] ) {
+			add_settings_error( self::OPTION, 'dzcod_ecotrack_url', __( 'The Ecotrack address must end with .ecotrack.dz (for example https://yourcourier.ecotrack.dz).', 'dz-cod-order-form' ) );
+		}
 		return $out;
 	}
 
@@ -219,7 +223,16 @@ class DZCOD_Couriers {
 		set_transient( $lock, 1, 2 * MINUTE_IN_SECONDS );
 
 		$parcel = self::parcel_from_order( $order );
-		$res    = DZCOD_Courier_API::create( $s['provider'], $s, $parcel );
+		if ( '' === $parcel['commune'] || '' === $parcel['wilaya_name'] ) {
+			$res = array(
+				'ok'       => false,
+				'error'    => __( 'The wilaya or commune is missing. Complete the shipping address, save, then send again.', 'dz-cod-order-form' ),
+				'tracking' => '',
+				'label'    => '',
+			);
+		} else {
+			$res = DZCOD_Courier_API::create( $s['provider'], $s, $parcel );
+		}
 		$title  = self::provider_title();
 
 		if ( $res['ok'] ) {
