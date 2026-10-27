@@ -5,7 +5,7 @@ Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,8 @@ Most Algerian online stores sell with cash on delivery (COD). Customers do not w
 * **Parcel tracking**: delivered / returned / in transit pulled from Yalidine, ZR Express and Ecotrack every 3 hours; orders move to Completed or the new "Returned (refused)" status automatically.
 * **Customer history and repeat refusers**: every order shows how many earlier parcels the phone number accepted or refused; repeat refusers can be put on hold or refused.
 * **Meta Conversions API and TikTok Events API**: server-side Purchase events deduplicated with the browser pixels, with the option to count a purchase only when the order is confirmed by phone.
+* **Free delivery per product**: choose which products ship free — home, stop desk or both, everywhere or only in the wilayas you pick. The form shows a "Free delivery" badge and the fee is removed on the server.
+* **Request a feature** screen: ask for features or another delivery company, or report a problem, straight from WordPress.
 * **One-click upsell** after the order: add a discounted product to the same order with one tap.
 * **COD dashboard**: orders, confirmation rate, delivery rate, cash collected, losses on returns, best products and wilayas.
 * **Arabic and French** included.
@@ -44,7 +46,7 @@ Most Algerian online stores sell with cash on delivery (COD). Customers do not w
 
 **Developers**
 
-Filters: `dzcod_ecotrack_hosts`, `dzcod_leads_per_hour`, `dzcod_meta_api_version`, `dzcod_locations`, `dzcod_is_valid_phone`, `dzcod_antifraud_result`, `dzcod_sheets_row`, `dzcod_auto_insert_for_product`, `dzcod_client_ip`, `dzcod_courier_providers`, `dzcod_courier_parcel`, `dzcod_courier_payload`, `dzcod_courier_logo`, `dzcod_offers`.
+Filters: `dzcod_free_delivery`, `dzcod_ecotrack_hosts`, `dzcod_leads_per_hour`, `dzcod_meta_api_version`, `dzcod_locations`, `dzcod_is_valid_phone`, `dzcod_antifraud_result`, `dzcod_sheets_row`, `dzcod_auto_insert_for_product`, `dzcod_client_ip`, `dzcod_courier_providers`, `dzcod_courier_parcel`, `dzcod_courier_payload`, `dzcod_courier_logo`, `dzcod_offers`.
 Actions: `dzcod_before_order_save`, `dzcod_order_created`, `dzcod_order_confirmed`, `dzcod_parcel_created`, `dzcod_parcel_status`, `dzcod_lead_recovered`, `dzcod_upsell_accepted`.
 
 Source code and issues: https://github.com/xthegodfatherx/dz-cod-order-form
@@ -107,6 +109,14 @@ In General settings set "New order status" to Pending payment and "When an order
 
 Parcel tracking marks it Returned and moves the order to "Returned (refused)". The phone number's history is updated, and if the customer refuses again they can be put on hold or refused automatically (Anti-fraud tab).
 
+= How do I give free delivery on a product? =
+
+Edit the product and use "Free delivery for this product" in the "COD form" box: free home delivery, free stop desk, or both, optionally only for some wilayas (for example 16, 09, 35). You can also give free delivery on a specific pack in the quantity offers, or above an order amount in Delivery prices.
+
+= How can I ask for a new feature? =
+
+Go to WooCommerce → Request a feature. It opens a pre-filled request on GitHub that you can review before posting. You can also vote 👍 on existing requests there.
+
 = Is Noest supported? =
 
 Not yet. Noest's API is not publicly documented; it is on the roadmap. Contributions are welcome on GitHub.
@@ -120,6 +130,11 @@ Delivery companies sometimes spell communes differently. Open the order, correct
 No. It creates standard WooCommerce orders with the Cash on delivery payment method, so your existing order management, emails and delivery plugins keep working.
 
 == Changelog ==
+
+= 1.5.0 =
+* New: free delivery per product — home, stop desk or both, everywhere or only in chosen wilayas — with a badge on the form, live price update and server-side pricing (also when recovering abandoned orders).
+* New: "Request a feature" screen that opens a pre-filled GitHub request (features, delivery companies, bugs), plus a feature-request template.
+* Translations: Arabic and French updated (411 strings).
 
 = 1.4.0 =
 * New: parcel status sync from Yalidine, ZR Express and Ecotrack every 3 hours, with a "Returned (refused)" order status and automatic Completed / Returned updates.

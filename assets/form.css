@@ -16,6 +16,7 @@
 }
 .dzcod-form *, .dzcod-form *::before, .dzcod-form *::after { box-sizing: border-box; }
 .dzcod-title { margin: 0 0 14px; font-size: 1.15em; text-align: center; }
+.dzcod-free-badge { margin: -6px 0 12px; padding: 6px 10px; border-radius: 20px; background: color-mix(in srgb, var(--dzcod-primary) 12%, #fff); color: var(--dzcod-primary); font-weight: 700; text-align: center; }
 .dzcod-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 520px) { .dzcod-row { grid-template-columns: 1fr; } }
 .dzcod-field { margin: 0 0 12px; min-width: 0; }

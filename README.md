@@ -19,6 +19,7 @@ Formulaire de commande paiement à la livraison pour les boutiques WooCommerce a
 - **Parcel tracking**: delivered / returned pulled from couriers every 3 h, "Returned (refused)" status
 - **Customer history**: delivered vs returned per phone, hold or refuse repeat refusers
 - **Meta CAPI + TikTok Events API** (server side, deduplicated), optional "purchase = confirmed order"
+- **Free delivery per product** (home / stop desk / both, optional wilaya list)
 - **One-click upsell** after the order · **COD dashboard** · **Arabic & French**
 - Live summary (product + delivery = total), simple & variable products, quantity
 - **Anti-fraud**: Algerian phone validation, duplicate detection (block or flag On hold), phone blocklist, IP rate limit, honeypot
@@ -71,12 +72,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). CI runs on every push and pull request.
 | `dzcod_parcel_status` | action | A parcel changed status (delivered, returned…) |
 | `dzcod_upsell_accepted` | action | The customer accepted the one-click upsell |
 | `dzcod_ecotrack_hosts` | filter | Allow other Ecotrack host suffixes |
+| `dzcod_free_delivery` | filter | Change a product's free delivery rule |
 
 ```js
 document.addEventListener('dzcod:order', e => console.log(e.detail)); // {id, total, currency, items}
 ```
 
 ## Roadmap — contributions welcome
+
+Want something? Use **WooCommerce → Request a feature** in the plugin, or [open a request](../../issues/new?template=feature_request.yml) and 👍 the ones you need most.
+
 
 - Noest and Maystro integrations (Noest's API is not publicly documented — help welcome)
 - Named entries (with verified addresses) for more Ecotrack couriers such as HHD Express

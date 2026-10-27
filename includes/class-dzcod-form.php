@@ -225,9 +225,20 @@ class DZCOD_Form {
 		<form class="dzcod-form" id="<?php echo esc_attr( $uid ); ?>" style="<?php echo esc_attr( '--dzcod-primary:' . $s['primary_color'] . ';' ); ?>" novalidate
 			data-product="<?php echo esc_attr( $product->get_id() ); ?>"
 			data-price="<?php echo esc_attr( $price ); ?>"
+			<?php $fd = DZCOD_Offers::free_delivery( $product->get_id() ); ?>
+			data-free-mode="<?php echo esc_attr( $fd['mode'] ); ?>"
+			data-free-wilayas="<?php echo esc_attr( implode( ',', $fd['wilayas'] ) ); ?>"
 			data-config="<?php echo esc_attr( wp_json_encode( self::config() ) ); ?>">
 			<?php if ( '' !== $s['form_title'] ) : ?>
 				<h3 class="dzcod-title"><?php echo esc_html( $s['form_title'] ); ?></h3>
+			<?php endif; ?>
+			<?php if ( '' !== $fd['mode'] ) : ?>
+				<p class="dzcod-free-badge">🚚
+					<?php
+					$what = 'home' === $fd['mode'] ? __( 'Free home delivery', 'dz-cod-order-form' ) : ( 'desk' === $fd['mode'] ? __( 'Free stop desk delivery', 'dz-cod-order-form' ) : __( 'Free delivery', 'dz-cod-order-form' ) );
+					echo esc_html( $fd['wilayas'] ? $what . ' ' . __( 'in selected wilayas', 'dz-cod-order-form' ) : $what );
+					?>
+				</p>
 			<?php endif; ?>
 
 			<?php if ( $variations ) : ?>

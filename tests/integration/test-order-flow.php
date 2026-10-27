@@ -141,6 +141,19 @@ class Test_Order_Flow extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * Free delivery set on the product: free only where and how the shop decided.
+	 */
+	public function test_product_free_delivery() {
+		update_post_meta( $this->product->get_id(), '_dzcod_free_delivery', array( 'mode' => 'desk', 'wilayas' => array( '16' ) ) );
+		$desk = wc_get_order( $this->submit( array( 'delivery_type' => 'desk', 'phone' => '0770000010' ) )['data']['order']['id'] );
+		$this->assertEquals( 0, (float) $desk->get_shipping_total() );
+		$home = wc_get_order( $this->submit( array( 'delivery_type' => 'home', 'phone' => '0770000011' ) )['data']['order']['id'] );
+		$this->assertEquals( 500, (float) $home->get_shipping_total() );
+		$other = wc_get_order( $this->submit( array( 'delivery_type' => 'desk', 'wilaya' => '09', 'commune' => 'Blida', 'phone' => '0770000012' ) )['data']['order']['id'] );
+		$this->assertEquals( 400, (float) $other->get_shipping_total() );
+	}
+
+	/**
 	 * Orders from a new wilaya are sent to couriers under the former wilaya code.
 	 */
 	public function test_new_wilaya_maps_to_legacy_code_for_couriers() {

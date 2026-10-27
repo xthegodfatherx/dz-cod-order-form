@@ -1,0 +1,24 @@
+name: Feature request
+description: Ask for a new feature or an improvement
+labels: [ enhancement ]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks! Please check existing requests first and add a 👍 instead of a duplicate. Never paste API tokens or customer data.
+  - type: textarea
+    id: details
+    attributes:
+      label: What do you need?
+      description: What do you want to do, and why does it matter for your store?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [ Order form, Quantity offers / upsell, Delivery companies, Delivery prices, Abandoned orders, Confirmation desk, Parcel tracking, Ads tracking, Google Sheets, Dashboard, Other ]
+  - type: dropdown
+    id: help
+    attributes:
+      label: Can you help?
+      options: [ "No", "I can test it", "I can write code", "I can translate" ]

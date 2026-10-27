@@ -129,6 +129,25 @@ class DZCOD_Offers {
 			</tbody>
 		</table>
 		<?php $up = self::upsell_settings( $post->ID ); ?>
+		<?php $fd = self::free_delivery( $post->ID ); ?>
+		<h4><?php esc_html_e( 'Free delivery for this product', 'dz-cod-order-form' ); ?></h4>
+		<p>
+			<select name="dzcod_free_delivery[mode]">
+				<?php
+				foreach ( array(
+					''     => __( 'No — normal delivery prices', 'dz-cod-order-form' ),
+					'all'  => __( 'Free home delivery and stop desk', 'dz-cod-order-form' ),
+					'home' => __( 'Free home delivery only', 'dz-cod-order-form' ),
+					'desk' => __( 'Free stop desk only', 'dz-cod-order-form' ),
+				) as $val => $label ) :
+					?>
+					<option value="<?php echo esc_attr( $val ); ?>" <?php selected( $fd['mode'], $val ); ?>><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+			<label style="margin-inline-start:12px"><?php esc_html_e( 'Only for these wilayas (codes, comma-separated, empty = all)', 'dz-cod-order-form' ); ?>
+				<input type="text" class="regular-text" name="dzcod_free_delivery[wilayas]" value="<?php echo esc_attr( implode( ', ', $fd['wilayas'] ) ); ?>" placeholder="16, 09, 35, 42"></label>
+		</p>
+		<p class="description"><?php esc_html_e( 'The form shows a “Free delivery” badge and the delivery fee becomes 0 when the conditions match.', 'dz-cod-order-form' ); ?></p>
 		<h4><?php esc_html_e( 'One-click upsell after the order', 'dz-cod-order-form' ); ?></h4>
 		<p class="description"><?php esc_html_e( 'After ordering this product, offer one more product at a discount. The customer adds it to the same order with one tap — no new form.', 'dz-cod-order-form' ); ?></p>
 		<p>
@@ -137,6 +156,41 @@ class DZCOD_Offers {
 			<label style="margin-inline-start:12px"><?php esc_html_e( 'Headline', 'dz-cod-order-form' ); ?> <input type="text" class="regular-text" name="dzcod_upsell[title]" value="<?php echo esc_attr( $up['title'] ); ?>" placeholder="<?php esc_attr_e( 'Add a second one at a special price?', 'dz-cod-order-form' ); ?>"></label>
 		</p>
 		<?php
+	}
+
+	/**
+	 * Free delivery settings of a product.
+	 *
+	 * @param int $product_id Product (parent) id.
+	 * @return array{mode:string,wilayas:string[]}
+	 */
+	public static function free_delivery( $product_id ) {
+		$f    = get_post_meta( $product_id, '_dzcod_free_delivery', true );
+		$f    = is_array( $f ) ? $f : array();
+		$mode = isset( $f['mode'] ) && in_array( $f['mode'], array( 'all', 'home', 'desk' ), true ) ? $f['mode'] : '';
+		$list = array();
+		foreach ( isset( $f['wilayas'] ) ? (array) $f['wilayas'] : array() as $c ) {
+			$c = str_pad( preg_replace( '/\D/', '', (string) $c ), 2, '0', STR_PAD_LEFT );
+			if ( '00' !== $c && isset( DZCOD_Locations::all()[ $c ] ) ) {
+				$list[] = $c;
+			}
+		}
+		return (array) apply_filters( 'dzcod_free_delivery', array( 'mode' => $mode, 'wilayas' => array_values( array_unique( $list ) ) ), $product_id );
+	}
+
+	/**
+	 * Does free delivery apply to this wilaya and delivery type?
+	 *
+	 * @param array  $fd     free_delivery() result.
+	 * @param string $wilaya Wilaya code.
+	 * @param string $type   home|desk.
+	 * @return bool
+	 */
+	public static function free_delivery_applies( $fd, $wilaya, $type ) {
+		if ( '' === $fd['mode'] || ( 'all' !== $fd['mode'] && $fd['mode'] !== $type ) ) {
+			return false;
+		}
+		return ! $fd['wilayas'] || in_array( str_pad( (string) $wilaya, 2, '0', STR_PAD_LEFT ), $fd['wilayas'], true );
 	}
 
 	/**
@@ -189,6 +243,15 @@ class DZCOD_Offers {
 			update_post_meta( $post_id, self::META, $out );
 		} else {
 			delete_post_meta( $post_id, self::META );
+		}
+
+		$fd   = isset( $_POST['dzcod_free_delivery'] ) ? (array) wp_unslash( $_POST['dzcod_free_delivery'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized per field below.
+		$mode = isset( $fd['mode'] ) ? sanitize_key( $fd['mode'] ) : '';
+		if ( in_array( $mode, array( 'all', 'home', 'desk' ), true ) ) {
+			$codes = array_filter( array_map( 'trim', explode( ',', isset( $fd['wilayas'] ) ? sanitize_text_field( $fd['wilayas'] ) : '' ) ), 'strlen' );
+			update_post_meta( $post_id, '_dzcod_free_delivery', array( 'mode' => $mode, 'wilayas' => array_values( $codes ) ) );
+		} else {
+			delete_post_meta( $post_id, '_dzcod_free_delivery' );
 		}
 
 		$u = isset( $_POST['dzcod_upsell'] ) ? (array) wp_unslash( $_POST['dzcod_upsell'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized per field below.

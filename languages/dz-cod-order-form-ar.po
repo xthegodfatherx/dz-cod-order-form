@@ -2,9 +2,9 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: DZ COD Order Form 1.4.0\n"
+"Project-Id-Version: DZ COD Order Form 1.5.0\n"
 "Report-Msgid-Bugs-To: https://github.com/xthegodfatherx/dz-cod-order-form/issues\n"
-"POT-Creation-Date: 2026-10-27 11:09+0000\n"
+"POT-Creation-Date: 2026-10-27 11:29+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -12,13 +12,17 @@ msgstr ""
 "Language: ar\n"
 "Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5);\n"
 
-#: dz-cod-order-form.php:64
+#: dz-cod-order-form.php:74
 msgid "DZ COD Order Form requires WooCommerce to be installed and active."
 msgstr "تتطلب إضافة DZ COD Order Form تثبيت WooCommerce وتفعيله."
 
-#: dz-cod-order-form.php:107
+#: dz-cod-order-form.php:118
 msgid "Settings"
 msgstr "الإعدادات"
+
+#: dz-cod-order-form.php:119 includes/class-dzcod-feedback.php:29 includes/class-dzcod-feedback.php:29 includes/class-dzcod-feedback.php:62
+msgid "Request a feature"
+msgstr "طلب ميزة"
 
 #: includes/class-dzcod-pixels.php:301
 msgid "Server-side conversion not accepted: %s"
@@ -80,7 +84,7 @@ msgstr "العنوان (اختياري)"
 msgid "Badge (optional)"
 msgstr "الشارة (اختيارية)"
 
-#: includes/class-dzcod-offers.php:102 includes/class-dzcod-form.php:354
+#: includes/class-dzcod-offers.php:102 includes/class-dzcod-form.php:238 includes/class-dzcod-form.php:365
 msgid "Free delivery"
 msgstr "توصيل مجاني"
 
@@ -92,27 +96,55 @@ msgstr "باقة العائلة"
 msgid "Best value"
 msgstr "أفضل قيمة"
 
-#: includes/class-dzcod-offers.php:132
+#: includes/class-dzcod-offers.php:133
+msgid "Free delivery for this product"
+msgstr "توصيل مجاني لهذا المنتج"
+
+#: includes/class-dzcod-offers.php:138
+msgid "No — normal delivery prices"
+msgstr "لا — أسعار التوصيل العادية"
+
+#: includes/class-dzcod-offers.php:139
+msgid "Free home delivery and stop desk"
+msgstr "توصيل مجاني إلى المنزل وإلى المكتب"
+
+#: includes/class-dzcod-offers.php:140
+msgid "Free home delivery only"
+msgstr "توصيل مجاني إلى المنزل فقط"
+
+#: includes/class-dzcod-offers.php:141
+msgid "Free stop desk only"
+msgstr "توصيل مجاني إلى المكتب فقط"
+
+#: includes/class-dzcod-offers.php:147
+msgid "Only for these wilayas (codes, comma-separated, empty = all)"
+msgstr "فقط لهذه الولايات (الرموز مفصولة بفواصل، فارغ = الكل)"
+
+#: includes/class-dzcod-offers.php:150
+msgid "The form shows a “Free delivery” badge and the delivery fee becomes 0 when the conditions match."
+msgstr "تعرض الاستمارة شارة «توصيل مجاني» وتصبح رسوم التوصيل 0 عند تحقق الشروط."
+
+#: includes/class-dzcod-offers.php:151
 msgid "One-click upsell after the order"
 msgstr "عرض إضافي بنقرة واحدة بعد الطلب"
 
-#: includes/class-dzcod-offers.php:133
+#: includes/class-dzcod-offers.php:152
 msgid "After ordering this product, offer one more product at a discount. The customer adds it to the same order with one tap — no new form."
 msgstr "بعد طلب هذا المنتج، اعرض منتجًا آخر بتخفيض. يضيفه الزبون إلى نفس الطلب بنقرة واحدة — دون استمارة جديدة."
 
-#: includes/class-dzcod-offers.php:135
+#: includes/class-dzcod-offers.php:154
 msgid "Product ID to offer"
 msgstr "معرّف المنتج المعروض (ID)"
 
-#: includes/class-dzcod-offers.php:136
+#: includes/class-dzcod-offers.php:155
 msgid "Discount %"
 msgstr "التخفيض %"
 
-#: includes/class-dzcod-offers.php:137
+#: includes/class-dzcod-offers.php:156
 msgid "Headline"
 msgstr "العنوان الرئيسي"
 
-#: includes/class-dzcod-offers.php:137
+#: includes/class-dzcod-offers.php:156
 msgid "Add a second one at a special price?"
 msgstr "هل تريد إضافة قطعة ثانية بسعر خاص؟"
 
@@ -358,7 +390,7 @@ msgstr "الزبون"
 msgid "Wilaya / commune"
 msgstr "الولاية / البلدية"
 
-#: includes/class-dzcod-leads.php:378 includes/class-dzcod-form.php:383 includes/class-dzcod-dashboard.php:224 includes/class-dzcod-elementor-widget.php:82
+#: includes/class-dzcod-leads.php:378 includes/class-dzcod-form.php:394 includes/class-dzcod-dashboard.php:224 includes/class-dzcod-elementor-widget.php:82
 msgid "Product"
 msgstr "المنتج"
 
@@ -386,7 +418,7 @@ msgstr "تم الاتصال"
 msgid "Delete"
 msgstr "حذف"
 
-#: includes/class-dzcod-leads.php:542
+#: includes/class-dzcod-leads.php:545
 msgid "Recovered from an abandoned order form. Check the address with the customer."
 msgstr "تم استرجاعه من استمارة متروكة. تحقق من العنوان مع الزبون."
 
@@ -426,7 +458,7 @@ msgstr "يرجى اختيار أحد الخيارات."
 msgid "Please enter your full name."
 msgstr "يرجى إدخال اسمك الكامل."
 
-#: includes/class-dzcod-form.php:137 includes/class-dzcod-antifraud.php:81 includes/class-dzcod-order.php:94 includes/class-dzcod-order.php:205
+#: includes/class-dzcod-form.php:137 includes/class-dzcod-antifraud.php:81 includes/class-dzcod-order.php:94 includes/class-dzcod-order.php:210
 msgid "Please enter a valid Algerian phone number (e.g. 0555 12 34 56)."
 msgstr "يرجى إدخال رقم هاتف جزائري صحيح (مثال: 0555 12 34 56)."
 
@@ -434,11 +466,11 @@ msgstr "يرجى إدخال رقم هاتف جزائري صحيح (مثال: 055
 msgid "Please enter your delivery address."
 msgstr "يرجى إدخال عنوان التوصيل."
 
-#: includes/class-dzcod-form.php:139 includes/class-dzcod-order.php:225 includes/class-dzcod-order.php:246
+#: includes/class-dzcod-form.php:139 includes/class-dzcod-order.php:230 includes/class-dzcod-order.php:251
 msgid "Please fill in this field."
 msgstr "يرجى ملء هذا الحقل."
 
-#: includes/class-dzcod-form.php:140 includes/class-dzcod-order.php:214
+#: includes/class-dzcod-form.php:140 includes/class-dzcod-order.php:219
 msgid "Please enter a valid email address."
 msgstr "يرجى إدخال بريد إلكتروني صحيح."
 
@@ -446,47 +478,59 @@ msgstr "يرجى إدخال بريد إلكتروني صحيح."
 msgid "optional"
 msgstr "اختياري"
 
-#: includes/class-dzcod-form.php:235
+#: includes/class-dzcod-form.php:238
+msgid "Free home delivery"
+msgstr "توصيل مجاني إلى المنزل"
+
+#: includes/class-dzcod-form.php:238
+msgid "Free stop desk delivery"
+msgstr "توصيل مجاني إلى المكتب"
+
+#: includes/class-dzcod-form.php:239
+msgid "in selected wilayas"
+msgstr "في ولايات محددة"
+
+#: includes/class-dzcod-form.php:246
 msgid "Option"
 msgstr "الخيار"
 
-#: includes/class-dzcod-form.php:283 includes/class-dzcod-form.php:384 includes/class-dzcod-desk.php:279
+#: includes/class-dzcod-form.php:294 includes/class-dzcod-form.php:395 includes/class-dzcod-desk.php:279
 msgid "Delivery"
 msgstr "التوصيل"
 
-#: includes/class-dzcod-form.php:285 includes/class-dzcod-admin.php:58
+#: includes/class-dzcod-form.php:296 includes/class-dzcod-admin.php:58
 msgid "Home delivery"
 msgstr "التوصيل إلى المنزل"
 
-#: includes/class-dzcod-form.php:286
+#: includes/class-dzcod-form.php:297
 msgid "Stop desk (office pickup)"
 msgstr "التوصيل إلى المكتب (Stop desk)"
 
-#: includes/class-dzcod-form.php:342
+#: includes/class-dzcod-form.php:353
 msgid "Choose your pack"
 msgstr "اختر الباقة"
 
-#: includes/class-dzcod-form.php:369
+#: includes/class-dzcod-form.php:380
 msgid "Decrease quantity"
 msgstr "إنقاص الكمية"
 
-#: includes/class-dzcod-form.php:371
+#: includes/class-dzcod-form.php:382
 msgid "Increase quantity"
 msgstr "زيادة الكمية"
 
-#: includes/class-dzcod-form.php:379
+#: includes/class-dzcod-form.php:390
 msgid "Leave this field empty"
 msgstr "اترك هذا الحقل فارغًا"
 
-#: includes/class-dzcod-form.php:385 includes/class-dzcod-desk.php:281
+#: includes/class-dzcod-form.php:396 includes/class-dzcod-desk.php:281
 msgid "Total"
 msgstr "المجموع"
 
-#: includes/class-dzcod-form.php:390
+#: includes/class-dzcod-form.php:401
 msgid "Pay on delivery — nothing to pay now"
 msgstr "الدفع عند الاستلام — لا شيء تدفعه الآن"
 
-#: includes/class-dzcod-form.php:352 includes/class-dzcod-order.php:142
+#: includes/class-dzcod-form.php:363 includes/class-dzcod-order.php:147
 msgid "%d piece"
 msgid_plural "%d pieces"
 msgstr[0] "%d قطعة"
@@ -715,6 +759,78 @@ msgstr "لقد قمت بطلب مؤخرًا. سنتصل بك لتأكيده — 
 msgid "We could not accept this order online. Please contact us directly."
 msgstr "لا يمكننا قبول هذا الطلب عبر الإنترنت. يرجى التواصل معنا مباشرة."
 
+#: includes/class-dzcod-feedback.php:56
+msgid "A new feature or improvement"
+msgstr "ميزة جديدة أو تحسين"
+
+#: includes/class-dzcod-feedback.php:57
+msgid "Add a delivery company"
+msgstr "إضافة شركة توصيل"
+
+#: includes/class-dzcod-feedback.php:58
+msgid "Something does not work"
+msgstr "شيء لا يعمل"
+
+#: includes/class-dzcod-feedback.php:63
+msgid "DZ COD Order Form is free and open source. Tell us what your store needs — new features, another delivery company, or a problem — and vote for other requests on GitHub."
+msgstr "إضافة DZ COD Order Form مجانية ومفتوحة المصدر. أخبرنا بما يحتاجه متجرك — ميزات جديدة، شركة توصيل أخرى، أو مشكلة — وصوّت على الطلبات الأخرى في GitHub."
+
+#: includes/class-dzcod-feedback.php:66
+msgid "What is it about?"
+msgstr "بماذا يتعلق الأمر؟"
+
+#: includes/class-dzcod-feedback.php:70
+msgid "Title"
+msgstr "العنوان"
+
+#: includes/class-dzcod-feedback.php:71
+msgid "e.g. Send an SMS when the parcel is out for delivery"
+msgstr "مثال: إرسال رسالة SMS عندما يخرج الطرد للتوصيل"
+
+#: includes/class-dzcod-feedback.php:72
+msgid "Details"
+msgstr "التفاصيل"
+
+#: includes/class-dzcod-feedback.php:73
+msgid "What do you want to do, and why does it matter for your store?"
+msgstr "ماذا تريد أن تفعل، ولماذا هو مهم لمتجرك؟"
+
+#: includes/class-dzcod-feedback.php:74
+msgid "Do not include API tokens, passwords, customer names or phone numbers: GitHub issues are public."
+msgstr "لا تضع رموز API أو كلمات المرور أو أسماء الزبائن أو أرقامهم: طلبات GitHub علنية."
+
+#: includes/class-dzcod-feedback.php:75
+msgid "Add version information:"
+msgstr "إضافة معلومات الإصدار:"
+
+#: includes/class-dzcod-feedback.php:77
+msgid "Continue on GitHub"
+msgstr "المتابعة على GitHub"
+
+#: includes/class-dzcod-feedback.php:78
+msgid "Opens GitHub in a new tab with your request filled in. You can review it before posting (a free GitHub account is needed)."
+msgstr "يفتح GitHub في علامة تبويب جديدة مع ملء طلبك مسبقًا. يمكنك مراجعته قبل النشر (يلزم حساب GitHub مجاني)."
+
+#: includes/class-dzcod-feedback.php:82
+msgid "Other ways to help"
+msgstr "طرق أخرى للمساعدة"
+
+#: includes/class-dzcod-feedback.php:84
+msgid "Vote 👍 on the most wanted requests"
+msgstr "صوّت 👍 على الطلبات الأكثر طلبًا"
+
+#: includes/class-dzcod-feedback.php:85
+msgid "See the roadmap"
+msgstr "الاطلاع على خطة التطوير"
+
+#: includes/class-dzcod-feedback.php:86
+msgid "Contribute code or translations"
+msgstr "المساهمة بالبرمجة أو الترجمة"
+
+#: includes/class-dzcod-feedback.php:87
+msgid "Report a security problem privately"
+msgstr "الإبلاغ عن مشكلة أمنية بشكل خاص"
+
 #: includes/class-dzcod-order.php:66
 msgid "Your session expired. Please try again."
 msgstr "انتهت صلاحية الجلسة. يرجى المحاولة مرة أخرى."
@@ -731,43 +847,43 @@ msgstr "عذرًا، لا نوصل إلى هذه الولاية حاليًا."
 msgid "This product is not available."
 msgstr "هذا المنتج غير متاح."
 
-#: includes/class-dzcod-order.php:135
+#: includes/class-dzcod-order.php:140
 msgid "Please choose a pack."
 msgstr "يرجى اختيار باقة."
 
-#: includes/class-dzcod-order.php:145
+#: includes/class-dzcod-order.php:150
 msgid "Sorry, this product is out of stock."
 msgstr "عذرًا، هذا المنتج غير متوفر في المخزون."
 
-#: includes/class-dzcod-order.php:157
+#: includes/class-dzcod-order.php:162
 msgid "Your order could not be saved. Please try again."
 msgstr "تعذّر حفظ طلبك. يرجى المحاولة مرة أخرى."
 
-#: includes/class-dzcod-order.php:235
+#: includes/class-dzcod-order.php:240
 msgid "Yes"
 msgstr "نعم"
 
-#: includes/class-dzcod-order.php:338
+#: includes/class-dzcod-order.php:343
 msgid "Stop desk delivery – %s"
 msgstr "التوصيل إلى المكتب – %s"
 
-#: includes/class-dzcod-order.php:340
+#: includes/class-dzcod-order.php:345
 msgid "Home delivery – %s"
 msgstr "التوصيل إلى المنزل – %s"
 
-#: includes/class-dzcod-order.php:348
+#: includes/class-dzcod-order.php:353
 msgid "Cash on delivery"
 msgstr "الدفع عند الاستلام"
 
-#: includes/class-dzcod-order.php:390
+#: includes/class-dzcod-order.php:395
 msgid "Possible duplicate: the same phone number placed order #%d recently."
 msgstr "تكرار محتمل: نفس رقم الهاتف قدّم الطلب رقم %d مؤخرًا."
 
-#: includes/class-dzcod-order.php:393
+#: includes/class-dzcod-order.php:398
 msgid "This phone number refused more parcels than it accepted. Confirm before shipping."
 msgstr "هذا الرقم رفض طرودًا أكثر مما استلم. أكّد قبل الشحن."
 
-#: includes/class-dzcod-order.php:395
+#: includes/class-dzcod-order.php:400
 msgid "Order placed from the COD form."
 msgstr "طلب من استمارة الدفع عند الاستلام."
 

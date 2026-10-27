@@ -519,7 +519,10 @@ class DZCOD_Leads {
 			$offer                   = $offers[ (int) $oi ];
 			$qty                     = $offer['qty'];
 			$extras['line_total']    = DZCOD_Offers::total( $offer, (float) $product->get_price() );
-			$extras['free_shipping'] = $offer['free_shipping'];
+			$extras['free_shipping'] = ! empty( $extras['free_shipping'] ) || $offer['free_shipping'];
+		}
+		if ( '' !== $wilaya && DZCOD_Offers::free_delivery_applies( DZCOD_Offers::free_delivery( $pid ), $wilaya, 'desk' === $type ? 'desk' : 'home' ) ) {
+			$extras['free_shipping'] = true;
 		}
 		$shipping = '' !== $wilaya ? DZCOD_Settings::delivery_price( $wilaya, $type ) : 0;
 

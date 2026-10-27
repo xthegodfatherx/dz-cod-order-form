@@ -128,6 +128,11 @@ class DZCOD_Order {
 			$qty = 1;
 		}
 		// Quantity offers: the pack decides the quantity and the price, never the browser.
+		// Free delivery chosen by the shop for this product (and wilaya / delivery type).
+		if ( DZCOD_Offers::free_delivery_applies( DZCOD_Offers::free_delivery( $product_id ), $wilaya, $type ) ) {
+			$extras['free_shipping'] = true;
+		}
+
 		$offers = $product->is_sold_individually() ? array() : DZCOD_Offers::get( $product_id );
 		if ( $offers ) {
 			$idx = self::field( 'offer' );
@@ -137,7 +142,7 @@ class DZCOD_Order {
 			$offer                   = $offers[ (int) $idx ];
 			$qty                     = $offer['qty'];
 			$extras['line_total']    = DZCOD_Offers::total( $offer, (float) $product->get_price() );
-			$extras['free_shipping'] = $offer['free_shipping'];
+			$extras['free_shipping'] = ! empty( $extras['free_shipping'] ) || $offer['free_shipping'];
 			/* translators: %d: quantity */
 			$extras['offer'] = '' !== $offer['label'] ? $offer['label'] : sprintf( _n( '%d piece', '%d pieces', $qty, 'dz-cod-order-form' ), $qty );
 		}

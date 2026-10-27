@@ -124,12 +124,14 @@
 			var q = Math.max(1, Math.min(99, parseInt(qty.value, 10) || 1));
 			var sub = offer ? offerTotal(offer, unit) : unit * q;
 			var p = C.prices[wilaya.value];
+			var fMode = form.getAttribute('data-free-mode') || '', fWil = (form.getAttribute('data-free-wilayas') || '').split(',').filter(Boolean);
+			var productFree = function (type) { return fMode !== '' && (fMode === 'all' || fMode === type) && (!fWil.length || fWil.indexOf(wilaya.value) !== -1); };
 			var free = (offer && offer.getAttribute('data-free') === '1') || (C.freeOver > 0 && sub >= C.freeOver);
 			var home = form.querySelector('.dzcod-price-home');
 			var desk = form.querySelector('.dzcod-price-desk');
-			if (home) { home.textContent = p ? (free ? C.i18n.free : money(C, p[0])) : ''; }
-			if (desk) { desk.textContent = p ? (free ? C.i18n.free : money(C, p[1])) : ''; }
-			var ship = p ? (free ? 0 : (deliveryType() === 'desk' ? p[1] : p[0])) : null;
+			if (home) { home.textContent = p ? ((free || productFree('home')) ? C.i18n.free : money(C, p[0])) : ''; }
+			if (desk) { desk.textContent = p ? ((free || productFree('desk')) ? C.i18n.free : money(C, p[1])) : ''; }
+			var ship = p ? ((free || productFree(deliveryType())) ? 0 : (deliveryType() === 'desk' ? p[1] : p[0])) : null;
 			$('.dzcod-sum-product').textContent = money(C, sub) + (q > 1 ? ' (×' + q + ')' : '');
 			$('.dzcod-sum-shipping').textContent = ship === null ? '—' : (ship === 0 ? C.i18n.free : money(C, ship));
 			$('.dzcod-sum-total').textContent = money(C, sub + (ship || 0));
