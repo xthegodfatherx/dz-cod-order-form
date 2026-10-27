@@ -20,7 +20,11 @@
 	"scripts": {
 		"test:unit": "php tests/unit/run.php",
 		"test:integration": "phpunit",
-		"lint": "phpcs --standard=WordPress --extensions=php --ignore=vendor,tests .",
-		"test": [ "@test:unit", "@test:integration" ]
+		"lint": "phpcs",
+		"test": [
+			"@test:unit",
+			"@test:integration"
+		],
+		"lint:fix": "phpcbf"
 	}
 }

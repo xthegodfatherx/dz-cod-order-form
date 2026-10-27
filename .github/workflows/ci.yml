@@ -17,7 +17,7 @@ jobs:
       matrix:
         php: [ '7.4', '8.1', '8.3' ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -34,13 +34,13 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           tools: composer
       - run: composer install --no-progress --prefer-dist
-      - run: composer lint
+      - run: vendor/bin/phpcs --report=checkstyle --report-file=/tmp/phpcs.xml || (php tests/integration/report.php /tmp/phpcs.xml; exit 1)
 
   integration:
     name: WordPress ${{ matrix.wp }} + WooCommerce
@@ -57,7 +57,7 @@ jobs:
         ports: [ '3306:3306' ]
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
@@ -74,4 +74,7 @@ jobs:
       - name: Integration tests
         env:
           WC_DIR: /tmp/plugins/woocommerce
-        run: vendor/bin/phpunit
+        run: vendor/bin/phpunit --log-junit /tmp/junit.xml
+      - name: Report failing tests as annotations
+        if: failure()
+        run: php tests/integration/report.php /tmp/junit.xml

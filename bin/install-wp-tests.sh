@@ -15,8 +15,12 @@ WP_TESTS_DIR=${WP_TESTS_DIR:-$TMPDIR/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR:-$TMPDIR/wordpress}
 
 if [ "$WP_VERSION" == "latest" ]; then
-	WP_TESTS_TAG="trunk"
-	WP_ZIP="https://wordpress.org/latest.tar.gz"
+	# Use the test library of the released version, not trunk (trunk can be ahead of the release).
+	WP_VERSION=$(curl -sSL https://api.wordpress.org/core/version-check/1.7/ | grep -o '"version":"[^"]*' | head -1 | sed 's/"version":"//')
+	WP_VERSION=${WP_VERSION%.0}
+	echo "Latest WordPress: $WP_VERSION"
+	WP_TESTS_TAG="tags/$WP_VERSION"
+	WP_ZIP="https://wordpress.org/wordpress-$WP_VERSION.tar.gz"
 else
 	WP_TESTS_TAG="tags/$WP_VERSION"
 	WP_ZIP="https://wordpress.org/wordpress-$WP_VERSION.tar.gz"

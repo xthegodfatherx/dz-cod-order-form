@@ -27,7 +27,6 @@ tests_add_filter(
 tests_add_filter(
 	'setup_theme',
 	function () {
-		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		WC_Install::install();
 		$GLOBALS['wp_roles'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		wp_roles();

@@ -219,7 +219,7 @@ class DZCOD_Offers {
 	/**
 	 * Save offers.
 	 *
-	 * @param int     $post_id Post id.
+	 * @param int $post_id Post id.
 	 */
 	public static function save( $post_id ) {
 		if ( ! isset( $_POST['dzcod_offers_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['dzcod_offers_nonce'] ), 'dzcod_offers_save' ) ) {
