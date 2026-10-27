@@ -22,6 +22,10 @@ class Test_Order_Flow extends WP_Ajax_UnitTestCase {
 	 */
 	public function set_up() {
 		parent::set_up();
+		// Test tables are TEMPORARY in the WP suite and MySQL cannot self-join them,
+		// which breaks the HPOS posts/orders sync check. Keep HPOS on, sync off.
+		update_option( 'woocommerce_custom_orders_table_enabled', 'yes' );
+		update_option( 'woocommerce_custom_orders_table_data_sync_enabled', 'no' );
 		update_option( 'woocommerce_currency', 'DZD' );
 		$this->product = new WC_Product_Simple();
 		$this->product->set_name( 'Miel Bilobee 1kg' );
