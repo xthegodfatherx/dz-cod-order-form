@@ -221,14 +221,13 @@ class DZCOD_Couriers {
 		}
 
 		// Lock: never create two parcels for the same order at the same time.
-		$lock = 'dzcod_sending_' . $order_id;
-		if ( get_transient( $lock ) ) {
+		$lock = 'sending_' . $order_id;
+		if ( ! DZCOD_Lock::acquire( $lock, 2 * MINUTE_IN_SECONDS ) ) {
 			return array(
 				'ok'    => false,
 				'error' => __( 'This order is already being sent.', 'dz-cod-order-form' ),
 			);
 		}
-		set_transient( $lock, 1, 2 * MINUTE_IN_SECONDS );
 
 		$parcel = self::parcel_from_order( $order );
 		if ( '' === $parcel['commune'] || '' === $parcel['wilaya_name'] ) {
@@ -258,7 +257,7 @@ class DZCOD_Couriers {
 			$order->add_order_note( sprintf( __( 'Could not send to %1$s: %2$s', 'dz-cod-order-form' ), $title, $res['error'] ) );
 			$order->save();
 		}
-		delete_transient( $lock );
+		DZCOD_Lock::release( $lock );
 		return $res;
 	}
 
@@ -522,10 +521,8 @@ class DZCOD_Couriers {
 		}
 		$colors = array(
 			'yalidine'  => '#e11d2a',
-			'yalitec'   => '#f97316',
 			'zrexpress' => '#0f766e',
 			'ecotrack'  => '#16a34a',
-			'dhd'       => '#1d4ed8',
 		);
 		$color  = isset( $colors[ $key ] ) ? $colors[ $key ] : 'hsl(' . ( abs( crc32( $key ) ) % 360 ) . ',55%,42%)';
 		$words  = preg_split( '/[\s\/()]+/', preg_replace( '/\(.*\)/', '', $title ), -1, PREG_SPLIT_NO_EMPTY );

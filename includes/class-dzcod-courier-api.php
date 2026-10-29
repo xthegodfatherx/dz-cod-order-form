@@ -1,6 +1,6 @@
 <?php
 /**
- * Algerian delivery company APIs: Yalidine / Yalitec, ZR Express (Procolis), Ecotrack couriers.
+ * Algerian delivery company APIs: Yalidine, ZR Express (Procolis), Ecotrack couriers.
  *
  * @package DZCOD
  */
@@ -20,32 +20,9 @@ class DZCOD_Courier_API {
 	 */
 	public static function providers() {
 		$list = array(
-			'yalidine'      => array( 'Yalidine', 'yalidine', 'https://api.yalidine.app' ),
-			'yalitec'       => array( 'Yalitec (Guepex)', 'yalidine', 'https://api.yalitec.me' ),
-			'zrexpress'     => array( 'ZR Express', 'procolis', 'https://procolis.com/api_v1' ),
-			'ecotrack'      => array( __( 'Ecotrack (any courier — paste its address)', 'dz-cod-order-form' ), 'ecotrack', '' ),
-			'dhd'           => array( 'DHD', 'ecotrack', 'https://dhd.ecotrack.dz' ),
-			'conexlog'      => array( 'Conexlog / UPS', 'ecotrack', 'https://conexlog.ecotrack.dz' ),
-			'msmgo'         => array( 'MSM Go', 'ecotrack', 'https://msmgo.ecotrack.dz' ),
-			'rex'           => array( 'Rex Livraison', 'ecotrack', 'https://rex.ecotrack.dz' ),
-			'rblivraison'   => array( 'RB Livraison', 'ecotrack', 'https://rblivraison.ecotrack.dz' ),
-			'speeddelivery' => array( 'Speed Delivery', 'ecotrack', 'https://speeddelivery.ecotrack.dz' ),
-			'areex'         => array( 'Areex', 'ecotrack', 'https://areex.ecotrack.dz' ),
-			'prest'         => array( 'Prest', 'ecotrack', 'https://prest.ecotrack.dz' ),
-			'rocket'        => array( 'Rocket Delivery', 'ecotrack', 'https://rocket.ecotrack.dz' ),
-			'worldexpress'  => array( 'World Express', 'ecotrack', 'https://worldexpress.ecotrack.dz' ),
-			'baconsult'     => array( 'BA Consult', 'ecotrack', 'https://baconsult.ecotrack.dz' ),
-			'packers'       => array( 'Packers', 'ecotrack', 'https://packers.ecotrack.dz' ),
-			'48hr'          => array( '48hr Livraison', 'ecotrack', 'https://48hr.ecotrack.dz' ),
-			'mono'          => array( 'Mono Hub', 'ecotrack', 'https://mono.ecotrack.dz' ),
-			'anderson'      => array( 'Anderson Delivery', 'ecotrack', 'https://anderson.ecotrack.dz' ),
-			'golivri'       => array( 'Golivri', 'ecotrack', 'https://golivri.ecotrack.dz' ),
-			'coyote'        => array( 'Coyote Express', 'ecotrack', 'https://coyote.ecotrack.dz' ),
-			'salvadelivery' => array( 'Salva Delivery', 'ecotrack', 'https://salvadelivery.ecotrack.dz' ),
-			'distazero'     => array( 'Distazero', 'ecotrack', 'https://distazero.ecotrack.dz' ),
-			'fretdirect'    => array( 'Fret Direct', 'ecotrack', 'https://fretdirect.ecotrack.dz' ),
-			'tsl'           => array( 'TSL Express', 'ecotrack', 'https://tsl.ecotrack.dz' ),
-			'negmar'        => array( 'Negmar Express', 'ecotrack', 'https://negmar.ecotrack.dz' ),
+			'yalidine'  => array( 'Yalidine', 'yalidine', 'https://api.yalidine.app' ),
+			'zrexpress' => array( 'ZR Express', 'procolis', 'https://procolis.com/api_v1' ),
+			'ecotrack'  => array( __( 'Ecotrack (any courier — paste its address)', 'dz-cod-order-form' ), 'ecotrack', '' ),
 		);
 		return (array) apply_filters( 'dzcod_courier_providers', $list );
 	}
@@ -494,7 +471,7 @@ class DZCOD_Courier_API {
 	}
 
 	/**
-	 * Create a Yalidine / Yalitec parcel.
+	 * Create a Yalidine parcel.
 	 *
 	 * @param string $base   Base URL.
 	 * @param array  $s      Settings.

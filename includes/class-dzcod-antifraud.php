@@ -91,9 +91,7 @@ class DZCOD_Antifraud {
 
 		$limit = (int) $s['rate_limit'];
 		if ( $limit > 0 && '' !== self::client_ip() ) {
-			$key   = 'dzcod_rl_' . md5( self::client_ip() );
-			$count = (int) get_transient( $key );
-			if ( $count >= $limit ) {
+			if ( DZCOD_Lock::count( 'order_rl_' . self::client_ip() ) >= $limit ) {
 				$result['ok']    = false;
 				$result['error'] = __( 'Too many orders from your connection. Please try again later.', 'dz-cod-order-form' );
 				return $result;
@@ -145,7 +143,6 @@ class DZCOD_Antifraud {
 		if ( $limit <= 0 || '' === self::client_ip() ) {
 			return;
 		}
-		$key = 'dzcod_rl_' . md5( self::client_ip() );
-		set_transient( $key, (int) get_transient( $key ) + 1, HOUR_IN_SECONDS );
+		DZCOD_Lock::incr( 'order_rl_' . self::client_ip() );
 	}
 }

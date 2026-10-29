@@ -1,5 +1,6 @@
 <?php
 define('ABSPATH','/');define('MB_IN_BYTES',1048576);
+if(!function_exists("wp_parse_url")){function wp_parse_url($u,$c=-1){return parse_url($u,$c);}}
 function __($s){return $s;} function esc_attr__($s){return $s;}
 function apply_filters($h,$v){return $v;} function wp_json_encode($v){return json_encode($v,JSON_UNESCAPED_UNICODE);}
 function untrailingslashit($s){return rtrim($s,'/');} function wp_strip_all_tags($s){return strip_tags($s);}
@@ -33,10 +34,11 @@ check('ZR Express: tracking, POST /add_colis, token/key headers',$r['ok'] && $r[
 check('ZR Express: legacy wilaya id + misspelled Confrimee field',$b['Colis'][0]['IDWilaya']==='28' && $b['Colis'][0]['Confrimee']==='1');
 q(200,['Colis'=>[['MessageRetour'=>'Double Tracking']]]);
 $r=DZCOD_Courier_API::create('zrexpress',$s,$parcel); check('ZR Express duplicate refused',!$r['ok'] && $r['error']==='Double Tracking');
+$s['ecotrack_url']='https://dhd.ecotrack.dz';
 q(200,['success'=>true,'tracking'=>'ECO-77']);
-$r=DZCOD_Courier_API::create('dhd',$s,$parcel); $b=json_decode(last()[3],true);
+$r=DZCOD_Courier_API::create('ecotrack',$s,$parcel); $b=json_decode(last()[3],true);
 check('Ecotrack (DHD): Bearer, /api/v1/create/order, tracking',$r['ok'] && $r['tracking']==='ECO-77' && last()[1]==='https://dhd.ecotrack.dz/api/v1/create/order' && last()[2]['Authorization']==='Bearer ET' && $b['code_wilaya']===28);
 q(422,['message'=>'The given data was invalid.','errors'=>['commune'=>['invalid']]]);
-$r=DZCOD_Courier_API::create('dhd',$s,$parcel); check('Ecotrack 422 shows field errors',!$r['ok'] && strpos($r['error'],'commune')!==false);
+$r=DZCOD_Courier_API::create('ecotrack',$s,$parcel); check('Ecotrack 422 shows field errors',!$r['ok'] && strpos($r['error'],'commune')!==false);
 $n=count($GLOBALS['LOG']); $p3=$parcel;$p3['amount']=200000;
 $r=DZCOD_Courier_API::create('yalidine',$s,$p3); check('Yalidine >150k refused locally, no request',!$r['ok'] && count($GLOBALS['LOG'])===$n);

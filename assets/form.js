@@ -285,7 +285,7 @@
 			no.addEventListener('click', function () { box.remove(); finish(); });
 			yes.addEventListener('click', function () {
 				yes.disabled = true; no.disabled = true; yes.textContent = C.i18n.sending;
-				post(C.ajaxUrl, { action: 'dzcod_upsell', order: u.order, product: u.product, token: u.token }).then(function (r) {
+				post(C.ajaxUrl, { action: 'dzcod_upsell', nonce: C.nonce, order: u.order, product: u.product, token: u.token }).then(function (r) {
 					var done = document.createElement('p');
 					done.className = 'dzcod-message ' + (r && r.success ? 'is-success' : 'is-error');
 					done.textContent = (r && r.data && r.data.message ? r.data.message : C.i18n.error) + (r && r.success && r.data.total ? ' — ' + r.data.total : '');

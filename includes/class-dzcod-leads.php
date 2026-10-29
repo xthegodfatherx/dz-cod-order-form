@@ -116,18 +116,15 @@ class DZCOD_Leads {
 		$id = self::find_by_token( $token );
 		if ( ! $id ) {
 			// New leads are rate limited per visitor; updates to an existing lead are not.
-			$ip  = DZCOD_Antifraud::client_ip();
-			$key = 'dzcod_lead_rl_' . md5( $ip );
-			if ( '' !== $ip && (int) get_transient( $key ) >= 10 ) {
+			$ip = DZCOD_Antifraud::client_ip();
+			// Increment first, then compare: the increment is atomic, so parallel requests cannot slip through.
+			if ( '' !== $ip && DZCOD_Lock::incr( 'lead_rl_' . $ip ) > 10 ) {
 				wp_send_json_error();
 			}
-			set_transient( $key, (int) get_transient( $key ) + 1, HOUR_IN_SECONDS );
 			// Site-wide ceiling so many IPs cannot flood the database.
-			$global = (int) get_transient( 'dzcod_lead_global' );
-			if ( $global >= (int) apply_filters( 'dzcod_leads_per_hour', 300 ) ) {
+			if ( DZCOD_Lock::incr( 'lead_global' ) > (int) apply_filters( 'dzcod_leads_per_hour', 300 ) ) {
 				wp_send_json_error();
 			}
-			set_transient( 'dzcod_lead_global', $global + 1, HOUR_IN_SECONDS );
 			self::flush_counts();
 		}
 
@@ -485,13 +482,12 @@ class DZCOD_Leads {
 		if ( (int) get_post_meta( $id, '_dzcod_order_id', true ) ) {
 			return 'created';
 		}
-		$lock = 'dzcod_lead_lock_' . $id;
-		if ( get_transient( $lock ) ) {
+		$lock = 'lead_' . $id;
+		if ( ! DZCOD_Lock::acquire( $lock, MINUTE_IN_SECONDS ) ) {
 			return 'failed';
 		}
-		set_transient( $lock, 1, MINUTE_IN_SECONDS );
 		$result = self::do_create_order( $id );
-		delete_transient( $lock );
+		DZCOD_Lock::release( $lock );
 		self::flush_counts();
 		return $result;
 	}
@@ -566,6 +562,7 @@ class DZCOD_Leads {
 	 * Delete leads older than the retention period.
 	 */
 	public static function cleanup() {
+		DZCOD_Lock::cleanup();
 		$days = max( 1, (int) DZCOD_Settings::get( 'leads_retention' ) );
 		$ids  = get_posts(
 			array(

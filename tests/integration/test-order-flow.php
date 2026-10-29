@@ -186,6 +186,7 @@ class Test_Order_Flow extends WP_Ajax_UnitTestCase {
 		$res   = $this->submit( array( 'phone' => '0770000002' ) );
 		$_POST = array(
 			'action'  => 'dzcod_upsell',
+			'nonce'   => wp_create_nonce( 'dzcod_order' ),
 			'order'   => $res['data']['order']['id'],
 			'product' => $this->product->get_id(),
 			'token'   => str_repeat( 'a', 64 ),

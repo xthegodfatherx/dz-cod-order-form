@@ -5,7 +5,7 @@ Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
 Requires Plugins: woocommerce
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,7 +37,7 @@ Most Algerian online stores sell with cash on delivery (COD). Customers do not w
 * Simple and variable products, quantity selector.
 * **Anti-fraud**: Algerian phone validation (+213 accepted), duplicate detection by phone (block, or accept and put On hold), blocked phone list, per-IP rate limit, bot honeypot.
 * **Google Sheets export** through a small Google Apps Script (no Google account connection needed). Status changes update the sheet.
-* **Delivery companies**: send orders to **Yalidine, Yalitec (Guepex), ZR Express** and **22 Ecotrack couriers** (DHD, Conexlog/UPS, Rex, MSM Go, Rocket, 48hr, Speed Delivery, Golivri, Coyote, World Express, Negmar and more). One click per order, bulk sending from the orders list, or automatic sending when an order reaches a status you choose. Tracking number and label saved on the order and pushed to Google Sheets.
+* **Delivery companies**: send orders to **Yalidine**, **ZR Express** and **any courier on the Ecotrack platform** (DHD, Conexlog/UPS, Rex, MSM Go, Rocket, 48hr, Golivri, EcoRapide and more: paste its address). One click per order, bulk sending from the orders list, or automatic sending when an order reaches a status you choose. Tracking number and label saved on the order and pushed to Google Sheets.
 * CSV export of form orders (opens correctly in Excel with Arabic).
 * Fires Meta Pixel `Purchase`, TikTok `CompletePayment` and GA4 `purchase` events if those pixels are already on your site, plus a `dzcod:order` JavaScript event for custom tracking.
 * Shortcode `[dzcod_form]`, automatic placement on product pages, and an **Elementor widget**.
@@ -56,16 +56,19 @@ Source code, build-free (no compiled files), and issues: https://github.com/xthe
 This plugin only contacts outside services that you configure yourself:
 
 * **Google Apps Script** (Google): when you enter a web app URL, each new order (name, phone, wilaya, commune, address, products, totals, status) is sent to your own script so it can be written to your Google Sheet. [Terms](https://policies.google.com/terms), [Privacy](https://policies.google.com/privacy).
-* **Your delivery company**: when you connect one and send an order (manually, in bulk or automatically), the customer name, phone, wilaya, commune, address, products, order number and amount to collect are sent to that company's API so it can create the parcel. Depending on your choice this is Yalidine (api.yalidine.app), Yalitec (api.yalitec.me), ZR Express (procolis.com) or an Ecotrack-based courier (*.ecotrack.dz). Their terms and privacy policies are on each company's website.
+* **Your delivery company**: only when you connect one in the Couriers tab and send an order (manually, in bulk or automatically), the customer name, phone, wilaya, commune, address, products, order number and amount to collect are sent to that company's API so it can create the parcel. When you click "Import" on the Delivery prices tab, the company's price list is read from the same API (nothing about your customers is sent). The company is the one you choose:
+  * **Yalidine** (api.yalidine.app): creates parcels, reads their status and delivery prices. [Transport conditions](https://yalidine.app/app/conditions_transport.php), [Privacy policy](https://www.yalidine.com/assets/docs/politique_confidentialite_yalidine.pdf).
+  * **ZR Express** (procolis.com, the API of ZR Express): creates parcels, reads their status and delivery prices. [Privacy policy](https://www.zrexpress.net/politique-de-confidentialite). ZR Express publishes no separate terms of use; the terms are those of your contract with ZR Express.
+  * **A courier that runs on the Ecotrack platform**: you type your own courier's Ecotrack address (it must end with .ecotrack.dz) and the token that courier gave you; the plugin contacts only that address. The terms and privacy policy that apply are those of the courier you signed a contract with; ask that courier for them before connecting it.
 
 * **Parcel tracking**: when parcel tracking is on, the tracking numbers of your parcels are sent to the same delivery company every 3 hours to read their status.
 * **Meta Conversions API** (Meta Platforms): when you enter a dataset ID and access token, a Purchase event is sent to graph.facebook.com for each order (or each confirmed order). It contains the order value, currency, product IDs and quantities, the order number, the page address, the visitor's IP address and browser, the _fbp / _fbc cookies, and the phone number, first name and commune **hashed with SHA-256**. [Terms](https://www.facebook.com/legal/terms/businesstools), [Privacy](https://www.facebook.com/privacy/policy).
 * **TikTok Events API** (TikTok): when you enter a pixel code and access token, a CompletePayment event with the same kind of data (phone hashed with SHA-256, IP address, browser, _ttp cookie, order value and products) is sent to business-api.tiktok.com. [Terms](https://ads.tiktok.com/i18n/official/policy/business-products-terms), [Privacy](https://www.tiktok.com/legal/page/row/privacy-policy/en).
 
-* **Delivery price import**: when you click "Import", your delivery company's price list is read from its API, or your Google Sheet is downloaded from docs.google.com (or the CSV address you entered). With the daily sync option, the sheet is downloaded once a day. Nothing about your customers is sent.
+* **Delivery price import from Google Sheets** (Google): when you paste a sheet link and click "Import from sheet now", the sheet is downloaded as CSV from docs.google.com (or from the CSV address you entered). With the daily sync option, it is downloaded once a day. Nothing about your customers is sent. [Terms](https://policies.google.com/terms), [Privacy](https://policies.google.com/privacy).
 * **GitHub** (feature requests): the "Request a feature" screen does not contact any server. Only when you click "Continue on GitHub" does your browser open github.com with the text you typed (and, if you leave the box ticked, the plugin, WordPress, WooCommerce and PHP version numbers). [Terms](https://docs.github.com/site-policy/github-terms/github-terms-of-service), [Privacy](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement).
 
-Nothing is sent anywhere until you configure these services.
+Nothing is sent anywhere until you configure these services. The Meta and TikTok server events are off by default: they are tracking tools, so only switch them on if your visitors have agreed to it where your law requires consent (for example through your cookie banner), and mention them in your privacy policy.
 
 == Installation ==
 
@@ -86,7 +89,7 @@ Follow the steps on the "Google Sheets & export" tab. The script to paste is in 
 
 = Which delivery companies are supported? =
 
-Yalidine, Yalitec (Guepex), ZR Express, and these Ecotrack couriers: DHD, Conexlog/UPS, MSM Go, Rex Livraison, RB Livraison, Speed Delivery, Areex, Prest, Rocket Delivery, World Express, BA Consult, Packers, 48hr Livraison, Mono Hub, Anderson Delivery, Golivri, Coyote Express, Salva Delivery, Distazero, Fret Direct, TSL Express and Negmar Express. Any other courier on Ecotrack (e.g. EcoRapide Express) works with the generic "Ecotrack" option: paste your courier's Ecotrack address and API token. Maystro and Noest are planned.
+Yalidine, ZR Express, and any courier that runs on the Ecotrack platform (for example DHD, Conexlog/UPS, MSM Go, Rex Livraison, EcoRapide Express): choose "Ecotrack", then paste your courier's Ecotrack address and API token. Maystro and Noest are planned.
 
 = How do I import delivery prices from Google Sheets? =
 
@@ -133,6 +136,10 @@ Delivery companies sometimes spell communes differently. Open the order, correct
 No. It creates standard WooCommerce orders with the Cash on delivery payment method, so your existing order management, emails and delivery plugins keep working.
 
 == Changelog ==
+
+= 1.5.2 =
+* Security: atomic locks and rate-limit counters, so parallel requests cannot bypass them.
+* Couriers: Ecotrack couriers are connected by pasting their own address; External services section documents each service with its terms and privacy links.
 
 = 1.5.1 =
 * WordPress.org review: all admin JavaScript moved to an enqueued file (no inline script tags); late escaping everywhere (the order form is filtered through an allow-list with wp_kses); array input sanitized with map_deep; bundled data read with wp_json_file_decode; scripts load deferred.

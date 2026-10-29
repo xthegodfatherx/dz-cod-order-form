@@ -96,9 +96,13 @@ class DZCOD_Upsell {
 	 * Customer clicked "Yes, add it".
 	 */
 	public static function ajax_accept() {
-		$order_id   = isset( $_POST['order'] ) ? absint( $_POST['order'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- authorised by the HMAC token below.
-		$product_id = isset( $_POST['product'] ) ? absint( $_POST['product'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$token      = isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		// Nonce first, then the per-order HMAC token proves the visitor placed this order.
+		if ( ! check_ajax_referer( 'dzcod_order', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'This offer is no longer available.', 'dz-cod-order-form' ) ) );
+		}
+		$order_id   = isset( $_POST['order'] ) ? absint( $_POST['order'] ) : 0;
+		$product_id = isset( $_POST['product'] ) ? absint( $_POST['product'] ) : 0;
+		$token      = isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : '';
 		$order      = wc_get_order( $order_id );
 		$fail       = function () {
 			wp_send_json_error( array( 'message' => __( 'This offer is no longer available.', 'dz-cod-order-form' ) ) );
@@ -116,11 +120,10 @@ class DZCOD_Upsell {
 			$fail();
 		}
 		// Lock: one upsell per order even with a double tap.
-		$lock = 'dzcod_upsell_' . $order_id;
-		if ( get_transient( $lock ) ) {
+		$lock = 'upsell_' . $order_id;
+		if ( ! DZCOD_Lock::acquire( $lock, MINUTE_IN_SECONDS ) ) {
 			$fail();
 		}
-		set_transient( $lock, 1, MINUTE_IN_SECONDS );
 
 		$order->add_product(
 			$offer['product'],
@@ -139,7 +142,7 @@ class DZCOD_Upsell {
 		if ( $order->get_data_store()->get_stock_reduced( $order->get_id() ) ) {
 			wc_update_product_stock( $offer['product'], 1, 'decrease' );
 		}
-		delete_transient( $lock );
+		DZCOD_Lock::release( $lock );
 		do_action( 'dzcod_upsell_accepted', $order, $offer['product'] );
 
 		wp_send_json_success(

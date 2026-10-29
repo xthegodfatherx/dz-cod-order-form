@@ -23,7 +23,7 @@ Formulaire de commande paiement à la livraison pour les boutiques WooCommerce a
 - **One-click upsell** after the order · **COD dashboard** · **Arabic & French**
 - Live summary (product + delivery = total), simple & variable products, quantity
 - **Anti-fraud**: Algerian phone validation, duplicate detection (block or flag On hold), phone blocklist, IP rate limit, honeypot
-- **Delivery companies**: Yalidine, Yalitec, ZR Express + 22 Ecotrack couriers (DHD, Conexlog/UPS, Rex, Rocket, 48hr…) — one click, bulk, or automatic on a chosen status; tracking + label saved on the order
+- **Delivery companies**: Yalidine, ZR Express and any Ecotrack courier (DHD, Conexlog/UPS, Rex, Rocket, 48hr… paste its address) — one click, bulk, or automatic on a chosen status; tracking + label saved on the order
 - **Google Sheets** sync via Apps Script (new orders + status updates), **CSV export**
 - Meta Pixel / TikTok / GA4 purchase events (if already installed) + `dzcod:order` JS event
 - Auto-insert on product pages, shortcode `[dzcod_form]`, **Elementor widget**

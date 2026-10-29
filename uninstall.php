@@ -30,3 +30,8 @@ $dzcod_leads = get_posts(
 foreach ( $dzcod_leads as $dzcod_lead ) {
 	wp_delete_post( $dzcod_lead, true );
 }
+
+// Rate-limit counters and locks (see includes/class-dzcod-lock.php).
+global $wpdb;
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-time cleanup on uninstall.
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'dzcod_lk_' ) . '%' ) );

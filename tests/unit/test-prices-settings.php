@@ -49,7 +49,7 @@ check('custom: options trimmed',$cf[0]['options']===['S','M','L']);
 check('custom: select w/o options → text',$cf[1]['type']==='text');
 
 // fees parsing (tolerant) via import_courier with mocked HTTP
-$GLOBALS['OPT']=['dzcod_couriers'=>['provider'=>'dhd','ecotrack_token'=>'x']];DZCOD_Settings::flush();
+$GLOBALS['OPT']=['dzcod_couriers'=>['provider'=>'ecotrack','ecotrack_url'=>'https://dhd.ecotrack.dz','ecotrack_token'=>'x']];DZCOD_Settings::flush();
 function q($c,$a){$GLOBALS['Q'][]=['code'=>$c,'body'=>json_encode($a)];}
 q(200,['livraison'=>[['wilaya_id'=>16,'tarif'=>'400','tarif_stopdesk'=>'250'],['wilaya_id'=>28,'tarif'=>800,'tarif_stopdesk'=>500]]]);
 $r=DZCOD_Prices::import_courier(0); $p=DZCOD_Settings::get('prices');

@@ -202,13 +202,12 @@ class DZCOD_Desk {
 		if ( $order->get_meta( '_dzcod_confirmed' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Already handled by someone else.', 'dz-cod-order-form' ) ) );
 		}
-		$lock = 'dzcod_desk_lock_' . $order->get_id();
-		if ( get_transient( $lock ) ) {
+		$lock = 'desk_' . $order->get_id();
+		if ( ! DZCOD_Lock::acquire( $lock, 30 ) ) {
 			wp_send_json_error( array( 'message' => __( 'Someone is handling this order right now.', 'dz-cod-order-form' ) ) );
 		}
-		set_transient( $lock, get_current_user_id(), 30 );
 		$msg = self::outcome( $order, $outcome );
-		delete_transient( $lock );
+		DZCOD_Lock::release( $lock );
 		wp_send_json_success( array( 'message' => $msg ) );
 	}
 
